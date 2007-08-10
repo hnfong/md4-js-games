@@ -28,7 +28,7 @@ function changeState(stateName) {
 
 { // free: my turn, do whatever i want
 	var st = new State('free');
-	st.onEnter = function() { setImageMapMode(nullMode); };
+	st.onEnter = function() { setImageMapMode(NULLMODE); };
 	st.buttonHandler = function(b) {
 		if (b == 'button_buy_road') {
 			if (players[myId].buildingCounts[roadConst] >= maxRoads) {
@@ -84,12 +84,12 @@ function changeState(stateName) {
 }
 { // wait: not my turn
 	var st = new State('wait');
-	st.onEnter = function() { setImageMapMode(nullMode); };
+	st.onEnter = function() { setImageMapMode(NULLMODE); };
 	states['wait'] = st;
 }
 { // roll: roll for resources
 	var st = new State('roll');
-	st.onEnter = function() { setImageMapMode(nullMode); };
+	st.onEnter = function() { setImageMapMode(NULLMODE); };
 	st.diceHandler = function() {
 		if (priv_rollForResources())
 			changeState('free');
@@ -102,7 +102,7 @@ function changeState(stateName) {
 	var st = new State('build_road');
 	st.onEnter = function() {
 		g('button_buy_road').value = 'Cancel';
-		setImageMapMode(edgeMode);
+		setImageMapMode(EDGEMODE);
 	};
 	st.onLeave = function() {
 		g('button_buy_road').value = 'Buy';
@@ -123,7 +123,7 @@ function changeState(stateName) {
 	var st = new State('build_sett');
 	st.onEnter = function() {
 		g('button_buy_sett').value = 'Cancel';
-		setImageMapMode(vertexMode);
+		setImageMapMode(vertexMODE);
 	};
 	st.onLeave = function() {
 		g('button_buy_sett').value = 'Buy';
@@ -144,7 +144,7 @@ function changeState(stateName) {
 	var st = new State('build_city');
 	st.onEnter = function() {
 		g('button_buy_city').value = 'Cancel';
-		setImageMapMode(vertexMode);
+		setImageMapMode(vertexMODE);
 	};
 	st.onLeave = function() {
 		g('button_buy_city').value = 'Buy';
@@ -164,7 +164,7 @@ function changeState(stateName) {
 }
 { // build_initial_sett: build initial (i.e. the first two) settlement
 	var st = new State('build_initial_sett');
-	st.onEnter = function() { setImageMapMode(vertexMode); };
+	st.onEnter = function() { setImageMapMode(vertexMODE); };
 	st.vertexHandler = function(i, j, v) {
 		if (priv_buildSett(i, j, v, true, true)) { // free + ignore reachability
 			changeState('build_initial_road');
@@ -175,7 +175,7 @@ function changeState(stateName) {
 }
 { // build_initial_road: build initial (i.e. the first two) road
 	var st = new State('build_initial_road');
-	st.onEnter = function() { setImageMapMode(edgeMode); };
+	st.onEnter = function() { setImageMapMode(EDGEMODE); };
 	st.edgeHandler = function(i, j, e) {
 		if (priv_buildRoad(i, j, e, true, true)) { // free + ignore reachability
 			if (players[myId].buildingCounts[settConst] == 1) {
@@ -197,7 +197,7 @@ function changeState(stateName) {
 }
 { // place_robber
 	var st = new State('place_robber');
-	st.onEnter = function() { setImageMapMode(cellMode); };
+	st.onEnter = function() { setImageMapMode(CELLMODE); };
 	st.cellHandler = function(i, j) {
 		if (priv_placeRobber(i, j)) {
 			var stealable = false;
@@ -218,7 +218,7 @@ function changeState(stateName) {
 { // steal
 	var st = new State('steal');
 	st.onEnter = function() {
-		setImageMapMode(nullMode);
+		setImageMapMode(NULLMODE);
 		ui_showStealWindow(myId);
 	};
 	st.onLeave = function() {
