@@ -593,7 +593,6 @@ function priv_transferTurn(next) {
 
 function pub_useCard(index, pid) {
 	var card = players[pid].devCards[index];
-	card.put();
 	players[pid].devCards.splice(index, 1);
 }
 
