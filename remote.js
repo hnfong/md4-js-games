@@ -3,7 +3,6 @@ var sendingMsgs = false;
 var waitingMsgId = 0;
 var recvBuffer = new Array();
 var startMsgId = -1;
-var loading = false;
 var cleared = false;
 var processing = false;
 var lastTime = new Date().getTime();
@@ -29,14 +28,6 @@ function sendRemoteMessage(txt) {
 }
 
 function clearRemoteLog() {
-	if (g('network_frame').contentWindow.document.getElementById('network_form') == null) {
-		if (!loading)
-			document.getElementById('network_frame').src = 'form.html';
-		setTimeout("clearRemoteLog()", 500);
-		loading = true;
-		return;
-	}
-	loading = false;
 	var postdata = 'cmd=clear';
 	__idplay__ajax_async('x.php', postdata, function(x){});
 	setTimeout("cleared = true;", 2000);
