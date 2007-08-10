@@ -12,7 +12,7 @@
 <table style="width:600px; height: 700px;">
  <tr>
   <td>
-   <img src="img/transparent.gif" id="board_interface" style="width:700px; height: 700px; border: 0; position: absolute; left: 0px; top: 0px; z-index: 100" usemap="#cellmap" />
+   <img src="img/transparent.gif" id="board_interface" style="width:600px; height: 600px; border: 0; position: absolute; left: 0px; top: -120px; z-index: 100" usemap="#cellmap" />
   </td>
  </tr>
 </table>
@@ -208,8 +208,8 @@ function drawBoard() {
 		else
 			tile.setAttribute('src', 'img/' + game.resourceNames[cellResources[i][j]] + '.gif');
 		tile.style.position = 'absolute';
-		tile.style.left = cellXY(i,j).x + 'px';
-		tile.style.top = cellXY(i,j).y + 'px';
+		tile.style.left = (cellXY(i,j).x + game.XDELTA) + 'px';
+		tile.style.top = (cellXY(i,j).y + game.YDELTA) + 'px';
 		document.getElementById('tiles').appendChild(tile);
 	}
 }
@@ -221,8 +221,8 @@ function drawMarkers() {
 		var marker = document.createElement('div');
 		marker.style.backgroundColor = '#ffffff';
 		marker.style.position = 'absolute';
-		marker.style.left = (cellXY(i,j).x + 30) + 'px';
-		marker.style.top = (cellXY(i,j).y + 20) + 'px';
+		marker.style.left = (cellXY(i,j).x + 30 + game.XDELTA) + 'px';
+		marker.style.top = (cellXY(i,j).y + 20 + game.YDELTA) + 'px';
 		marker.innerHTML = cellMarkers[i][j];
 		document.getElementById('markers').appendChild(marker);
 	}
@@ -400,7 +400,7 @@ function pub_rollForResources(a, pid) {
 	var outcome = 0;
 	for (var i = 0; i < game.numDice; ++i)
 		outcome += parseInt(a[i]);
-	if (outcome == robberOutcome)
+	if (outcome == game.robberOutcome)
 		return false;
 
 	var gain = new Array(numPlayers);
@@ -457,16 +457,16 @@ function pub_buildRoad(i, j, e, isFree, pid) {
 	road.style.position = 'absolute';
 	switch (o.e) {
 		case 0:
-			road.style.left = x + 'px';
-			road.style.top = (y-2) + 'px';
+			road.style.left = (x + game.XDELTA) + 'px';
+			road.style.top = (y-2 + game.YDELTA) + 'px';
 			break;
 		case 1:
-			road.style.left = x + 'px';
-			road.style.top = y + 'px';
+			road.style.left = (x + game.XDELTA) + 'px';
+			road.style.top = (y + game.YDELTA) + 'px';
 			break;
 		case 2:
-			road.style.left = (x-19) + 'px';
-			road.style.top = y + 'px';
+			road.style.left = (x-19 + game.XDELTA) + 'px';
+			road.style.top = (y+ game.YDELTA) + 'px';
 			break;
 	}
 	g('roads').appendChild(road);
@@ -492,8 +492,8 @@ function pub_buildSett(i, j, v, isFree, pid) {
 	var sett = document.createElement('img');
 	sett.setAttribute('src', 'img/sett_' + pid + '.gif');
 	sett.style.position = 'absolute';
-	sett.style.left = (x-10) + 'px';
-	sett.style.top = (y-10) + 'px';
+	sett.style.left = (x-10+game.XDELTA) + 'px';
+	sett.style.top = (y-10+game.YDELTA) + 'px';
 	sett.id = 'sett_id_' + vertexToString(i, j, v);
 	g('buildings').appendChild(sett);
 }
@@ -536,8 +536,8 @@ function priv_buyCard() {
 
 function pub_placeRobber(i, j, pid) {
 	robberPos = { i: i, j: j };
-	g('robber').style.left = (cellXY(i, j).x + 45) + 'px';
-	g('robber').style.top = (cellXY(i, j).y + 25) + 'px';
+	g('robber').style.left = (cellXY(i, j).x + 45 + game.XDELTA) + 'px';
+	g('robber').style.top = (cellXY(i, j).y + 25 + game.YDELTA) + 'px';
 	g('robber').style.visibility = 'visible';
 }
 

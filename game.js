@@ -5,6 +5,9 @@ var __game_defaults =
 	numResourceTypes : 5,
 	resourceNames : new Array('sheep', 'ore', 'wheat', 'wood', 'clay'),
 
+	XDELTA    : 0,
+	YDELTA    :-120,
+
 	DESERT    : -1,
 	SEA       : -2,
 
