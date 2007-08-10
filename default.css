@@ -12,3 +12,13 @@ body {
 	font-family: Arial, Tahoma, Verdana, Sans;
 	font-size: 14px;
 }
+
+#res_window {
+	border:1px solid #404040;
+	position: absolute; 
+	padding: 5px;
+}
+
+img {
+	vertical-align: text-bottom;
+}

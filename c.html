@@ -28,7 +28,7 @@
 <div id="robber" style="position:absolute;visibility:hidden;"><img src="img/robber.gif"/></div>
 
 <div id="player_window" class="window" style="left: 600px; top: 100px;"></div>
-<div id="res_window" class="window" style="left: 800px; top: 300px;"></div>
+<div id="res_window" style="left: 800px; top: 300px;"></div>
 <div id="purchase_window" class="window" style="left: 800px; top: 50px;"></div>
 <div id="log_window" class="window" style="left: 800px; top: 500px; width: 400px; height: 100px; overflow: auto;">Welcome to Lonely Island~</div>
 <div id="dice" class="dice" style="left: 700px; top: 50px;" onmousedown="state.diceHandler();"><img src="img/dice1.png"><img src="img/dice6.png"></div>
@@ -315,7 +315,7 @@ function ui_showResourceWindow(pid) {
 	var p = players[pid];
 	var txt = '';
 	for (var i = 0; i < game.numResourceTypes; ++i)
-		txt += game.resourceNames[i] + ":" + p.resources[i] + "<br/>";
+		txt += '<img src="img/'+game.resourceNames[i]+'_small.gif"> ' + game.resourceNames[i]  + ": " + p.resources[i] + "<br/>";
 	g('res_window').innerHTML = txt;
 }
 
@@ -327,7 +327,7 @@ function ui_showPurchaseWindow(pid) {
 		var s = '';
 		for (var i = 0; i < game.numResourceTypes; ++i)
 			if (a[i] > 0)
-				s += game.resourceNames[i] + ' x' + a[i] + '&nbsp;&nbsp;&nbsp;';
+				s += '<img src="img/'+game.resourceNames[i]+'_small.gif">' + ' x' + a[i] + '&nbsp;&nbsp;';
 		return s;
 	}
 
