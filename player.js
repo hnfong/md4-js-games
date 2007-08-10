@@ -6,7 +6,7 @@ function Player(id, name) {
 	this.extraPoints = 0;
 	this.buildingCounts = create1DArray(3); // roads, settlements, cities
 	this.devCards = new Array();
-	this.resources = create1DArray(numResourceTypes);
+	this.resources = create1DArray(game.numResourceTypes);
 
 	this.buildRoadCheck = function(i, j, e, ignoreReachability) {
 		var s = edgeToString(i, j, e);
@@ -33,8 +33,8 @@ function Player(id, name) {
 		var v2 = (e+1) % 6;
 		this.addVertexReachable(i, j, v1);
 		this.addVertexReachable(i, j, v2);
-		edgeBuildingMap[s] = { owner: this.id, type: roadConst };
-		this.buildingCounts[roadConst]++;
+		edgeBuildingMap[s] = { owner: this.id, type: game.ROAD };
+		this.buildingCounts[game.ROAD]++;
 	};
 
 	this.buildSettCheck = function(i, j, v, ignoreReachability) {
@@ -54,23 +54,23 @@ function Player(id, name) {
 	this.buildSett = function(i, j, v) {
 		var s = vertexToString(i, j, v);
 		this.addVertexReachable(i, j, v);
-		vertexBuildingMap[s] = { owner: this.id, type: settConst };
-		this.buildingCounts[settConst]++;
+		vertexBuildingMap[s] = { owner: this.id, type: game.SETT };
+		this.buildingCounts[game.SETT]++;
 	}
 
 	this.buildCityCheck = function(i, j, v) {
 		var s = vertexToString(i, j, v);
 		if (!vertexBuildingMap[s]) return false;
 		if (vertexBuildingMap[s].owner != this.id) return false;
-		if (vertexBuildingMap[s].type != settConst) return false;
+		if (vertexBuildingMap[s].type != game.SETT) return false;
 		return true;
 	};
 
 	this.buildCity = function(i, j, v) {
 		var s = vertexToString(i, j, v);
-		vertexBuildingMap[s].type = cityConst;
-		this.buildingCounts[settConst]--;
-		this.buildingCounts[cityConst]++;
+		vertexBuildingMap[s].type = game.CITY;
+		this.buildingCounts[game.SETT]--;
+		this.buildingCounts[game.CITY]++;
 		return true;
 	};
 
@@ -130,12 +130,12 @@ function Player(id, name) {
 	};
 
 	this.points = function() {
-		return this.buildingCounts[settConst] + this.buildingCounts[cityConst] * 2 + this.extraPoints;
+		return this.buildingCounts[game.SETT] + this.buildingCounts[game.CITY] * 2 + this.extraPoints;
 	}
 
 	this.numResources = function() {
 		var total = 0;
-		for (var i = 0; i < numResourceTypes; ++i)
+		for (var i = 0; i < game.numResourceTypes; ++i)
 			total += this.resources[i];
 		return total;			
 	}

@@ -11,8 +11,8 @@ function randInt(n) {
 
 function roll() {
 	var a = new Array();
-	for (var i = 0; i < numDice; ++i)
-		a.push(randInt(6) + 1);
+	for (var i = 0; i < game.numDice; ++i)
+		a.push(randInt(game.numDiceFaces) + 1);
 	return a;
 }
 
@@ -74,9 +74,9 @@ function g(x) {
 
 function resourcesToString(a) {
 	var txt = '';
-	for (var j = 0; j < numResourceTypes; ++j)
+	for (var j = 0; j < game.numResourceTypes; ++j)
 		if (a[j] > 0)
-			txt += ', ' + a[j] + ' ' + resourceNames[j];
+			txt += ', ' + a[j] + ' ' + game.resourceNames[j];
 	if (txt == '')
 		txt = '  nothing';
 	return txt.substr(2);

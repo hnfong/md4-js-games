@@ -31,33 +31,33 @@ function changeState(stateName) {
 	st.onEnter = function() { setImageMapMode(NULLMODE); };
 	st.buttonHandler = function(b) {
 		if (b == 'button_buy_road') {
-			if (players[myId].buildingCounts[roadConst] >= maxRoads) {
+			if (players[myId].buildingCounts[ROAD] >= game.maxRoads) {
 				alert('No more roads!');
 				return;
 			}
-			if (hasEnoughResources(players[myId].resources, roadCost)) {
+			if (hasEnoughResources(players[myId].resources, game.roadCost)) {
 				alert('Not enough resources!');
 				return;
 			}
 			changeState('build_road');
 
 		} else if (b == 'button_buy_sett') {
-			if (players[myId].buildingCounts[settConst] >= maxSetts) {
+			if (players[myId].buildingCounts[game.SETT] >= game.maxSetts) {
 				alert('No more settlements!');
 				return;
 			}
-			if (hasEnoughResources(players[myId].resources, settCost)) {
+			if (hasEnoughResources(players[myId].resources, game.settCost)) {
 				alert('Not enough resources!');
 				return;
 			}
 			changeState('build_sett');
 
 		} else if (b == 'button_buy_city') {
-			if (players[myId].buildingCounts[cityConst] >= maxCities) {
+			if (players[myId].buildingCounts[game.CITY] >= game.maxCities) {
 				alert('No more cities!');
 				return;
 			}
-			if (hasEnoughResources(players[myId].resources, cityCost)) {
+			if (hasEnoughResources(players[myId].resources, game.cityCost)) {
 				alert('Not enough resources!');
 				return;
 			}
@@ -68,7 +68,7 @@ function changeState(stateName) {
 				alert('No more development cards!');
 				return;
 			}
-			if (hasEnoughResources(players[myId].resources, cardCost)) {
+			if (hasEnoughResources(players[myId].resources, game.cardCost)) {
 				alert('Not enough resources!');
 				return;
 			}
@@ -178,7 +178,7 @@ function changeState(stateName) {
 	st.onEnter = function() { setImageMapMode(EDGEMODE); };
 	st.edgeHandler = function(i, j, e) {
 		if (priv_buildRoad(i, j, e, true, true)) { // free + ignore reachability
-			if (players[myId].buildingCounts[settConst] == 1) {
+			if (players[myId].buildingCounts[game.SETT] == 1) {
 				var next = (myId + 1) % numPlayers;
 				if (next == firstPlayer) // I am the last player, so build again
 					changeState('build_initial_sett');
