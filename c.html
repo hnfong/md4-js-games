@@ -9,7 +9,7 @@
 <body>
 
 
-<table style="width:600px; height: 700px;">
+<table>
  <tr>
   <td>
    <img src="img/transparent.gif" id="board_interface" style="width:600px; height: 600px; border: 0; position: absolute; left: 0px; top: -120px; z-index: 100" usemap="#cellmap" />
@@ -27,20 +27,22 @@
 <div id="markers"></div>
 <div id="robber" style="position:absolute;visibility:hidden;"><img src="img/robber.gif"/></div>
 
-<div id="player_window" class="window" style="left: 600px; top: 100px;"></div>
-<div id="res_window" style="left: 800px; top: 300px;"></div>
-<div id="purchase_window" class="window" style="left: 800px; top: 50px;"></div>
-<div id="log_window" class="window" style="left: 800px; top: 500px; width: 400px; height: 100px; overflow: auto;">Welcome to Lonely Island~</div>
-<div id="dice" class="dice" style="left: 700px; top: 50px;" onmousedown="state.diceHandler();"><img src="img/dice1.png"><img src="img/dice6.png"></div>
-<input type="button" value="End Turn" class="window" style="left: 800px; top: 450px;" onclick="state.buttonHandler('button_end_turn');"/>
-<div id="status" class="window" style="left: 300px; top: 600px;">Status: idle</div>
+<div id="player_window" class="window" style="left: 600px; top: 20px;"></div>
+<div id="dice" class="dice" style="left: 700px; top: 300px;" onmousedown="state.diceHandler();"><img src="img/dice1.png"><img src="img/dice6.png"></div>
+<div id="steal_window" class="window" style="left: 700px; top: 500px;visibility:hidden;">Steal from:</div>
 
-<div id="steal_window" class="window" style="left: 700px; top: 600px;visibility:hidden;">Steal from:</div>
-<div id="devcard_window" class="window" style="left: 800px; top: 650px;">Development Cards:</div>
+<div id="purchase_window" class="window" style="left: 770px; top: 20px;"></div>
+<div id="res_window" style="left: 770px; top: 250px;"></div>
+<input type="button" value="End Turn" class="window" style="left: 770px; top: 350px;" onclick="state.buttonHandler('button_end_turn');"/>
+<div id="log_window" class="window" style="left: 770px; top: 380px; width: 200px; height: 100px; overflow: auto;">Welcome to Lonely Island~</div>
+<div id="devcard_window" class="window" style="left: 770px; top: 500px;">Development Cards:</div>
 
+<div id="status" class="window" style="left: 300px; top: 500px;">Status: idle</div>
+<div style="top: 500px; position: absolute">
 <div onmousedown="regPlayer('cx',0); setupGame(new Array('cx', 'Si', 'phisho')); priv_sendMapData(); priv_startGame();">I am player 0</div>
 <div onmousedown="regPlayer('Si',1);">I am player 1</div>
 <div onmousedown="regPlayer('cychoi',2);">I am player 2</div>
+</div>
 
 </body>
 
