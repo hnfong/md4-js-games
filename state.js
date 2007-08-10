@@ -31,7 +31,7 @@ function changeState(stateName) {
 	st.onEnter = function() { setImageMapMode(NULLMODE); };
 	st.buttonHandler = function(b) {
 		if (b == 'button_buy_road') {
-			if (players[myId].buildingCounts[ROAD] >= game.maxRoads) {
+			if (players[myId].buildingCounts[game.ROAD] >= game.maxRoads) {
 				alert('No more roads!');
 				return;
 			}
