@@ -1,0 +1,950 @@
+<html>
+ <head>
+  <title>Lonely Island</title>
+  <script src="util.js" type="text/javascript"></script>
+ </head>
+<body>
+
+
+<table style="width:600px; height: 700px;">
+<tr><td>
+<img src="img/transparent.gif" id="board_interface" style="width:700px; height: 700px; border: 0; position: absolute; left: 0px; top: 0px; z-index: 100" usemap="#cellmap"/>
+</td></tr>
+</table>
+
+<map name="cellmap" id="cellmap"></map>
+<map name="vertexmap" id="vertexmap"></map>
+<map name="edgemap" id="edgemap"></map>
+
+<div id="tiles"></div>
+<div id="roads"></div>
+<div id="buildings"></div>
+<div id="markers"></div>
+<div id="robber" style="position:absolute;visibility:hidden;"><img src="img/robber.gif"/></div>
+
+<div id="player_window" style="border:1px solid black; position: absolute; left: 600px; top: 100px;"></div>
+<div id="res_window" style="border:1px solid black; position: absolute; left: 800px; top: 300px;"></div>
+<div id="purchase_window" style="border:1px solid black; position: absolute; left: 800px; top: 50px;"></div>
+<div id="log_window" style="border:1px solid black; position: absolute; left: 800px; top: 500px; width: 400px; height: 100px; overflow: auto;">Welcome to Lonely Island~</div>
+<div id="dice" style="border:1px solid black; position: absolute; left: 700px; top: 50px;" onmousedown="state.diceHandler();">1 1</div>
+<input type="button" value="End Turn" style="border:1px solid black; position: absolute; left: 800px; top: 450px;" onclick="state.buttonHandler('button_end_turn');"/>
+<div id="status" style="border:1px solid black; position: absolute; left: 300px; top: 600px;">Status: idle</div>
+
+<div id="steal_window" style="border:1px solid black; position: absolute; left: 700px; top: 600px;visibility:hidden;">Steal from:</div>
+<div id="devcard_window" style="border:1px solid black; position: absolute; left: 800px; top: 650px;">Development Cards:</div>
+
+<iframe id="network_frame" name="network_frame" src="form.html"></iframe>
+<iframe id="recv_frame" name="recv_frame"></iframe>
+
+
+<div onmousedown="regPlayer('cx',0); setupGame(new Array('cx', 'Si', 'phisho')); priv_sendMapData(); priv_startGame();">I am player 0</div>
+<div onmousedown="regPlayer('Si',1);">I am player 1</div>
+<div onmousedown="regPlayer('cychoi',2);">I am player 2</div>
+
+</body>
+
+<script language="javascript" src="player.js"></script>
+<script language="javascript" src="state.js"></script>
+<script language="javascript" src="remote.js"></script>
+<script language="javascript" src="devcard.js"></script>
+
+<script language="javascript">
+
+//IMAGE MAP CONSTANTS
+var nullMode = 0;
+var cellMode = 1;
+var vertexMode = 2;
+var edgeMode = 3;
+
+
+// axes:
+//
+//  |\
+//  | \
+//  |  \
+//  |   \
+//  j    i
+//
+
+
+
+
+//
+//  Vertex order
+//
+//    0--1
+//   /    \
+//  5      2
+//   \    /
+//    4--3
+//
+
+var commonVertex = new Array(6);
+commonVertex[0] = new Array(2);
+commonVertex[0][0] = { i: -1, j: 0, v: 2 };
+commonVertex[0][1] = { i: 0, j: -1, v: 4 };
+commonVertex[1] = new Array(2);
+commonVertex[1][0] = { i: 0, j: -1, v: 3 };
+commonVertex[1][1] = { i: 1, j: -1, v: 5 };
+commonVertex[2] = new Array(2);
+commonVertex[2][0] = { i: 1, j: -1, v: 4 };
+commonVertex[2][1] = { i: 1, j: 0, v: 0 };
+commonVertex[3] = new Array(2);
+commonVertex[3][0] = { i: 1, j: 0, v: 5 };
+commonVertex[3][1] = { i: 0, j: 1, v: 1 };
+commonVertex[4] = new Array(2);
+commonVertex[4][0] = { i: 0, j: 1, v: 0 };
+commonVertex[4][1] = { i: -1, j: 1, v: 2 };
+commonVertex[5] = new Array(2);
+commonVertex[5][0] = { i: -1, j: 1, v: 1 };
+commonVertex[5][1] = { i: -1, j: 0, v: 3 };
+
+//
+//  Edge order
+//
+//      0
+//      --
+//  5 /    \ 1
+//  4 \    / 2
+//      --
+//      3
+//
+
+var commonEdge = new Array(6);
+commonEdge[0] = { i: 0, j: -1, e: 3 };
+commonEdge[1] = { i: 1, j: -1, e: 4 };
+commonEdge[2] = { i: 1, j: 0, e: 5 };
+commonEdge[3] = { i: 0, j: 1, e: 0 };
+commonEdge[4] = { i: -1, j: 1, e: 1 };
+commonEdge[5] = { i: -1, j: 0, e: 2 };
+
+function isInRange(i, j) {
+	return i >= 0 && i < board_w && j >= 0 && j < board_h;
+}
+
+
+function isValidCell(i, j) {
+	return isInRange(i, j) && board[i][j] == 1;
+}
+
+function isValidVertex(i, j, v) {
+	if (isValidCell(i, j))
+		return true;
+	var cv1 = commonVertex[v][0];
+	if (isValidCell(i + cv1.i, j + cv1.j))
+		return true;
+	var cv2 = commonVertex[v][1];
+	return isValidCell(i + cv2.i, j + cv2.j);
+}
+
+function isValidEdge(i, j, e) {
+	if (isValidCell(i, j))
+		return true;
+	return isValidCell(i + commonEdge[e].i, j + commonEdge[e].j);
+}
+
+function canonicalVertex(i, j, v) {
+	if (v < 2)
+		return {i: i, j: j, v: v};
+	var cv1 = commonVertex[v][0];
+	if (cv1.v < 2)
+		return { i: i+cv1.i, j: j+cv1.j, v: cv1.v };
+	var cv2 = commonVertex[v][1];
+	return { i: i+cv2.i, j: j+cv2.j, v: cv2.v };
+}
+
+function canonicalEdge(i, j, e) {
+	if (e < 3)
+		return { i: i, j: j, e: e };
+	var ce = commonEdge[e];
+	return { i: i + ce.i, j: j + ce.j, e: ce.e };
+}
+
+function isSameVertex(i1, j1, v1, i2, j2, v2) {
+	var canon1 = canonicalVertex(i1, j1, v1);
+	var canon2 = canonicalVertex(i2, j2, v2);
+	return canon1.i == canon2.i && canon1.j == canon2.j && canon1.v == canon2.v;
+}
+
+function isSameEdge(i1, j1, e1, i2, j2, e2) {
+	var canon1 = canonicalEdge(i1, j1, e1);
+	var canon2 = canonicalEdge(i2, j2, e2);
+	return canon1.i == canon2.i && canon1.j == canon2.j && canon1.e == canon2.e;
+}
+
+function cellXY(i, j) {
+	var x = 50 + 54 * i;
+	var y = 50 + 32 * i + 64 * j;
+	return { x: x, y: y };
+}
+
+
+function vertexXY(i, j, v) {
+	var cxy = cellXY(i, j);
+	switch (v) {
+		case 0: return { x: cxy.x+18, y: cxy.y }; 
+		case 1: return { x: cxy.x+52, y: cxy.y }; 
+		case 2: return { x: cxy.x+71, y: cxy.y+31 }; 
+		case 3: return { x: cxy.x+52, y: cxy.y+63 }; 
+		case 4: return { x: cxy.x+18, y: cxy.y+63 }; 
+		case 5: return { x: cxy.x, y: cxy.y+31 }; 
+	}
+}
+
+
+function vertexToString(i, j, v) {
+	var o = canonicalVertex(i, j, v);
+	return o.i + "," + o.j + "," + o.v;
+}
+
+
+function edgeToString(i, j, e) {
+	var o = canonicalEdge(i, j, e);
+	return o.i + "," + o.j + "," + o.e;
+}
+
+
+// Testing code
+
+
+
+//////////////////////////////////////////////////////// END BOARD GEOMETRY STUFF
+
+
+//////////////////////////////////////////////////////// BEGIN CONFIG AND CONSTANTS
+
+var maxPlayers = 4;
+var numResourceTypes = 5;
+var resourceNames = new Array('sheep', 'ore', 'wheat', 'wood', 'clay');
+
+var desertConst = -1;
+var seaConst = -2;
+
+var roadConst = 0;
+var settConst = 1;
+var cityConst = 2;
+
+var goalPoints = 10;
+var numDice = 2;
+var numDiceFaces = 6;
+var maxRoads = 15;
+var maxSetts = 5;
+var maxCities = 4;
+var resourceCardLimit = 7;
+var robberOutcome = 7;
+
+var roadCost = new Array(0, 0, 0, 1, 1);
+var settCost = new Array(1, 0, 1, 1, 1);
+var cityCost = new Array(0, 3, 2, 0, 0);
+var cardCost = new Array(1, 1, 1, 0, 0);
+
+var settBonus = 1;
+var cityBonus = 2;
+var longestRoadBonus = 2;
+var largestArmyBonus = 2;
+
+// Note: need to edit images as well
+var playerColors = new Array('blue', 'red', 'green', 'orange');
+
+//////////////////////////////////////////////////////// END CONFIG AND CONSTANTS
+
+
+//////////////////////////////////////////////////////// BEGIN GAME STATE STUFF
+
+var board_w = 7;
+var board_h = 7;
+
+var board = new Array(board_w);
+board[0] = new Array(0, 0, 0, 2, 2, 2, 2);
+board[1] = new Array(0, 0, 2, 1, 1, 1, 2);
+board[2] = new Array(0, 2, 1, 1, 1, 1, 2);
+board[3] = new Array(2, 1, 1, 1, 1, 1, 2);
+board[4] = new Array(2, 1, 1, 1, 1, 2, 0);
+board[5] = new Array(2, 1, 1, 1, 2, 0, 0);
+board[6] = new Array(2, 2, 2, 2, 0, 0, 0);
+
+var numPlayers;
+var myId;
+var cellResources; // 2D array (same size as board)
+var cellMarkers; // 2D array (same size as board)
+var outcomeCellMap; // 2D array (outcome -> cell)
+var robberPos;
+var players; // array of Players
+var vertexBuildingMap; // coordinates->building
+var edgeBuildingMap; // coordinates->building
+var vertexReachableMap; // coordinates->array of player IDs
+var currentAction;
+var currentTurn;
+var initRolls;
+var tiedPlayers;
+var firstPlayer;
+var initialSett;
+
+
+//////////////////////////////////////////////////////// END GAME STATE STUFF
+
+
+//////////////////////////////////////////////////////// BEGIN GAME SETUP STUFF
+
+function setupGame(playerNames, mapData) {
+	numPlayers = playerNames.length;
+	players = new Array();
+	for (var i = 0; i < numPlayers; ++i)
+		players.push(new Player(i, playerNames[i]));
+	if (mapData == null)
+		randomizeCells();
+	else
+		loadMap(mapData);
+	drawBoard();
+	drawMarkers();
+	initCellMap();
+	initVertexMap();
+	initEdgeMap();
+
+	ui_showResourceWindow(myId);
+	ui_showPurchaseWindow(myId);
+	ui_showPlayerWindow(myId);
+
+	vertexBuildingMap = new Array();
+	edgeBuildingMap = new Array();
+	vertexReachableMap = new Array();
+
+	initRolls = create1DArray(numPlayers);
+	tiedPlayers = new Array();
+	for (var i = 0; i < numPlayers; ++i)
+		tiedPlayers.push(i);
+
+	changeState('wait');
+}
+
+function randomizeCells() {
+	var remainTiles = new Array(4, 3, 4, 4, 3);
+	var numberMarkers = new Array(6, 2, 5, 3, 4, 9, 10, 8, 11, 3, 8, 10, 5, 6, 4, 9, 12, 11);
+	cellResources = create2DArray(board_w, board_h);
+	cellMarkers = create2DArray(board_w, board_h);
+	outcomeCellMap = new Array();
+	robberPos = { i: -999, j: -999 };
+
+	while (true) {
+		var i = randInt(board_w);
+		var j = randInt(board_h);
+		if (isValidCell(i, j)) {
+			cellResources[i][j] = desertConst;
+			pub_placeRobber(i, j, myId);
+			break;
+		}
+	}
+	for (var i = 0; i < board_w; ++i)
+		for (var j = 0; j < board_h; ++j) {
+			if (isValidCell(i, j) && cellResources[i][j] != desertConst) {
+				while (true) {
+					var type = randInt(numResourceTypes);
+					if (remainTiles[type] > 0) {
+						cellResources[i][j] = type;
+						remainTiles[type]--;
+						break;
+					}
+				}
+				while (true) {
+					var mark = randInt(numberMarkers.length);
+					var m = numberMarkers[mark];
+					if (m > 0) {
+						cellMarkers[i][j] = m;
+						numberMarkers[mark] = 0;
+						if (!outcomeCellMap[m])
+							outcomeCellMap[m] = new Array();
+						outcomeCellMap[m].push( {i: i, j: j} );
+						break;
+					}
+				}
+			}
+		}
+}
+
+function loadMap(mapData) {
+	board_w = mapData.shift();
+	board_h = mapData.shift();
+	cellResources = create2DArray(board_w, board_h);
+	cellMarkers = create2DArray(board_w, board_h);
+	outcomeCellMap = new Array();
+	robberPos = { i: -999, j: -999 };
+	for (var i = 0; i < board_w; ++i)
+		for (var j = 0; j < board_h; ++j)
+			board[i][j] = parseInt(mapData.shift());
+	for (var i = 0; i < board_w; ++i)
+		for (var j = 0; j < board_h; ++j)
+			cellResources[i][j] = parseInt(mapData.shift());
+	for (var i = 0; i < board_w; ++i)
+		for (var j = 0; j < board_h; ++j) {
+			var m = cellMarkers[i][j] = parseInt(mapData.shift());
+			if (!outcomeCellMap[m])
+				outcomeCellMap[m] = new Array();
+			outcomeCellMap[m].push( {i: i, j: j} );
+		}
+	var x = mapData.shift();
+	var y = mapData.shift();
+	pub_placeRobber(x, y, myId);
+}
+
+function drawBoard() {
+	for (var i = 0; i < board_w; ++i)
+	for (var j = 0; j < board_h; ++j) 
+	if (board[i][j]) {
+		var tile = document.createElement('img');
+		if (board[i][j] == 2)
+			tile.setAttribute('src', 'img/sea.gif');
+		else if (cellResources[i][j] == desertConst)
+			tile.setAttribute('src', 'img/desert.gif');
+		else
+			tile.setAttribute('src', 'img/' + resourceNames[cellResources[i][j]] + '.gif');
+		tile.style.position = 'absolute';
+		tile.style.left = cellXY(i,j).x + 'px';
+		tile.style.top = cellXY(i,j).y + 'px';
+		document.getElementById('tiles').appendChild(tile);
+	}
+}
+
+function drawMarkers() {
+	for (var i = 0; i < board_w; ++i)
+	for (var j = 0; j < board_h; ++j) 
+	if (cellMarkers[i][j] > 0) {
+		var marker = document.createElement('div');
+		marker.style.backgroundColor = '#ffffff';
+		marker.style.position = 'absolute';
+		marker.style.left = (cellXY(i,j).x + 30) + 'px';
+		marker.style.top = (cellXY(i,j).y + 20) + 'px';
+		marker.innerHTML = cellMarkers[i][j];
+		document.getElementById('markers').appendChild(marker);
+	}
+}
+
+function initCellMap() {
+	for (var i = 0; i < board_w; ++i)
+	for (var j = 0; j < board_h; ++j)
+	if (isValidCell(i, j)) {
+		var area = document.createElement('area');
+		var x = cellXY(i,j).x;
+		var y = cellXY(i,j).y;
+		area.setAttribute('shape', 'polygon');
+		area.setAttribute('coords', (x+18) + ',' + (y) + ',' +
+		                            (x+52) + ',' + (y) + ',' +
+		                            (x+71) + ',' + (y+31) + ',' +
+		                            (x+52) + ',' + (y+63) + ',' +
+		                            (x+18) + ',' + (y+63) + ',' +
+		                            (x) + ',' + (y+31));
+		area.setAttribute('onmousedown', 'state.cellHandler('+i+','+j+');return false;');
+		document.getElementById('cellmap').appendChild(area);
+	}
+}
+
+function initVertexMap() {
+	for (var i = -1; i <= board_w; ++i)
+	for (var j = -1; j <= board_h; ++j)
+	for (var v = 0; v < 2; ++v)
+	if (isValidVertex(i, j, v)) {
+		var area = document.createElement('area');
+		var x = vertexXY(i,j,v).x;
+		var y = vertexXY(i,j,v).y;
+		area.setAttribute('shape', 'rect');
+		area.setAttribute('coords', (x-12) + ',' + (y-12) + ',' +
+		                            (x+12) + ',' + (y+12));
+		area.setAttribute('onmousedown', 'state.vertexHandler('+i+','+j+','+v+');return false;');
+		document.getElementById('vertexmap').appendChild(area);
+	}
+}
+
+function initEdgeMap() {
+	for (var i = -1; i <= board_w; ++i)
+	for (var j = -1; j <= board_h; ++j)
+	for (var e = 0; e < 3; ++e)
+	if (isValidEdge(i, j, e)) {
+		var area = document.createElement('area');
+		var x1 = vertexXY(i,j,e).x;
+		var y1 = vertexXY(i,j,e).y;
+		var x2 = vertexXY(i,j,(e+1)%6).x;
+		var y2 = vertexXY(i,j,(e+1)%6).y;
+		area.setAttribute('shape', 'polygon');
+		switch (e) {
+			case 0:
+				area.setAttribute('coords', (x1+5) + ',' + (y1-7) + ',' +
+				                            (x2-5) + ',' + (y2-7) + ',' +
+				                            (x2-5) + ',' + (y2+7) + ',' +
+				                            (x1+5) + ',' + (y1+7));
+				break;
+			case 1:
+				area.setAttribute('coords', (x1+9) + ',' + (y1+2) + ',' +
+				                            (x2+1) + ',' + (y2-9) + ',' +
+				                            (x2-9) + ',' + (y2-2) + ',' +
+				                            (x1-1) + ',' + (y1+9));
+				break;
+			case 2:
+				area.setAttribute('coords', (x1+1) + ',' + (y1+9) + ',' +
+				                            (x2+9) + ',' + (y2-2) + ',' +
+				                            (x2-1) + ',' + (y2-9) + ',' +
+				                            (x1-9) + ',' + (y1+2));
+				break;
+		}
+		area.setAttribute('onmousedown', 'state.edgeHandler('+i+','+j+','+e+');return false;');
+		document.getElementById('edgemap').appendChild(area);
+	}
+}
+
+//////////////////////////////////////////////////////// BEGIN GAME PROGRESS STUFF
+
+//////////////////////////////////////////// BEGIN UI stuff
+
+function ui_drawDice(a) {
+	var txt = '';
+	for (var i = 0; i < numDice; ++i) {
+		txt += a[i] + ' ';
+	}
+	g('dice').innerHTML = txt;
+}
+
+function ui_showResourceWindow(pid) {
+	var p = players[pid];
+	var txt = '';
+	for (var i = 0; i < numResourceTypes; ++i)
+		txt += resourceNames[i] + ":" + p.resources[i] + "<br/>";
+	g('res_window').innerHTML = txt;
+}
+
+function ui_showPurchaseWindow(pid) {
+	var p = players[pid];
+	var txt = '';
+
+	function dumpCost(a) {
+		var s = '';
+		for (var i = 0; i < numResourceTypes; ++i)
+			if (a[i] > 0)
+				s += resourceNames[i] + ' x' + a[i] + '&nbsp;&nbsp;&nbsp;';
+		return s;
+	}
+
+	txt += 'Development Card <input type="button" id="button_buy_devcard" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_devcard\');return false;"/> (' + remainingDevCards() + ' left)<br/>' + dumpCost(cardCost) + '<br/><hr/>';
+	txt += 'City <input type="button" id="button_buy_city" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_city\');return false;"/> (' + (maxCities-players[pid].buildingCounts[cityConst]) + ' left)<br/>' + dumpCost(cityCost) + '<br/><hr/>';
+	txt += 'Settlement <input type="button" id="button_buy_sett" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_sett\');return false;"/> (' + (maxSetts-players[pid].buildingCounts[settConst]) + ' left)<br/>' + dumpCost(settCost) + '<br/><hr/>';
+	txt += 'Road <input type="button" id="button_buy_road" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_road\');return false;"/> (' + (maxRoads-players[pid].buildingCounts[roadConst]) + ' left)<br/>' + dumpCost(roadCost) + '<br/><hr/>';
+
+	g('purchase_window').innerHTML = txt;
+}
+
+function ui_showPlayerWindow(pid) {
+	var txt = '';
+	for (var i = 0; i < numPlayers; ++i) {
+		txt += '<div style="background-color:' + playerColors[i] + ';">';
+		if (currentTurn == i)
+			txt += '<b><i><u>' + players[i].name + '</u></i></b><br/>';
+		else
+			txt += '<b>' + players[i].name + '</b><br/>';
+		txt += 'Points: ' + players[i].points() + '<br/>';
+		txt += 'Resource cards: ' + players[i].numResources() + '<br/>';
+		txt += 'Development cards: ' + players[i].devCards.length + '</div>';
+		txt += '<hr/>';
+	}
+	g('player_window').innerHTML = txt;
+}
+
+function ui_refreshWindows(pid) {
+	ui_showPlayerWindow(pid);
+	ui_showResourceWindow(pid);
+	ui_showPurchaseWindow(pid);
+	ui_showDevCardWindow(pid)
+}
+
+function ui_writeLog(txt) {
+	g('log_window').innerHTML = txt + '<br/>' + g('log_window').innerHTML;
+}
+
+function ui_showStealWindow(pid) {
+	var victims = new Array();
+	for (var v = 0; v < 6; ++v) {
+		var own = vertexOwner(robberPos.i, robberPos.j, v);
+		if (own >= 0 && own != pid) {
+			if (players[own].numResources() > 0) {
+				var existed = false;
+				for (var i = 0; i < victims.length; ++i)
+					if (victims[i] == own)
+						existed = true;
+				if (!existed)
+					victims.push(own);
+			}
+		}
+	}
+
+	var txt = 'Steal from:<br/>';
+	for (var i = 0; i < victims.length; ++i)
+		txt += '<a href="#" onmousedown="state.customHandler(' + victims[i] + ');return false;">' + players[victims[i]].name + '</a><br/>';
+	g('steal_window').innerHTML = txt;
+	g('steal_window').style.visibility = 'visible';
+}
+
+function ui_hideStealWindow() {
+	g('steal_window').style.visibility = 'hidden';	
+}
+
+//////////////////////////////////////////// BEGIN action functions
+
+function pub_rollForResources(a, pid) {
+	ui_drawDice(a);
+	var outcome = 0;
+	for (var i = 0; i < numDice; ++i)
+		outcome += parseInt(a[i]);
+	if (outcome == robberOutcome)
+		return false;
+
+	var gain = new Array(numPlayers);
+	for (var i = 0; i < numPlayers; ++i) {
+		gain[i] = new Array(numResourceTypes);
+		for (var j = 0; j < numResourceTypes; ++j)
+			gain[i][j] = 0;
+	}
+	var cells = outcomeCellMap[outcome];
+	if (!cells) return true;
+	for (var i = 0; i < cells.length; ++i) {
+		var o = cells[i];
+		if (o.i == robberPos.i && o.j == robberPos.j) continue;
+		var resType = cellResources[o.i][o.j];
+		if (resType < 0) continue;
+		for (var v = 0; v < 6; ++v) {
+			var b = vertexBuilding(o.i, o.j, v);
+			if (!b) continue;
+			switch (b.type) {
+				case settConst: gain[b.owner][resType]++; break;
+				case cityConst: gain[b.owner][resType] += 2; break;
+				default: break;
+			}
+		}
+	}
+	for (var i = 0; i < numPlayers; ++i)
+		players[i].addResources(gain[i]);
+
+	for (var i = 0; i < numPlayers; ++i)
+		ui_writeLog(players[i].name + ' got ' + resourcesToString(gain[i]) + '.');
+
+	return true;
+}
+
+function priv_rollForResources() {
+	var a = roll();
+	var txt = '';
+	for (var i = 0; i < numDice; ++i)
+		txt += ' ' + a[i];
+	sendRemoteMessage('roll ' + myId + txt);
+	return pub_rollForResources(a, myId);
+}
+
+
+function pub_buildRoad(i, j, e, isFree, pid) {
+	if (!isFree)
+		players[pid].subtractResources(roadCost);
+	players[pid].buildRoad(i, j, e);
+	var o = canonicalEdge(i, j, e);
+	var x = vertexXY(i, j, e).x;
+	var y = vertexXY(i, j, e).y;
+	var road = document.createElement('img');
+	road.setAttribute('src', 'img/road' + o.e + '_' + pid + '.gif');
+	road.style.position = 'absolute';
+	switch (o.e) {
+		case 0:
+			road.style.left = x + 'px';
+			road.style.top = (y-2) + 'px';
+			break;
+		case 1:
+			road.style.left = x + 'px';
+			road.style.top = y + 'px';
+			break;
+		case 2:
+			road.style.left = (x-19) + 'px';
+			road.style.top = y + 'px';
+			break;
+	}
+	g('roads').appendChild(road);
+}
+
+function priv_buildRoad(i, j, e, isFree, ignoreReachability) {
+	if (!players[myId].buildRoadCheck(i, j, e, ignoreReachability)) return false;
+	pub_buildRoad(i, j, e, isFree, myId);
+	if (isFree)
+		sendRemoteMessage('build_road ' + myId + ' ' + i + ' ' + j + ' ' + e);
+	else
+		sendRemoteMessage('buy_road ' + myId + ' ' + i + ' ' + j + ' ' + e);
+	return true;
+}
+
+
+function pub_buildSett(i, j, v, isFree, pid) {
+	if (!isFree)
+		players[pid].subtractResources(settCost);
+	players[pid].buildSett(i, j, v);
+	var x = vertexXY(i, j, v).x;
+	var y = vertexXY(i, j, v).y;
+	var sett = document.createElement('img');
+	sett.setAttribute('src', 'img/sett_' + pid + '.gif');
+	sett.style.position = 'absolute';
+	sett.style.left = (x-10) + 'px';
+	sett.style.top = (y-10) + 'px';
+	sett.id = 'sett_id_' + vertexToString(i, j, v);
+	g('buildings').appendChild(sett);
+}
+
+
+function priv_buildSett(i, j, v, isFree, ignoreReachability) {
+	if (!players[myId].buildSettCheck(i, j, v, ignoreReachability)) return false;
+	if (isFree)
+		sendRemoteMessage('build_sett ' + myId + ' ' + i + ' ' + j + ' ' + v);
+	else
+		sendRemoteMessage('buy_sett ' + myId + ' ' + i + ' ' + j + ' ' + v);
+	pub_buildSett(i, j, v, isFree, myId);
+	return true;
+}
+
+
+function pub_buildCity(i, j, v, pid) {
+	players[pid].subtractResources(cityCost);
+	players[pid].buildCity(i, j, v);
+	var img = g('sett_id_' + vertexToString(i, j, v));
+	img.src = 'img/city_' + pid + '.gif';
+}
+
+function priv_buildCity(i, j, v) {
+	if (!players[myId].buildCityCheck(i, j, v)) return false;
+	sendRemoteMessage('buy_city ' + myId + ' ' + i + ' ' + j + ' ' + v);
+	pub_buildCity(i, j, v, myId);
+	return true;
+}
+
+function pub_buyCard(type, pid) {
+	players[pid].devCards.push(devCardBase[type].take());
+}
+
+function priv_buyCard() {
+	var index = drawDevCard();
+	sendRemoteMessage('buy_devcard ' + myId + ' ' + index);
+	pub_buyCard(index, myId);
+}
+
+function pub_placeRobber(i, j, pid) {
+	robberPos = { i: i, j: j };
+	g('robber').style.left = (cellXY(i, j).x + 45) + 'px';
+	g('robber').style.top = (cellXY(i, j).y + 25) + 'px';
+	g('robber').style.visibility = 'visible';
+}
+
+function priv_placeRobber(i, j) {
+	if (robberPos.i < 0 || cellResources[i][j] >= 0 && (i != robberPos.i || j != robberPos.j)) {
+		sendRemoteMessage('place_robber ' + myId + ' ' + i + ' ' + j);
+		pub_placeRobber(i, j, myId);
+		return true;
+	}
+	alert('Cannot put the robber here!');
+	return false;
+}
+
+function pub_steal(victim, type, pid) {
+	players[victim].resources[type]--;
+	players[pid].resources[type]++;
+	return type;
+}
+
+function priv_steal(victim) {
+	var a = new Array();
+	for (var i = 0; i < numResourceTypes; ++i)
+		for (var j = 0; j < players[victim].resources[i]; ++j)
+			a.push(i);
+	var k = randInt(a.length);
+	var type = a[k];
+	sendRemoteMessage('steal ' + myId + ' ' + victim + ' ' + type);
+	var t = pub_steal(victim, type, myId);
+	return true;
+}
+
+function pub_transferTurn(next, pid) {
+	currentTurn = next;
+	if (currentTurn != myId)
+		changeState('wait');
+	else {
+		if (players[myId].buildingCounts[roadConst] < 2)
+			changeState('build_initial_sett');
+		else
+			changeState('roll');
+	}
+}
+
+function priv_transferTurn(next) {
+	if (next == null)
+		next = (myId + 1) % numPlayers;
+	sendRemoteMessage('transfer ' + myId + ' ' + next);
+	pub_transferTurn(next, myId);
+}
+
+function pub_useCard(index, pid) {
+	var card = players[pid].devCards[index];
+	card.put();
+	players[pid].devCards.splice(index, 1);
+}
+
+function priv_useCard(index) {
+	var card = players[myId].devCards[index];
+	sendRemoteMessage('use_card ' + myId + ' ' + index);
+	ui_writeLog(players[myId].name + ' played ' + card.name + '.');
+	pub_useCard(index, myId);
+	card.use();
+}
+
+function pub_adjustExtraPoints(inc, pid) {
+	players[pid].extraPoints += inc;
+}
+
+function priv_adjustExtraPoints(inc) {
+	sendRemoteMessage('adjust_extra ' +  myId + ' ' + inc);
+	pub_adjustExtraPoints(inc, myId);
+}
+
+function cat_initRoll(pid) {
+	var a = roll();
+	var txt = '';
+	var outcome = 0;
+	for (var i = 0; i < numDice; ++i) {
+		txt += a[i] + ' ';
+		outcome += a[i];
+	}
+	initRolls[pid] = outcome;
+	// determine next roller
+	var index = 0;
+	for (var i = 0; i < tiedPlayers.length; ++i)
+		if (tiedPlayers[i] == pid)
+			index = i;
+	if (index < tiedPlayers.length - 1)
+		return tiedPlayers[index+1];
+	return -1;
+}
+
+function cat_initRollFinishRound() {
+	var highest = 0;
+	for (var i = 0; i < tiedPlayers.length; ++i)
+		if (initRolls[tiedPlayers[i]] > highest)
+			highest = initRolls[tiedPlayers[i]];
+	var newTiedPlayers = new Array();
+	for (var i = 0; i < tiedPlayers.length; ++i)
+		if (initRolls[tiedPlayers[i]] == highest)
+			newTiedPlayers.push(tiedPlayers[i]);
+	tiedPlayers = newTiedPlayers;
+	if (tiedPlayers.length == 1)
+		return firstPlayer = tiedPlayers[0];
+	else
+		return -1;
+}
+
+function priv_sendMapData() {
+	var s = '';
+	s += 'map_data ' + myId + ' ' + board_w + ' ' + board_h + ' ';
+	for (var i = 0; i < board_w; ++i)
+		for (var j = 0; j < board_h; ++j)
+			s += board[i][j] + ' ';
+	for (var i = 0; i < board_w; ++i)
+		for (var j = 0; j < board_h; ++j)
+			s += cellResources[i][j] + ' ';
+	for (var i = 0; i < board_w; ++i)
+		for (var j = 0; j < board_h; ++j)
+			s += cellMarkers[i][j] + ' ';
+	s += robberPos.i + ' ' + robberPos.j;
+	sendRemoteMessage(s);
+}
+
+function priv_startGame() {
+	sendRemoteMessage('start_game 0');
+}
+
+
+function regPlayer(name, id) {
+	myId = id;
+	sendRemoteMessage('register ' + id + ' ' + name);
+}
+
+///////////////////////////////////////////// BEGIN GENERAL/HELPER STUFF
+
+function randInt(n) {
+	return Math.floor(Math.random() * n);
+}
+
+function roll() {
+	var a = new Array();
+	for (var i = 0; i < numDice; ++i)
+		a.push(randInt(6) + 1);
+	return a;
+}
+
+function create1DArray(w) {
+	var a = new Array(w);
+	for (var i = 0; i < w; ++i)
+		a[i] = 0;
+	return a;
+}
+
+function create2DArray(w, h) {
+	var a = new Array(w);
+	for (var i = 0; i < w; ++i) {
+		a[i] = new Array(h);
+		for (var j = 0; j < h; ++j)
+			a[i][j] = 0;
+	}
+	return a;
+}
+
+function hasEnoughResources(res, cost) {
+	for (var i = 0; i < res.length; ++i)
+		if (res[i] < cost[i])
+			return false;
+	return true;
+}
+
+
+function setImageMapMode(mapMode) {
+	var map;
+	switch (mapMode) {
+		case nullMode: map = ''; break;
+		case cellMode: map = '#cellmap'; break;
+		case vertexMode: map = '#vertexmap'; break;
+		case edgeMode: map = '#edgemap'; break;
+		default: map = ''; break;
+	}
+	g('board_interface').useMap = map;
+}
+
+
+
+
+function vertexOwner(i, j, v) {
+	var s = vertexToString(i, j, v);
+	if (!vertexBuildingMap[s]) return -1;
+	return vertexBuildingMap[s].owner;
+}
+
+function vertexBuilding(i, j, v) {
+	var s = vertexToString(i, j, v);
+	if (!vertexBuildingMap[s]) return false;
+	return vertexBuildingMap[s];
+}
+
+function g(x) {
+	return document.getElementById(x);
+}
+
+function resourcesToString(a) {
+	var txt = '';
+	for (var j = 0; j < numResourceTypes; ++j)
+		if (a[j] > 0)
+			txt += ', ' + a[j] + ' ' + resourceNames[j];
+	if (txt == '')
+		txt = '  nothing';
+	return txt.substr(2);
+}
+
+window.frames['network_frame'].location.href = 'form.html';
+//clearRemoteLog();
+receiveRemoteMessages();
+
+</script>
+
+</html>
