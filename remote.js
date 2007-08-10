@@ -3,7 +3,6 @@ var sendingMsgs = false;
 var waitingMsgId = 0;
 var recvBuffer = new Array();
 var startMsgId = -1;
-var cleared = false;
 var processing = false;
 var lastTime = new Date().getTime();
 
@@ -30,13 +29,11 @@ function sendRemoteMessage(txt) {
 function clearRemoteLog() {
 	var postdata = 'cmd=clear';
 	__idplay__ajax_async('x.php', postdata, function(x){});
-	setTimeout("cleared = true;", 2000);
 }
 
 
 function receiveRemoteMessages() {
 	setTimeout('receiveRemoteMessages()', 2000);
-//	if (!cleared) return;
 	var f = function(http) {
 		var s = http.responseText;
 		var a = s.split('\n');
