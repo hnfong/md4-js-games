@@ -1,5 +1,14 @@
 .window {
 	border:1px solid black;
 	position: absolute; 
+}
+
+.dice {
+	position: absolute; 
 	cursor: pointer;
+}
+
+body {
+	font-family: Arial, Tahoma, Verdana, Sans;
+	font-size: 14px;
 }

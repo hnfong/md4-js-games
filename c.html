@@ -31,7 +31,7 @@
 <div id="res_window" class="window" style="left: 800px; top: 300px;"></div>
 <div id="purchase_window" class="window" style="left: 800px; top: 50px;"></div>
 <div id="log_window" class="window" style="left: 800px; top: 500px; width: 400px; height: 100px; overflow: auto;">Welcome to Lonely Island~</div>
-<div id="dice" class="window" style="left: 700px; top: 50px;" onmousedown="state.diceHandler();">1 1</div>
+<div id="dice" class="dice" style="left: 700px; top: 50px;" onmousedown="state.diceHandler();"><img src="img/dice1.png"><img src="img/dice6.png"></div>
 <input type="button" value="End Turn" class="window" style="left: 800px; top: 450px;" onclick="state.buttonHandler('button_end_turn');"/>
 <div id="status" class="window" style="left: 300px; top: 600px;">Status: idle</div>
 
@@ -306,7 +306,7 @@ function initEdgeMap() {
 function ui_drawDice(a) {
 	var txt = '';
 	for (var i = 0; i < game.numDice; ++i) {
-		txt += a[i] + ' ';
+		txt += '<img src="img/dice'+a[i]+'.png">';
 	}
 	g('dice').innerHTML = txt;
 }
