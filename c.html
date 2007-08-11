@@ -587,7 +587,10 @@ function pub_transferTurn(next, pid) {
 function priv_transferTurn(next) {
 	if (next == null)
 		next = (myId + 1) % numPlayers;
-	sendRemoteMessage('transfer ' + myId + ' ' + next);
+	if (players[myId].points() >= game.goalPoints)
+		sendRemoteMessage('win ' + myId + ' ' + players[myId].points());
+	else
+		sendRemoteMessage('transfer ' + myId + ' ' + next);
 	pub_transferTurn(next, myId);
 }
 

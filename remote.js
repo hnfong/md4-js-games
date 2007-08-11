@@ -159,6 +159,11 @@ function remoteMessageHandler(txt)
 		case 'init_roll':
 			break;
 
+		case 'win':
+			ui_writeLog(players[pid].name + ' won with ' + a[2] + ' points.');
+			changeState('idle');
+			break;
+
 		case 'register':
 			ui_writeLog('Player ' + pid + ' (' + a[2] + ') arrived.');
 			return;

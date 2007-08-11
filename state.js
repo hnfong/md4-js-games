@@ -232,3 +232,8 @@ function changeState(stateName) {
 	};
 	states['steal'] = st;
 }
+{ // idle
+	var st = new State('idle');
+	st.onEnter = function() { setImageMapMode(NULLMODE); };
+	states['idle'] = st;
+}
