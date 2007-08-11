@@ -20,7 +20,7 @@ var state = new State();
 function changeState(stateName) {
 	state.onLeave();
 	g('status').innerHTML = 'Status: ' + stateName;
-	ui_refreshWindows(myId);
+	ui.refreshWindows(myId);
 	state = states[stateName];
 	state.onEnter();
 }
@@ -221,10 +221,10 @@ function changeState(stateName) {
 	var st = new State('steal');
 	st.onEnter = function() {
 		setImageMapMode(NULLMODE);
-		ui_showStealWindow(myId);
+		ui.showStealWindow(myId);
 	};
 	st.onLeave = function() {
-		ui_hideStealWindow();
+		ui.hideStealWindow();
 	};
 	st.customHandler = function(victim) {
 		if (priv_steal(victim))

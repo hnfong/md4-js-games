@@ -70,9 +70,7 @@ Game.prototype.start = function(players, mapData)
 	ui.initVertexMap();
 	ui.initEdgeMap();
 
-	ui_showResourceWindow(myId);
-	ui_showPurchaseWindow(myId);
-	ui_showPlayerWindow(myId);
+	ui.refreshWindows(myId);
 
 	vertexBuildingMap = new Array();
 	edgeBuildingMap = new Array();

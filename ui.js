@@ -35,7 +35,7 @@ ui.initVertexMap = function() {
 		area.setAttribute('onmousedown', 'state.vertexHandler('+i+','+j+','+v+');return false;');
 		document.getElementById('vertexmap').appendChild(area);
 	}
-}
+};
 
 /* creates the image map of edges */
 ui.initEdgeMap = function() {
@@ -72,5 +72,106 @@ ui.initEdgeMap = function() {
 		area.setAttribute('onmousedown', 'state.edgeHandler('+i+','+j+','+e+');return false;');
 		document.getElementById('edgemap').appendChild(area);
 	}
-}
+};
 
+ui.drawDice = function(a) {
+	var txt = '';
+	for (var i = 0; i < a.length; ++i) {
+		txt += '<img src="img/dice'+a[i]+'.png">';
+	}
+	g('dice').innerHTML = txt;
+};
+
+
+ui.hideStealWindow = function() {
+	g('steal_window').style.visibility = 'hidden';	
+};
+
+ui.writeLog = function (txt) {
+	g('log_window').innerHTML = txt + '<br/>' + g('log_window').innerHTML;
+};
+
+ui.showPlayerWindow = function() {
+	var txt = '';
+	for (var i = 0; i < game.numPlayers; ++i) {
+		txt += '<div style="background-color:' + playerColors[i] + ';">';
+		if (currentTurn == i)
+			txt += '<b><i><u>' + game.players[i].name + '</u></i></b><br/>';
+		else
+			txt += '<b>' + game.players[i].name + '</b><br/>';
+		txt += 'Points: ' + game.players[i].points() + '<br/>';
+		txt += 'Resource cards: ' + game.players[i].numResources() + '<br/>';
+		txt += 'Development cards: ' + game.players[i].devCards.length + '</div>';
+		txt += '<hr/>';
+	}
+	g('player_window').innerHTML = txt;
+};
+
+ui.showResourceWindow = function(pid) {
+	var p = game.players[pid];
+	var txt = '';
+	for (var i = 0; i < game.numResourceTypes; ++i)
+		txt += '<img src="img/'+game.resourceNames[i]+'_small.gif"> ' + game.resourceNames[i]  + ": " + p.resources[i] + "<br/>";
+	g('res_window').innerHTML = txt;
+};
+
+ui.showPurchaseWindow = function (pid) {
+	var p = game.players[pid];
+	var txt = '';
+
+	function dumpCost(a) {
+		var s = '';
+		for (var i = 0; i < game.numResourceTypes; ++i)
+			if (a[i] > 0)
+				s += '<img src="img/'+game.resourceNames[i]+'_small.gif">' + ' x' + a[i] + '&nbsp;';
+		return s;
+	}
+
+	txt += 'Development Card <input type="button" id="button_buy_devcard" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_devcard\');return false;"/> (' + remainingDevCards() + ' left)<br/>' + dumpCost(game.cardCost) + '<br/><hr/>';
+	txt += 'City <input type="button" id="button_buy_city" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_city\');return false;"/> (' + (game.maxCities-game.players[pid].buildingCounts[game.CITY]) + ' left)<br/>' + dumpCost(game.cityCost) + '<br/><hr/>';
+	txt += 'Settlement <input type="button" id="button_buy_sett" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_sett\');return false;"/> (' + (game.maxSetts-game.players[pid].buildingCounts[game.SETT]) + ' left)<br/>' + dumpCost(game.settCost) + '<br/><hr/>';
+	txt += 'Road <input type="button" id="button_buy_road" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_road\');return false;"/> (' + (game.maxRoads-game.players[pid].buildingCounts[game.ROAD]) + ' left)<br/>' + dumpCost(game.roadCost) + '<br/><hr/>';
+
+	g('purchase_window').innerHTML = txt;
+};
+
+
+ui.refreshWindows = function (pid) {
+	ui.showPlayerWindow();
+	ui.showResourceWindow(pid);
+	ui.showPurchaseWindow(pid);
+	ui.showDevCardWindow(pid)
+};
+
+ui.showStealWindow = function (pid) {
+	var victims = new Array();
+	for (var v = 0; v < 6; ++v) {
+		var own = vertexOwner(robberPos.i, robberPos.j, v);
+		if (own >= 0 && own != pid) {
+			if (game.players[own].numResources() > 0) {
+				var existed = false;
+				for (var i = 0; i < victims.length; ++i)
+					if (victims[i] == own)
+						existed = true;
+				if (!existed)
+					victims.push(own);
+			}
+		}
+	}
+
+	var txt = 'Steal from:<br/>';
+	for (var i = 0; i < victims.length; ++i)
+		txt += '<a href="#" onmousedown="state.customHandler(' + victims[i] + ');return false;">' + game.players[victims[i]].name + '</a><br/>';
+	g('steal_window').innerHTML = txt;
+	g('steal_window').style.visibility = 'visible';
+};
+
+
+ui.showDevCardWindow = function (pid) {
+	var txt = 'Development Cards:<br/>';
+	for (var i = 0; i < game.players[pid].devCards.length; ++i) {
+		var card = game.players[pid].devCards[i];
+		txt += '<a href="#" onmousedown="if(state.name!=\'free\')return false;priv_useCard(' + i + ');ui.refreshWindows(' + pid + ');return false;">' + card.name + '</a><br/>';
+	} 
+	g('devcard_window').innerHTML = txt;
+};

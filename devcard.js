@@ -57,12 +57,3 @@ function drawDevCard() {
 	devCardBase.push(onepoint);
 }
 
-
-function ui_showDevCardWindow(pid) {
-	var txt = 'Development Cards:<br/>';
-	for (var i = 0; i < game.players[pid].devCards.length; ++i) {
-		var card = game.players[pid].devCards[i];
-		txt += '<a href="#" onmousedown="if(state.name!=\'free\')return false;priv_useCard(' + i + ');ui_refreshWindows(' + pid + ');return false;">' + card.name + '</a><br/>';
-	} 
-	g('devcard_window').innerHTML = txt;
-}

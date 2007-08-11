@@ -82,100 +82,10 @@ var initialSett;
 
 //////////////////////////////////////////// BEGIN UI stuff
 
-function ui_drawDice(a) {
-	var txt = '';
-	for (var i = 0; i < game.numDice; ++i) {
-		txt += '<img src="img/dice'+a[i]+'.png">';
-	}
-	g('dice').innerHTML = txt;
-}
-
-function ui_showResourceWindow(pid) {
-	var p = game.players[pid];
-	var txt = '';
-	for (var i = 0; i < game.numResourceTypes; ++i)
-		txt += '<img src="img/'+game.resourceNames[i]+'_small.gif"> ' + game.resourceNames[i]  + ": " + p.resources[i] + "<br/>";
-	g('res_window').innerHTML = txt;
-}
-
-function ui_showPurchaseWindow(pid) {
-	var p = game.players[pid];
-	var txt = '';
-
-	function dumpCost(a) {
-		var s = '';
-		for (var i = 0; i < game.numResourceTypes; ++i)
-			if (a[i] > 0)
-				s += '<img src="img/'+game.resourceNames[i]+'_small.gif">' + ' x' + a[i] + '&nbsp;';
-		return s;
-	}
-
-	txt += 'Development Card <input type="button" id="button_buy_devcard" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_devcard\');return false;"/> (' + remainingDevCards() + ' left)<br/>' + dumpCost(game.cardCost) + '<br/><hr/>';
-	txt += 'City <input type="button" id="button_buy_city" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_city\');return false;"/> (' + (game.maxCities-game.players[pid].buildingCounts[game.CITY]) + ' left)<br/>' + dumpCost(game.cityCost) + '<br/><hr/>';
-	txt += 'Settlement <input type="button" id="button_buy_sett" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_sett\');return false;"/> (' + (game.maxSetts-game.players[pid].buildingCounts[game.SETT]) + ' left)<br/>' + dumpCost(game.settCost) + '<br/><hr/>';
-	txt += 'Road <input type="button" id="button_buy_road" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_road\');return false;"/> (' + (game.maxRoads-game.players[pid].buildingCounts[game.ROAD]) + ' left)<br/>' + dumpCost(game.roadCost) + '<br/><hr/>';
-
-	g('purchase_window').innerHTML = txt;
-}
-
-function ui_showPlayerWindow(pid) {
-	var txt = '';
-	for (var i = 0; i < game.numPlayers; ++i) {
-		txt += '<div style="background-color:' + playerColors[i] + ';">';
-		if (currentTurn == i)
-			txt += '<b><i><u>' + game.players[i].name + '</u></i></b><br/>';
-		else
-			txt += '<b>' + game.players[i].name + '</b><br/>';
-		txt += 'Points: ' + game.players[i].points() + '<br/>';
-		txt += 'Resource cards: ' + game.players[i].numResources() + '<br/>';
-		txt += 'Development cards: ' + game.players[i].devCards.length + '</div>';
-		txt += '<hr/>';
-	}
-	g('player_window').innerHTML = txt;
-}
-
-function ui_refreshWindows(pid) {
-	ui_showPlayerWindow(pid);
-	ui_showResourceWindow(pid);
-	ui_showPurchaseWindow(pid);
-	ui_showDevCardWindow(pid)
-}
-
-function ui_writeLog(txt) {
-	g('log_window').innerHTML = txt + '<br/>' + g('log_window').innerHTML;
-}
-
-function ui_showStealWindow(pid) {
-	var victims = new Array();
-	for (var v = 0; v < 6; ++v) {
-		var own = vertexOwner(robberPos.i, robberPos.j, v);
-		if (own >= 0 && own != pid) {
-			if (game.players[own].numResources() > 0) {
-				var existed = false;
-				for (var i = 0; i < victims.length; ++i)
-					if (victims[i] == own)
-						existed = true;
-				if (!existed)
-					victims.push(own);
-			}
-		}
-	}
-
-	var txt = 'Steal from:<br/>';
-	for (var i = 0; i < victims.length; ++i)
-		txt += '<a href="#" onmousedown="state.customHandler(' + victims[i] + ');return false;">' + game.players[victims[i]].name + '</a><br/>';
-	g('steal_window').innerHTML = txt;
-	g('steal_window').style.visibility = 'visible';
-}
-
-function ui_hideStealWindow() {
-	g('steal_window').style.visibility = 'hidden';	
-}
-
 //////////////////////////////////////////// BEGIN action functions
 
 function pub_rollForResources(a, pid) {
-	ui_drawDice(a);
+	ui.drawDice(a);
 	var outcome = 0;
 	for (var i = 0; i < game.numDice; ++i)
 		outcome += parseInt(a[i]);
@@ -209,7 +119,7 @@ function pub_rollForResources(a, pid) {
 		game.players[i].addResources(gain[i]);
 
 	for (var i = 0; i < game.numPlayers; ++i)
-		ui_writeLog(game.players[i].name + ' got ' + resourcesToString(gain[i]) + '.');
+		ui.writeLog(game.players[i].name + ' got ' + resourcesToString(gain[i]) + '.');
 
 	return true;
 }
@@ -378,7 +288,7 @@ function pub_useCard(index, pid) {
 function priv_useCard(index) {
 	var card = game.players[myId].devCards[index];
 	sendRemoteMessage('use_card ' + myId + ' ' + index);
-	ui_writeLog(game.players[myId].name + ' played ' + card.name + '.');
+	ui.writeLog(game.players[myId].name + ' played ' + card.name + '.');
 	pub_useCard(index, myId);
 	card.use();
 }
