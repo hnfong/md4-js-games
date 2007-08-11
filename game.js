@@ -66,9 +66,9 @@ Game.prototype.start = function(players, mapData)
 	board.drawBoard();
 	board.drawMarkers();
 
-	initCellMap();
-	initVertexMap();
-	initEdgeMap();
+	ui.initCellMap();
+	ui.initVertexMap();
+	ui.initEdgeMap();
 
 	ui_showResourceWindow(myId);
 	ui_showPurchaseWindow(myId);
