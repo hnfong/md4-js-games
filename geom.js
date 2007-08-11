@@ -1,10 +1,3 @@
-//IMAGE MAP CONSTANTS
-var NULLMODE = 0;
-var CELLMODE = 1;
-var vertexMODE = 2;
-var EDGEMODE = 3;
-
-
 // axes:
 //
 //  |\
