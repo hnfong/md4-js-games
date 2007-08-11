@@ -31,33 +31,33 @@ function changeState(stateName) {
 	st.onEnter = function() { setImageMapMode(NULLMODE); };
 	st.buttonHandler = function(b) {
 		if (b == 'button_buy_road') {
-			if (players[myId].buildingCounts[game.ROAD] >= game.maxRoads) {
+			if (game.players[myId].buildingCounts[game.ROAD] >= game.maxRoads) {
 				alert('No more roads!');
 				return;
 			}
-			if (hasEnoughResources(players[myId].resources, game.roadCost)) {
+			if (hasEnoughResources(game.players[myId].resources, game.roadCost)) {
 				alert('Not enough resources!');
 				return;
 			}
 			changeState('build_road');
 
 		} else if (b == 'button_buy_sett') {
-			if (players[myId].buildingCounts[game.SETT] >= game.maxSetts) {
+			if (game.players[myId].buildingCounts[game.SETT] >= game.maxSetts) {
 				alert('No more settlements!');
 				return;
 			}
-			if (hasEnoughResources(players[myId].resources, game.settCost)) {
+			if (hasEnoughResources(game.players[myId].resources, game.settCost)) {
 				alert('Not enough resources!');
 				return;
 			}
 			changeState('build_sett');
 
 		} else if (b == 'button_buy_city') {
-			if (players[myId].buildingCounts[game.CITY] >= game.maxCities) {
+			if (game.players[myId].buildingCounts[game.CITY] >= game.maxCities) {
 				alert('No more cities!');
 				return;
 			}
-			if (hasEnoughResources(players[myId].resources, game.cityCost)) {
+			if (hasEnoughResources(game.players[myId].resources, game.cityCost)) {
 				alert('Not enough resources!');
 				return;
 			}
@@ -68,7 +68,7 @@ function changeState(stateName) {
 				alert('No more development cards!');
 				return;
 			}
-			if (hasEnoughResources(players[myId].resources, game.cardCost)) {
+			if (hasEnoughResources(game.players[myId].resources, game.cardCost)) {
 				alert('Not enough resources!');
 				return;
 			}
@@ -169,7 +169,7 @@ function changeState(stateName) {
 		if (priv_buildSett(i, j, v, true, true)) { // free + ignore reachability
 			changeState('build_initial_road');
 			initialSett = { i: i, j: j, v: v };
-			if (players[myId].buildingCounts[game.SETT] == 2)
+			if (game.players[myId].buildingCounts[game.SETT] == 2)
 				priv_getInitialResources();
 		}
 	};
@@ -180,14 +180,14 @@ function changeState(stateName) {
 	st.onEnter = function() { setImageMapMode(EDGEMODE); };
 	st.edgeHandler = function(i, j, e) {
 		if (priv_buildRoad(i, j, e, true, true)) { // free + ignore reachability
-			if (players[myId].buildingCounts[game.SETT] == 1) {
-				var next = (myId + 1) % numPlayers;
+			if (game.players[myId].buildingCounts[game.SETT] == 1) {
+				var next = (myId + 1) % this.numPlayers;
 				if (next == firstPlayer) // I am the last player, so build again
 					changeState('build_initial_sett');
 				else
 					priv_transferTurn(next);
 			} else { // 2 settlements
-				var next = (myId + numPlayers - 1) % numPlayers;
+				var next = (myId + this.numPlayers - 1) % this.numPlayers;
 				if (myId == firstPlayer)
 					changeState('roll');
 				else
@@ -206,7 +206,7 @@ function changeState(stateName) {
 			for (var v = 0; v < 6; ++v) {
 				var own = vertexOwner(i, j, v);
 				if (own >= 0 && own != myId)
-					if (players[own].numResources() > 0)
+					if (game.players[own].numResources() > 0)
 						stealable = true;
 			}
 			if (stealable)

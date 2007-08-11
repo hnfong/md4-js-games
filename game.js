@@ -41,7 +41,8 @@ var playerColors = new Array('blue', 'red', 'green', 'orange');
 
 
 // settings is a dictionary of settings that overrides the defaults. if none, defaults are used.
-function Game(settings) {
+function Game(settings)
+{
 	if (settings == undefined || settings == null) settings = {};
 
 	for (var k in __game_defaults)
@@ -49,3 +50,38 @@ function Game(settings) {
 		this[k] = (settings[k] != undefined ? settings[k] : __game_defaults[k]);
 	}
 }
+
+Game.prototype.start = function(players, mapData)
+{
+	this.numPlayers = players.length;
+	this.players = new Array();
+	for (var i = 0; i < players.length; ++i)
+		this.players.push(new Player(i, players[i]));
+
+	if (mapData == null)
+		randomizeCells();
+	else
+		loadMap(mapData);
+
+	drawBoard();
+	drawMarkers();
+	initCellMap();
+	initVertexMap();
+	initEdgeMap();
+
+	ui_showResourceWindow(myId);
+	ui_showPurchaseWindow(myId);
+	ui_showPlayerWindow(myId);
+
+	vertexBuildingMap = new Array();
+	edgeBuildingMap = new Array();
+	vertexReachableMap = new Array();
+
+	initRolls = create1DArray(this.numPlayers);
+	tiedPlayers = new Array();
+	for (var i = 0; i < this.numPlayers; ++i)
+		tiedPlayers.push(i);
+
+	changeState('wait');
+}
+

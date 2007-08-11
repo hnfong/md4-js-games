@@ -40,7 +40,7 @@
 
 <div id="status" class="window" style="left: 300px; top: 500px;">Status: idle</div>
 <div style="top: 500px; position: absolute">
-<div onmousedown="regPlayer('cx',0); setupGame(new Array('cx', 'Si', 'phisho')); priv_sendMapData(); priv_startGame();">I am player 0</div>
+<div onmousedown="regPlayer('cx',0); game.start(new Array('cx', 'Si', 'phisho')); priv_sendMapData(); priv_startGame();">I am player 0</div>
 <div onmousedown="regPlayer('Si',1);">I am player 1</div>
 <div onmousedown="regPlayer('cychoi',2);">I am player 2</div>
 <div onmousedown="clearRemoteLog();">Clear Data</div>
@@ -68,13 +68,11 @@ game = new Game();
 
 board = new Board();
 
-var numPlayers;
 var myId;
 var cellResources; // 2D array (same size as board)
 var cellMarkers; // 2D array (same size as board)
 var outcomeCellMap; // 2D array (outcome -> cell)
 var robberPos;
-var players; // array of Players
 var vertexBuildingMap; // coordinates->building
 var edgeBuildingMap; // coordinates->building
 var vertexReachableMap; // coordinates->array of player IDs
@@ -90,37 +88,6 @@ var initialSett;
 
 
 //////////////////////////////////////////////////////// BEGIN GAME SETUP STUFF
-
-function setupGame(playerNames, mapData) {
-	numPlayers = playerNames.length;
-	players = new Array();
-	for (var i = 0; i < numPlayers; ++i)
-		players.push(new Player(i, playerNames[i]));
-	if (mapData == null)
-		randomizeCells();
-	else
-		loadMap(mapData);
-	drawBoard();
-	drawMarkers();
-	initCellMap();
-	initVertexMap();
-	initEdgeMap();
-
-	ui_showResourceWindow(myId);
-	ui_showPurchaseWindow(myId);
-	ui_showPlayerWindow(myId);
-
-	vertexBuildingMap = new Array();
-	edgeBuildingMap = new Array();
-	vertexReachableMap = new Array();
-
-	initRolls = create1DArray(numPlayers);
-	tiedPlayers = new Array();
-	for (var i = 0; i < numPlayers; ++i)
-		tiedPlayers.push(i);
-
-	changeState('wait');
-}
 
 function randomizeCells() {
 	var remainTiles = new Array(4, 3, 4, 4, 3);
@@ -307,7 +274,7 @@ function ui_drawDice(a) {
 }
 
 function ui_showResourceWindow(pid) {
-	var p = players[pid];
+	var p = game.players[pid];
 	var txt = '';
 	for (var i = 0; i < game.numResourceTypes; ++i)
 		txt += '<img src="img/'+game.resourceNames[i]+'_small.gif"> ' + game.resourceNames[i]  + ": " + p.resources[i] + "<br/>";
@@ -315,7 +282,7 @@ function ui_showResourceWindow(pid) {
 }
 
 function ui_showPurchaseWindow(pid) {
-	var p = players[pid];
+	var p = game.players[pid];
 	var txt = '';
 
 	function dumpCost(a) {
@@ -327,24 +294,24 @@ function ui_showPurchaseWindow(pid) {
 	}
 
 	txt += 'Development Card <input type="button" id="button_buy_devcard" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_devcard\');return false;"/> (' + remainingDevCards() + ' left)<br/>' + dumpCost(game.cardCost) + '<br/><hr/>';
-	txt += 'City <input type="button" id="button_buy_city" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_city\');return false;"/> (' + (game.maxCities-players[pid].buildingCounts[game.CITY]) + ' left)<br/>' + dumpCost(game.cityCost) + '<br/><hr/>';
-	txt += 'Settlement <input type="button" id="button_buy_sett" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_sett\');return false;"/> (' + (game.maxSetts-players[pid].buildingCounts[game.SETT]) + ' left)<br/>' + dumpCost(game.settCost) + '<br/><hr/>';
-	txt += 'Road <input type="button" id="button_buy_road" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_road\');return false;"/> (' + (game.maxRoads-players[pid].buildingCounts[game.ROAD]) + ' left)<br/>' + dumpCost(game.roadCost) + '<br/><hr/>';
+	txt += 'City <input type="button" id="button_buy_city" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_city\');return false;"/> (' + (game.maxCities-game.players[pid].buildingCounts[game.CITY]) + ' left)<br/>' + dumpCost(game.cityCost) + '<br/><hr/>';
+	txt += 'Settlement <input type="button" id="button_buy_sett" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_sett\');return false;"/> (' + (game.maxSetts-game.players[pid].buildingCounts[game.SETT]) + ' left)<br/>' + dumpCost(game.settCost) + '<br/><hr/>';
+	txt += 'Road <input type="button" id="button_buy_road" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_road\');return false;"/> (' + (game.maxRoads-game.players[pid].buildingCounts[game.ROAD]) + ' left)<br/>' + dumpCost(game.roadCost) + '<br/><hr/>';
 
 	g('purchase_window').innerHTML = txt;
 }
 
 function ui_showPlayerWindow(pid) {
 	var txt = '';
-	for (var i = 0; i < numPlayers; ++i) {
+	for (var i = 0; i < game.numPlayers; ++i) {
 		txt += '<div style="background-color:' + playerColors[i] + ';">';
 		if (currentTurn == i)
-			txt += '<b><i><u>' + players[i].name + '</u></i></b><br/>';
+			txt += '<b><i><u>' + game.players[i].name + '</u></i></b><br/>';
 		else
-			txt += '<b>' + players[i].name + '</b><br/>';
-		txt += 'Points: ' + players[i].points() + '<br/>';
-		txt += 'Resource cards: ' + players[i].numResources() + '<br/>';
-		txt += 'Development cards: ' + players[i].devCards.length + '</div>';
+			txt += '<b>' + game.players[i].name + '</b><br/>';
+		txt += 'Points: ' + game.players[i].points() + '<br/>';
+		txt += 'Resource cards: ' + game.players[i].numResources() + '<br/>';
+		txt += 'Development cards: ' + game.players[i].devCards.length + '</div>';
 		txt += '<hr/>';
 	}
 	g('player_window').innerHTML = txt;
@@ -366,7 +333,7 @@ function ui_showStealWindow(pid) {
 	for (var v = 0; v < 6; ++v) {
 		var own = vertexOwner(robberPos.i, robberPos.j, v);
 		if (own >= 0 && own != pid) {
-			if (players[own].numResources() > 0) {
+			if (game.players[own].numResources() > 0) {
 				var existed = false;
 				for (var i = 0; i < victims.length; ++i)
 					if (victims[i] == own)
@@ -379,7 +346,7 @@ function ui_showStealWindow(pid) {
 
 	var txt = 'Steal from:<br/>';
 	for (var i = 0; i < victims.length; ++i)
-		txt += '<a href="#" onmousedown="state.customHandler(' + victims[i] + ');return false;">' + players[victims[i]].name + '</a><br/>';
+		txt += '<a href="#" onmousedown="state.customHandler(' + victims[i] + ');return false;">' + game.players[victims[i]].name + '</a><br/>';
 	g('steal_window').innerHTML = txt;
 	g('steal_window').style.visibility = 'visible';
 }
@@ -398,8 +365,8 @@ function pub_rollForResources(a, pid) {
 	if (outcome == game.robberOutcome)
 		return false;
 
-	var gain = new Array(numPlayers);
-	for (var i = 0; i < numPlayers; ++i) {
+	var gain = new Array(game.numPlayers);
+	for (var i = 0; i < game.numPlayers; ++i) {
 		gain[i] = new Array(game.numResourceTypes);
 		for (var j = 0; j < game.numResourceTypes; ++j)
 			gain[i][j] = 0;
@@ -421,11 +388,11 @@ function pub_rollForResources(a, pid) {
 			}
 		}
 	}
-	for (var i = 0; i < numPlayers; ++i)
-		players[i].addResources(gain[i]);
+	for (var i = 0; i < game.numPlayers; ++i)
+		game.players[i].addResources(gain[i]);
 
-	for (var i = 0; i < numPlayers; ++i)
-		ui_writeLog(players[i].name + ' got ' + resourcesToString(gain[i]) + '.');
+	for (var i = 0; i < game.numPlayers; ++i)
+		ui_writeLog(game.players[i].name + ' got ' + resourcesToString(gain[i]) + '.');
 
 	return true;
 }
@@ -442,8 +409,8 @@ function priv_rollForResources() {
 
 function pub_buildRoad(i, j, e, isFree, pid) {
 	if (!isFree)
-		players[pid].subtractResources(game.roadCost);
-	players[pid].buildRoad(i, j, e);
+		game.players[pid].subtractResources(game.roadCost);
+	game.players[pid].buildRoad(i, j, e);
 	var o = canonicalEdge(i, j, e);
 	var x = vertexXY(i, j, e).x;
 	var y = vertexXY(i, j, e).y;
@@ -468,7 +435,7 @@ function pub_buildRoad(i, j, e, isFree, pid) {
 }
 
 function priv_buildRoad(i, j, e, isFree, ignoreReachability) {
-	if (!players[myId].buildRoadCheck(i, j, e, ignoreReachability)) return false;
+	if (!game.players[myId].buildRoadCheck(i, j, e, ignoreReachability)) return false;
 	pub_buildRoad(i, j, e, isFree, myId);
 	if (isFree)
 		sendRemoteMessage('build_road ' + myId + ' ' + i + ' ' + j + ' ' + e);
@@ -480,8 +447,8 @@ function priv_buildRoad(i, j, e, isFree, ignoreReachability) {
 
 function pub_buildSett(i, j, v, isFree, pid) {
 	if (!isFree)
-		players[pid].subtractResources(game.settCost);
-	players[pid].buildSett(i, j, v);
+		game.players[pid].subtractResources(game.settCost);
+	game.players[pid].buildSett(i, j, v);
 	var x = vertexXY(i, j, v).x;
 	var y = vertexXY(i, j, v).y;
 	var sett = document.createElement('img');
@@ -495,7 +462,7 @@ function pub_buildSett(i, j, v, isFree, pid) {
 
 
 function priv_buildSett(i, j, v, isFree, ignoreReachability) {
-	if (!players[myId].buildSettCheck(i, j, v, ignoreReachability)) return false;
+	if (!game.players[myId].buildSettCheck(i, j, v, ignoreReachability)) return false;
 	if (isFree)
 		sendRemoteMessage('build_sett ' + myId + ' ' + i + ' ' + j + ' ' + v);
 	else
@@ -506,21 +473,21 @@ function priv_buildSett(i, j, v, isFree, ignoreReachability) {
 
 
 function pub_buildCity(i, j, v, pid) {
-	players[pid].subtractResources(game.cityCost);
-	players[pid].buildCity(i, j, v);
+	game.players[pid].subtractResources(game.cityCost);
+	game.players[pid].buildCity(i, j, v);
 	var img = g('sett_id_' + vertexToString(i, j, v));
 	img.src = 'img/city_' + pid + '.gif';
 }
 
 function priv_buildCity(i, j, v) {
-	if (!players[myId].buildCityCheck(i, j, v)) return false;
+	if (!game.players[myId].buildCityCheck(i, j, v)) return false;
 	sendRemoteMessage('buy_city ' + myId + ' ' + i + ' ' + j + ' ' + v);
 	pub_buildCity(i, j, v, myId);
 	return true;
 }
 
 function pub_buyCard(type, pid) {
-	players[pid].devCards.push(devCardBase[type].take());
+	game.players[pid].devCards.push(devCardBase[type].take());
 }
 
 function priv_buyCard() {
@@ -547,15 +514,15 @@ function priv_placeRobber(i, j) {
 }
 
 function pub_steal(victim, type, pid) {
-	players[victim].resources[type]--;
-	players[pid].resources[type]++;
+	game.players[victim].resources[type]--;
+	game.players[pid].resources[type]++;
 	return type;
 }
 
 function priv_steal(victim) {
 	var a = new Array();
 	for (var i = 0; i < game.numResourceTypes; ++i)
-		for (var j = 0; j < players[victim].resources[i]; ++j)
+		for (var j = 0; j < game.players[victim].resources[i]; ++j)
 			a.push(i);
 	var k = randInt(a.length);
 	var type = a[k];
@@ -569,7 +536,7 @@ function pub_transferTurn(next, pid) {
 	if (currentTurn != myId)
 		changeState('wait');
 	else {
-		if (players[myId].buildingCounts[game.ROAD] < 2)
+		if (game.players[myId].buildingCounts[game.ROAD] < 2)
 			changeState('build_initial_sett');
 		else
 			changeState('roll');
@@ -578,29 +545,29 @@ function pub_transferTurn(next, pid) {
 
 function priv_transferTurn(next) {
 	if (next == null)
-		next = (myId + 1) % numPlayers;
-	if (players[myId].points() >= game.goalPoints)
-		sendRemoteMessage('win ' + myId + ' ' + players[myId].points());
+		next = (myId + 1) % game.numPlayers;
+	if (game.players[myId].points() >= game.goalPoints)
+		sendRemoteMessage('win ' + myId + ' ' + game.players[myId].points());
 	else
 		sendRemoteMessage('transfer ' + myId + ' ' + next);
 	pub_transferTurn(next, myId);
 }
 
 function pub_useCard(index, pid) {
-	var card = players[pid].devCards[index];
-	players[pid].devCards.splice(index, 1);
+	var card = game.players[pid].devCards[index];
+	game.players[pid].devCards.splice(index, 1);
 }
 
 function priv_useCard(index) {
-	var card = players[myId].devCards[index];
+	var card = game.players[myId].devCards[index];
 	sendRemoteMessage('use_card ' + myId + ' ' + index);
-	ui_writeLog(players[myId].name + ' played ' + card.name + '.');
+	ui_writeLog(game.players[myId].name + ' played ' + card.name + '.');
 	pub_useCard(index, myId);
 	card.use();
 }
 
 function pub_adjustExtraPoints(inc, pid) {
-	players[pid].extraPoints += inc;
+	game.players[pid].extraPoints += inc;
 }
 
 function priv_adjustExtraPoints(inc) {
@@ -609,7 +576,7 @@ function priv_adjustExtraPoints(inc) {
 }
 
 function pub_getResources(gain, pid) {
-	players[pid].addResources(gain, true);
+	game.players[pid].addResources(gain, true);
 }
 
 function priv_getInitialResources() {
