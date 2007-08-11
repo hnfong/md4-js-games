@@ -168,7 +168,9 @@ function changeState(stateName) {
 	st.vertexHandler = function(i, j, v) {
 		if (priv_buildSett(i, j, v, true, true)) { // free + ignore reachability
 			changeState('build_initial_road');
-			initialSett = { i: i, j: j, v: v }; 
+			initialSett = { i: i, j: j, v: v };
+			if (players[myId].buildingCounts[game.SETT] == 2)
+				priv_getInitialResources();
 		}
 	};
 	states['build_initial_sett'] = st;

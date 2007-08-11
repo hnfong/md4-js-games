@@ -82,3 +82,15 @@ function resourcesToString(a) {
 	return txt.substr(2);
 }
 
+function isArray(a) {
+	return (typeof a == 'object' && a.constructor.toString().match(/array/i) != null);
+}
+
+function dumpArray(a) {
+	if (!isArray(a))
+		return '' + a;
+	var s = '';
+	for (var i = 0; i < a.length; ++i)
+		s += ' ' + dumpArray(a[i]);
+	return s.substr(1);
+}

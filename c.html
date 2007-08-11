@@ -613,6 +613,27 @@ function priv_adjustExtraPoints(inc) {
 	pub_adjustExtraPoints(inc, myId);
 }
 
+function pub_getResources(gain, pid) {
+	players[pid].addResources(gain, true);
+}
+
+function priv_getInitialResources() {
+	var gain = create1DArray(game.numResourceTypes);
+	var i = initialSett.i, j = initialSett.j;
+	if (isValidCell(i, j) && cellResources[i][j] >= 0)
+		gain[cellResources[i][j]]++;
+	var i2 = i + commonVertex[initialSett.v][0].i;
+	var j2 = j + commonVertex[initialSett.v][0].j;
+	if (isValidCell(i2, j2) && cellResources[i2][j2] >= 0)
+		gain[cellResources[i2][j2]]++;
+	var i3 = i + commonVertex[initialSett.v][1].i;
+	var j3 = j + commonVertex[initialSett.v][1].j;
+	if (isValidCell(i3, j3) && cellResources[i3][j3] >= 0)
+		gain[cellResources[i3][j3]]++;
+	sendRemoteMessage('get_resources ' + myId + ' ' + dumpArray(gain));
+	pub_getResources(gain, myId);
+}
+
 function cat_initRoll(pid) {
 	var a = roll();
 	var txt = '';
@@ -650,17 +671,11 @@ function cat_initRollFinishRound() {
 
 function priv_sendMapData() {
 	var s = '';
-	s += 'map_data ' + myId + ' ' + board_w + ' ' + board_h + ' ';
-	for (var i = 0; i < board_w; ++i)
-		for (var j = 0; j < board_h; ++j)
-			s += board[i][j] + ' ';
-	for (var i = 0; i < board_w; ++i)
-		for (var j = 0; j < board_h; ++j)
-			s += cellResources[i][j] + ' ';
-	for (var i = 0; i < board_w; ++i)
-		for (var j = 0; j < board_h; ++j)
-			s += cellMarkers[i][j] + ' ';
-	s += robberPos.i + ' ' + robberPos.j;
+	s += 'map_data ' + myId + ' ' + board_w + ' ' + board_h;
+	s += ' ' + dumpArray(board);
+	s += ' ' + dumpArray(cellResources);
+	s += ' ' + dumpArray(cellMarkers);
+	s += ' ' + robberPos.i + ' ' + robberPos.j;
 	sendRemoteMessage(s);
 }
 

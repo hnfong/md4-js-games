@@ -76,12 +76,12 @@ function Player(id, name) {
 
 	this.addResources = function(array, silent) {
 		for (var i = 0; i < array.length; ++i)
-			this.resources[i] += array[i];
+			this.resources[i] += parseInt(array[i]);
 	};
 
 	this.subtractResources = function(array) {
 		for (var i = 0; i < array.length; ++i)
-			this.resources[i] -= array[i];
+			this.resources[i] -= parseInt(array[i]);
 	};
 
 	this.getOneResource = function(res) {

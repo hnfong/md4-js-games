@@ -115,10 +115,11 @@ function remoteMessageHandler(txt)
 			pub_buildSett(parseInt(a[2]), parseInt(a[3]), parseInt(a[4]), true, pid);
 			break;
 
-		case 'build_city':
-			break;
-
 		case 'get_resources':
+			if (pid == myId) return;
+			a.shift();
+			a.shift();
+			pub_getResources(a, pid);
 			break;
 
 		case 'discard':
@@ -131,7 +132,10 @@ function remoteMessageHandler(txt)
 			break;
 
 		case 'steal':
-			ui_writeLog(players[pid].name + ' stole <i>something</i> from ' + players[parseInt(a[2])].name + '.');
+			if (myId == a[2] || pid == myId)
+				ui_writeLog(players[pid].name + ' stole 1 ' + game.resourceNames[parseInt(a[3])] + ' from ' + players[parseInt(a[2])].name + '.');
+			else
+				ui_writeLog(players[pid].name + ' stole <i>something</i> from ' + players[parseInt(a[2])].name + '.');
 			if (pid == myId) return;
 			pub_steal(parseInt(a[2]), parseInt(a[3]), pid);
 			break;
