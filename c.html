@@ -69,13 +69,6 @@ game = new Game();
 board = new Board();
 
 var myId;
-var cellResources; // 2D array (same size as board)
-var cellMarkers; // 2D array (same size as board)
-var outcomeCellMap; // 2D array (outcome -> cell)
-var robberPos;
-var vertexBuildingMap; // coordinates->building
-var edgeBuildingMap; // coordinates->building
-var vertexReachableMap; // coordinates->array of player IDs
 var currentAction;
 var currentTurn;
 var initRolls;
@@ -88,107 +81,6 @@ var initialSett;
 
 
 //////////////////////////////////////////////////////// BEGIN GAME SETUP STUFF
-
-function randomizeCells() {
-	var remainTiles = new Array(4, 3, 4, 4, 3);
-	var numberMarkers = new Array(6, 2, 5, 3, 4, 9, 10, 8, 11, 3, 8, 10, 5, 6, 4, 9, 12, 11);
-	cellResources = create2DArray(board.WIDTH, board.HEIGHT);
-	cellMarkers = create2DArray(board.WIDTH, board.HEIGHT);
-	outcomeCellMap = new Array();
-	robberPos = { i: -999, j: -999 };
-
-	while (true) {
-		var i = randInt(board.WIDTH);
-		var j = randInt(board.HEIGHT);
-		if (isValidCell(i, j)) {
-			cellResources[i][j] = game.DESERT;
-			pub_placeRobber(i, j, myId);
-			break;
-		}
-	}
-	for (var i = 0; i < board.WIDTH; ++i)
-		for (var j = 0; j < board.HEIGHT; ++j) {
-			if (isValidCell(i, j) && cellResources[i][j] != game.DESERT) {
-				while (true) {
-					var type = randInt(game.numResourceTypes);
-					if (remainTiles[type] > 0) {
-						cellResources[i][j] = type;
-						remainTiles[type]--;
-						break;
-					}
-				}
-				while (true) {
-					var mark = randInt(numberMarkers.length);
-					var m = numberMarkers[mark];
-					if (m > 0) {
-						cellMarkers[i][j] = m;
-						numberMarkers[mark] = 0;
-						if (!outcomeCellMap[m])
-							outcomeCellMap[m] = new Array();
-						outcomeCellMap[m].push( {i: i, j: j} );
-						break;
-					}
-				}
-			}
-		}
-}
-
-function loadMap(mapData) {
-	board.WIDTH = mapData.shift();
-	board.HEIGHT = mapData.shift();
-	cellResources = create2DArray(board.WIDTH, board.HEIGHT);
-	cellMarkers = create2DArray(board.WIDTH, board.HEIGHT);
-	outcomeCellMap = new Array();
-	robberPos = { i: -999, j: -999 };
-	for (var i = 0; i < board.WIDTH; ++i)
-		for (var j = 0; j < board.HEIGHT; ++j)
-			board.data[i][j] = parseInt(mapData.shift());
-	for (var i = 0; i < board.WIDTH; ++i)
-		for (var j = 0; j < board.HEIGHT; ++j)
-			cellResources[i][j] = parseInt(mapData.shift());
-	for (var i = 0; i < board.WIDTH; ++i)
-		for (var j = 0; j < board.HEIGHT; ++j) {
-			var m = cellMarkers[i][j] = parseInt(mapData.shift());
-			if (!outcomeCellMap[m])
-				outcomeCellMap[m] = new Array();
-			outcomeCellMap[m].push( {i: i, j: j} );
-		}
-	var x = mapData.shift();
-	var y = mapData.shift();
-	pub_placeRobber(x, y, myId);
-}
-
-function drawBoard() {
-	for (var i = 0; i < board.WIDTH; ++i)
-	for (var j = 0; j < board.HEIGHT; ++j) 
-	if (board.data[i][j]) {
-		var tile = document.createElement('img');
-		if (board.data[i][j] == 2)
-			tile.setAttribute('src', 'img/sea.gif');
-		else if (cellResources[i][j] == game.DESERT)
-			tile.setAttribute('src', 'img/desert.gif');
-		else
-			tile.setAttribute('src', 'img/' + game.resourceNames[cellResources[i][j]] + '.gif');
-		tile.style.position = 'absolute';
-		tile.style.left = (cellXY(i,j).x + game.XDELTA) + 'px';
-		tile.style.top = (cellXY(i,j).y + game.YDELTA) + 'px';
-		document.getElementById('tiles').appendChild(tile);
-	}
-}
-
-function drawMarkers() {
-	for (var i = 0; i < board.WIDTH; ++i)
-	for (var j = 0; j < board.HEIGHT; ++j) 
-	if (cellMarkers[i][j] > 0) {
-		var marker = document.createElement('div');
-		marker.style.backgroundColor = '#ffffff';
-		marker.style.position = 'absolute';
-		marker.style.left = (cellXY(i,j).x + 30 + game.XDELTA) + 'px';
-		marker.style.top = (cellXY(i,j).y + 20 + game.YDELTA) + 'px';
-		marker.innerHTML = cellMarkers[i][j];
-		document.getElementById('markers').appendChild(marker);
-	}
-}
 
 function initCellMap() {
 	for (var i = 0; i < board.WIDTH; ++i)
@@ -635,9 +527,9 @@ function priv_sendMapData() {
 	var s = '';
 	s += 'map_data ' + myId + ' ' + board.WIDTH + ' ' + board.HEIGHT;
 	s += ' ' + dumpArray(board.data);
-	s += ' ' + dumpArray(cellResources);
-	s += ' ' + dumpArray(cellMarkers);
-	s += ' ' + robberPos.i + ' ' + robberPos.j;
+	s += ' ' + dumpArray(board.cellResources);
+	s += ' ' + dumpArray(board.cellMarkers);
+	s += ' ' + board.robberPos.i + ' ' + board.robberPos.j;
 	sendRemoteMessage(s);
 }
 

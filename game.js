@@ -59,12 +59,13 @@ Game.prototype.start = function(players, mapData)
 		this.players.push(new Player(i, players[i]));
 
 	if (mapData == null)
-		randomizeCells();
+		board.randomizeCells();
 	else
-		loadMap(mapData);
+		board.loadMap(mapData);
 
-	drawBoard();
-	drawMarkers();
+	board.drawBoard();
+	board.drawMarkers();
+
 	initCellMap();
 	initVertexMap();
 	initEdgeMap();
@@ -84,4 +85,3 @@ Game.prototype.start = function(players, mapData)
 
 	changeState('wait');
 }
-
