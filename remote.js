@@ -77,11 +77,11 @@ function remoteMessageHandler(txt)
 			if (pid == myId) return;
 			a.shift();
 			a.shift();
-			pub_rollForResources(a, pid);
+			game.rollForResources(a);
 			break;
 		case 'transfer':
 			if (pid == myId) return;
-			pub_transferTurn(a[2], pid);
+			game.transferTurn(a[2]);
 			break;
 		case 'buy_road':
 			ui.writeLog(p.name + ' built a road.');
@@ -97,13 +97,13 @@ function remoteMessageHandler(txt)
 		case 'buy_city':
 			ui.writeLog(p.name + ' built a city.');
 			if (pid == myId) return;
-			pub_buildCity(parseInt(a[2]), parseInt(a[3]), parseInt(a[4]), pid);
+			p.buildCity(parseInt(a[2]), parseInt(a[3]), parseInt(a[4]));
 			break;
 
 		case 'buy_devcard':
 			ui.writeLog(p.name + ' bought a development card.');
 			if (pid == myId) return;
-			pub_buyCard(parseInt(a[2]), pid);
+			p.buyCard(parseInt(a[2]));
 			break;
 
 		case 'build_road':
@@ -122,7 +122,7 @@ function remoteMessageHandler(txt)
 			if (pid == myId) return;
 			a.shift();
 			a.shift();
-			pub_getResources(a, pid);
+			p.addResources(a);
 			break;
 
 		case 'discard':
@@ -131,7 +131,7 @@ function remoteMessageHandler(txt)
 		case 'place_robber':
 			ui.writeLog(p.name + ' moved the robber.');
 			if (pid == myId) return;
-			pub_placeRobber(parseInt(a[2]), parseInt(a[3]), pid);
+			board.placeRobber(parseInt(a[2]), parseInt(a[3]));
 			break;
 
 		case 'steal':
@@ -140,17 +140,17 @@ function remoteMessageHandler(txt)
 			else
 				ui.writeLog(p.name + ' stole <i>something</i> from ' + game.players[parseInt(a[2])].name + '.');
 			if (pid == myId) return;
-			pub_steal(parseInt(a[2]), parseInt(a[3]), pid);
+			p.steal(game.players[parseInt(a[2])], parseInt(a[3]));
 			break;
 		case 'use_card':
 			if (pid == myId) return;
 			ui.writeLog(p.name + ' played ' + p.devCards[parseInt(a[2])].name + '.');
-			pub_useCard(parseInt(a[2]), pid);
+			p.useCard(parseInt(a[2]));
 			break;
 
 		case 'adjust_extra':
 			if (pid == myId) return;
-			pub_adjustExtraPoints(parseInt(a[2]), pid);
+			p.adjustExtraPoints(parseInt(a[2]));
 			break;
 
 		case 'propose_trade':
@@ -173,7 +173,7 @@ function remoteMessageHandler(txt)
 			break;
 
 		case 'start_game':
-			pub_transferTurn(0);
+			game.transferTurn(0);
 			firstPlayer = 0;
 			ui.writeLog('Game started!');
 			break;

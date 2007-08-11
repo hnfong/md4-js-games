@@ -152,7 +152,7 @@ ui.refreshWindows = function (pid) {
 ui.showStealWindow = function (pid) {
 	var victims = new Array();
 	for (var v = 0; v < 6; ++v) {
-		var own = vertexOwner(robberPos.i, robberPos.j, v);
+		var own = vertexOwner(board.robberPos.i, board.robberPos.j, v);
 		if (own >= 0 && own != pid) {
 			if (game.players[own].numResources() > 0) {
 				var existed = false;
@@ -177,7 +177,7 @@ ui.showDevCardWindow = function (pid) {
 	var txt = 'Development Cards:<br/>';
 	for (var i = 0; i < game.players[pid].devCards.length; ++i) {
 		var card = game.players[pid].devCards[i];
-		txt += '<a href="#" onmousedown="if(state.name!=\'free\')return false;priv_useCard(' + i + ');ui.refreshWindows(' + pid + ');return false;">' + card.name + '</a><br/>';
+		txt += '<a href="#" onmousedown="if(state.name!=\'free\')return false;game.me.useCard(' + i + ');ui.refreshWindows(' + pid + ');return false;">' + card.name + '</a><br/>';
 	} 
 	g('devcard_window').innerHTML = txt;
 };

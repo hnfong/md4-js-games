@@ -72,11 +72,11 @@ function changeState(stateName) {
 				alert('Not enough resources!');
 				return;
 			}
-			priv_buyCard();
+			game.me.buyCard();
 			changeState('free');
 
 		} else if (b == 'button_end_turn') {
-			priv_transferTurn();
+			game.me.transferTurn();
 
 		}
 	};
@@ -91,7 +91,7 @@ function changeState(stateName) {
 	var st = new State('roll');
 	st.onEnter = function() { setImageMapMode(NULLMODE); };
 	st.diceHandler = function() {
-		if (priv_rollForResources())
+		if (game.me.rollForResources())
 			changeState('free');
 		else
 			changeState('place_robber');
@@ -150,7 +150,7 @@ function changeState(stateName) {
 		g('button_buy_city').value = 'Buy';
 	}
 	st.vertexHandler = function(i, j, v) {
-		if (priv_buildCity(i, j, v, false)) {
+		if (game.me.buildCity(i, j, v, false)) {
 			changeState('free');
 		}
 	};
@@ -170,7 +170,7 @@ function changeState(stateName) {
 			changeState('build_initial_road');
 			initialSett = { i: i, j: j, v: v };
 			if (game.players[myId].buildingCounts[game.SETT] == 2)
-				priv_getInitialResources();
+				game.me.getInitialResources();
 		}
 	};
 	states['build_initial_sett'] = st;
@@ -185,13 +185,13 @@ function changeState(stateName) {
 				if (next == firstPlayer) // I am the last player, so build again
 					changeState('build_initial_sett');
 				else
-					priv_transferTurn(next);
+					game.me.transferTurn(next);
 			} else { // 2 settlements
 				var next = (myId + game.numPlayers - 1) % game.numPlayers;
 				if (myId == firstPlayer)
 					changeState('roll');
 				else
-					priv_transferTurn(next);
+					game.me.transferTurn(next);
 			}
 		}
 	};
@@ -201,7 +201,7 @@ function changeState(stateName) {
 	var st = new State('place_robber');
 	st.onEnter = function() { setImageMapMode(CELLMODE); };
 	st.cellHandler = function(i, j) {
-		if (priv_placeRobber(i, j)) {
+		if (game.me.placeRobber(i, j)) {
 			var stealable = false;
 			for (var v = 0; v < 6; ++v) {
 				var own = vertexOwner(i, j, v);
@@ -227,7 +227,7 @@ function changeState(stateName) {
 		ui.hideStealWindow();
 	};
 	st.customHandler = function(victim) {
-		if (priv_steal(victim))
+		if (game.me.steal(game.players[victim]))
 			changeState('free');
 	};
 	states['steal'] = st;

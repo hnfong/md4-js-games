@@ -61,15 +61,7 @@ Me.prototype = new Player();
 		return true;
 	};
 
-	Player.prototype.buildCity = function(i, j, v) {
-		var s = vertexToString(i, j, v);
-		vertexBuildingMap[s].type = game.CITY;
-		this.buildingCounts[game.SETT]--;
-		this.buildingCounts[game.CITY]++;
-		return true;
-	};
-
-	Player.prototype.addResources = function(array, silent) {
+	Player.prototype.addResources = function(array) {
 		for (var i = 0; i < array.length; ++i)
 			this.resources[i] += parseInt(array[i]);
 	};
@@ -224,5 +216,127 @@ Me.prototype.buildSett = function(i, j, v, isFree, ignoreReachability)
 	
 	Player.prototype.buildSett.call(this, i, j, v, isFree);
 	return true;
+};
+
+Me.prototype.rollForResources = function() {
+	var a = roll();
+	var txt = '';
+	for (var i = 0; i < game.numDice; ++i)
+		txt += ' ' + a[i];
+	sendRemoteMessage('roll ' + this.id + txt);
+	return game.rollForResources(a);
+};
+
+Player.prototype.buildCity = function(i, j, v) {
+	this.subtractResources(game.cityCost);
+
+	// internal
+	{
+		var s = vertexToString(i, j, v);
+		vertexBuildingMap[s].type = game.CITY;
+		this.buildingCounts[game.SETT]--;
+		this.buildingCounts[game.CITY]++;
+	}
+
+	// ui
+	var img = g('sett_id_' + vertexToString(i, j, v));
+	img.src = 'img/city_' + this.id+ '.gif';
+};
+
+Me.prototype.buildCity = function(i, j, v) {
+	if (!this.buildCityCheck(i, j, v)) return false;
+	sendRemoteMessage('buy_city ' + this.id + ' ' + i + ' ' + j + ' ' + v);
+	Player.prototype.buildCity.call(this, i, j, v, myId);
+	return true;
+};
+
+Player.prototype.buyCard = function(type) {
+	this.devCards.push(devCardBase[type].take());
+};
+
+Me.prototype.buyCard = function () {
+	var index = drawDevCard();
+	sendRemoteMessage('buy_devcard ' + this.id + ' ' + index);
+	Player.prototype.buyCard.call(this, index);
+};
+
+Me.prototype.placeRobber = function(i, j) {
+	if (board.robberPos.i < 0 || board.cellResources[i][j] >= 0 && (i != board.robberPos.i || j != board.robberPos.j)) {
+		sendRemoteMessage('place_robber ' + myId + ' ' + i + ' ' + j);
+		board.placeRobber(i, j);
+		return true;
+	}
+	alert('Cannot put the robber here!');
+	return false;
+};
+
+Player.prototype.steal = function(victim, type) {
+	victim.resources[type]--;
+	this.resources[type]++;
+	return type;
+};
+
+Me.prototype.steal = function(victim) {
+	var a = new Array();
+	for (var i = 0; i < game.numResourceTypes; ++i)
+		for (var j = 0; j < victim.resources[i]; ++j)
+			a.push(i);
+	var k = randInt(a.length);
+	var type = a[k];
+	sendRemoteMessage('steal ' + this.id + ' ' + victim.id + ' ' + type);
+	var t = Player.prototype.steal.call(this, victim, type);
+	return true;
+};
+
+Me.prototype.transferTurn = function(next) {
+	if (next == null)
+		next = (myId + 1) % game.numPlayers;
+
+	if (this.points() >= game.goalPoints)
+		sendRemoteMessage('win ' + this.id + ' ' + this.points());
+	else
+		sendRemoteMessage('transfer ' + this.id + ' ' + next);
+
+	game.transferTurn(next);
+};
+
+Player.prototype.useCard = function(index) {
+	var card = this.devCards[index];
+	this.devCards.splice(index, 1);
+};
+
+Me.prototype.useCard = function(index)
+{
+	var card = this.devCards[index];
+	sendRemoteMessage('use_card ' + this.id + ' ' + index);
+	ui.writeLog(this.name + ' played ' + card.name + '.'); // why is it here instead of Player.useCard()??!
+	Player.prototype.useCard.call(this, index);
+	// card.use(); // FIXME
+};
+
+Player.prototype.adjustExtraPoints = function(inc) {
+	this.extraPoints += inc;
+};
+
+Me.prototype.adjustExtraPoints = function(inc) {
+	sendRemoteMessage('adjust_extra ' +  this.id + ' ' + inc); // FIXME: really needed? isn't it simply a matter of checking state changes?
+	Player.prototype.adjustExtraPoints.call(this, inc);
+};
+
+Me.prototype.getInitialResources = function() {
+	var gain = create1DArray(game.numResourceTypes);
+	var i = initialSett.i, j = initialSett.j;
+	if (isValidCell(i, j) && board.cellResources[i][j] >= 0)
+		gain[board.cellResources[i][j]]++;
+	var i2 = i + commonVertex[initialSett.v][0].i;
+	var j2 = j + commonVertex[initialSett.v][0].j;
+	if (isValidCell(i2, j2) && board.cellResources[i2][j2] >= 0)
+		gain[board.cellResources[i2][j2]]++;
+	var i3 = i + commonVertex[initialSett.v][1].i;
+	var j3 = j + commonVertex[initialSett.v][1].j;
+	if (isValidCell(i3, j3) && board.cellResources[i3][j3] >= 0)
+		gain[board.cellResources[i3][j3]]++;
+	sendRemoteMessage('get_resources ' + this.id + ' ' + dumpArray(gain));
+	this.addResources(gain);
 };
 

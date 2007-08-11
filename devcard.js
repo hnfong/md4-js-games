@@ -52,7 +52,7 @@ function drawDevCard() {
 {
 	var onepoint = new DevCard(1, 'One Victory Point', 5);
 	onepoint.use = function() {
-		priv_adjustExtraPoints(+1);
+		game.me.adjustExtraPoints(+1);
 	};
 	devCardBase.push(onepoint);
 }

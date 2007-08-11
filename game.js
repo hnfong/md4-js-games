@@ -88,4 +88,63 @@ Game.prototype.start = function(playerNames, mapData)
 		tiedPlayers.push(i);
 
 	changeState('wait');
-}
+};
+
+Game.prototype.rollForResources = function (a) {
+	ui.drawDice(a);
+	var outcome = 0;
+	for (var i = 0; i < game.numDice; ++i)
+		outcome += parseInt(a[i]);
+
+	if (outcome == game.robberOutcome)
+		return false;
+
+	// initialize "gain"
+	var gain = new Array(game.numPlayers);
+	for (var i = 0; i < game.numPlayers; ++i) {
+		gain[i] = new Array(game.numResourceTypes);
+		for (var j = 0; j < game.numResourceTypes; ++j)
+			gain[i][j] = 0;
+	}
+
+	// calculate how much each player gains
+	var cells = board.outcomeCellMap[outcome];
+	if (!cells) return true;
+	for (var i = 0; i < cells.length; ++i) {
+		var o = cells[i];
+		if (o.i == board.robberPos.i && o.j == board.robberPos.j) continue;
+		var resType = board.cellResources[o.i][o.j];
+		if (resType < 0) continue;
+		for (var v = 0; v < 6; ++v) {
+			var b = vertexBuilding(o.i, o.j, v);
+			if (!b) continue;
+			switch (b.type) {
+				case game.SETT: gain[b.owner][resType]++; break;
+				case game.CITY: gain[b.owner][resType] += 2; break;
+				default: break;
+			}
+		}
+	}
+
+	// add them to player's resource tables
+	for (var i = 0; i < game.numPlayers; ++i)
+		game.players[i].addResources(gain[i]);
+
+	for (var i = 0; i < game.numPlayers; ++i)
+		ui.writeLog(game.players[i].name + ' got ' + resourcesToString(gain[i]) + '.');
+
+	return true;
+};
+
+Game.prototype.transferTurn = function (next) {
+	currentTurn = next;
+	if (currentTurn != game.me.id)
+		changeState('wait');
+	else {
+		if (game.me.buildingCounts[game.ROAD] < 2)
+			changeState('build_initial_sett');
+		else
+			changeState('roll');
+	}
+};
+

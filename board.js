@@ -36,7 +36,7 @@ Board.prototype.randomizeCells = function () {
 		var j = randInt(this.HEIGHT);
 		if (isValidCell(i, j)) {
 			this.cellResources[i][j] = game.DESERT;
-			pub_placeRobber(i, j, myId);
+			board.placeRobber(i, j);
 			break;
 		}
 	}
@@ -94,7 +94,7 @@ Board.prototype.loadMap = function(mapData) {
 
 	var x = mapData.shift();
 	var y = mapData.shift();
-	pub_placeRobber(x, y, myId);
+	board.placeRobber(x, y);
 }
 
 
@@ -129,4 +129,11 @@ Board.prototype.drawMarkers = function () {
 		document.getElementById('markers').appendChild(marker);
 	}
 }
+
+Board.prototype.placeRobber = function(i, j) {
+	this.robberPos = { i: i, j: j };
+	g('robber').style.left = (cellXY(i, j).x + 45 + game.XDELTA) + 'px';
+	g('robber').style.top = (cellXY(i, j).y + 25 + game.YDELTA) + 'px';
+	g('robber').style.visibility = 'visible';
+};
 
