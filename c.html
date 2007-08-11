@@ -134,43 +134,6 @@ function priv_rollForResources() {
 }
 
 
-function pub_buildRoad(i, j, e, isFree, pid) {
-	if (!isFree)
-		game.players[pid].subtractResources(game.roadCost);
-	game.players[pid].buildRoad(i, j, e);
-	var o = canonicalEdge(i, j, e);
-	var x = vertexXY(i, j, e).x;
-	var y = vertexXY(i, j, e).y;
-	var road = document.createElement('img');
-	road.setAttribute('src', 'img/road' + o.e + '_' + pid + '.gif');
-	road.style.position = 'absolute';
-	switch (o.e) {
-		case 0:
-			road.style.left = (x + game.XDELTA) + 'px';
-			road.style.top = (y-2 + game.YDELTA) + 'px';
-			break;
-		case 1:
-			road.style.left = (x + game.XDELTA) + 'px';
-			road.style.top = (y + game.YDELTA) + 'px';
-			break;
-		case 2:
-			road.style.left = (x-19 + game.XDELTA) + 'px';
-			road.style.top = (y+ game.YDELTA) + 'px';
-			break;
-	}
-	g('roads').appendChild(road);
-}
-
-function priv_buildRoad(i, j, e, isFree, ignoreReachability) {
-	if (!game.players[myId].buildRoadCheck(i, j, e, ignoreReachability)) return false;
-	pub_buildRoad(i, j, e, isFree, myId);
-	if (isFree)
-		sendRemoteMessage('build_road ' + myId + ' ' + i + ' ' + j + ' ' + e);
-	else
-		sendRemoteMessage('buy_road ' + myId + ' ' + i + ' ' + j + ' ' + e);
-	return true;
-}
-
 
 function pub_buildSett(i, j, v, isFree, pid) {
 	if (!isFree)

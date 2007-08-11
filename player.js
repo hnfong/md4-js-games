@@ -1,4 +1,11 @@
-function Player(id, name) {
+/*
+   Some inheritance techniques may have been borrowed from:
+   http://truecode.blogspot.com/2006/08/object-oriented-super-class-method.html
+*/
+
+function Player(id, name) { this.construct(id,name); }
+Player.prototype.construct = function(id,name) {
+	if (id == undefined) return; // this is for the Me.prototype as shown below. ugly, but i dunno any workarounds
 	this.id = id;
 	this.name = name;
 	if (!name)
@@ -7,8 +14,13 @@ function Player(id, name) {
 	this.buildingCounts = create1DArray(3); // roads, settlements, cities
 	this.devCards = new Array();
 	this.resources = create1DArray(game.numResourceTypes);
+};
 
-	this.buildRoadCheck = function(i, j, e, ignoreReachability) {
+function Me(id, name) { Player.prototype.construct.call(this, id, name); } // subclass of Player.
+Me.prototype = new Player();
+
+{
+	Player.prototype.buildRoadCheck = function(i, j, e, ignoreReachability) {
 		var s = edgeToString(i, j, e);
 		if (edgeBuildingMap[s]) return false;
 		var v1 = e;
@@ -25,19 +37,9 @@ function Player(id, name) {
 		}
 		if (!v1Extensible && !v2Extensible) return false;
 		return true;
-	}
-
-	this.buildRoad = function(i, j, e) {
-		var s = edgeToString(i, j, e);
-		var v1 = e;
-		var v2 = (e+1) % 6;
-		this.addVertexReachable(i, j, v1);
-		this.addVertexReachable(i, j, v2);
-		edgeBuildingMap[s] = { owner: this.id, type: game.ROAD };
-		this.buildingCounts[game.ROAD]++;
 	};
 
-	this.buildSettCheck = function(i, j, v, ignoreReachability) {
+	Player.prototype.buildSettCheck = function(i, j, v, ignoreReachability) {
 		// occupied...
 		if (vertexOwner(i, j, v) >= 0) return false;
 		// any of the two adjacent vertices occupied...
@@ -51,14 +53,14 @@ function Player(id, name) {
 		return true;
 	};
 
-	this.buildSett = function(i, j, v) {
+	Player.prototype.buildSett = function(i, j, v) {
 		var s = vertexToString(i, j, v);
 		this.addVertexReachable(i, j, v);
 		vertexBuildingMap[s] = { owner: this.id, type: game.SETT };
 		this.buildingCounts[game.SETT]++;
-	}
+	};
 
-	this.buildCityCheck = function(i, j, v) {
+	Player.prototype.buildCityCheck = function(i, j, v) {
 		var s = vertexToString(i, j, v);
 		if (!vertexBuildingMap[s]) return false;
 		if (vertexBuildingMap[s].owner != this.id) return false;
@@ -66,7 +68,7 @@ function Player(id, name) {
 		return true;
 	};
 
-	this.buildCity = function(i, j, v) {
+	Player.prototype.buildCity = function(i, j, v) {
 		var s = vertexToString(i, j, v);
 		vertexBuildingMap[s].type = game.CITY;
 		this.buildingCounts[game.SETT]--;
@@ -74,25 +76,25 @@ function Player(id, name) {
 		return true;
 	};
 
-	this.addResources = function(array, silent) {
+	Player.prototype.addResources = function(array, silent) {
 		for (var i = 0; i < array.length; ++i)
 			this.resources[i] += parseInt(array[i]);
 	};
 
-	this.subtractResources = function(array) {
+	Player.prototype.subtractResources = function(array) {
 		for (var i = 0; i < array.length; ++i)
 			this.resources[i] -= parseInt(array[i]);
 	};
 
-	this.getOneResource = function(res) {
+	Player.prototype.getOneResource = function(res) {
 		this.resources[res]++;
 	};
 
-	this.loseOneResource = function(res) {
+	Player.prototype.loseOneResource = function(res) {
 		this.resources[res]--;
 	};
 
-	this.isVertexReachable = function(i, j, v) {
+	Player.prototype.isVertexReachable = function(i, j, v) {
 		var s = vertexToString(i, j, v);
 		if (!vertexReachableMap[s]) return false;
 		var a = vertexReachableMap[s];
@@ -102,7 +104,7 @@ function Player(id, name) {
 		return false;
 	};
 
-	this.addVertexReachable = function(i, j, v) {
+	Player.prototype.addVertexReachable = function(i, j, v) {
 		var s = vertexToString(i, j, v);
 		if (!vertexReachableMap[s]) {
 			vertexReachableMap[s] = new Array();
@@ -115,28 +117,80 @@ function Player(id, name) {
 		a.push(this.id);
 	};
 
-	this.isVertexOwned = function(i, j, v) {
+	Player.prototype.isVertexOwned = function(i, j, v) {
 		var s = vertexToString(i, j, v);
 		if (!vertexBuildingMap[s]) return false;
 		if (vertexBuildingMap[s].owner != this.id) return false;
 		return vertexBuildingMap[s].type;
 	};
 
-	this.isEdgeOwned = function(i, j, e) {
+	Player.prototype.isEdgeOwned = function(i, j, e) {
 		var s = edgeToString(i, j, e);
 		if (!edgeBuildingMap[s]) return false;
 		if (edgeBuildingMap[s].owner != this.id) return false;
 		return edgeBuildingMap[s].type;
 	};
 
-	this.points = function() {
+	Player.prototype.points = function() {
 		return this.buildingCounts[game.SETT] + this.buildingCounts[game.CITY] * 2 + this.extraPoints;
-	}
+	};
 
-	this.numResources = function() {
+	Player.prototype.numResources = function() {
 		var total = 0;
 		for (var i = 0; i < game.numResourceTypes; ++i)
 			total += this.resources[i];
 		return total;			
-	}
+	};
 }
+
+
+Player.prototype.buildRoad = function(i, j, e, isFree) {
+	if (!isFree)
+		this.subtractResources(game.roadCost);
+
+	// internal data changes
+	{
+		var s = edgeToString(i, j, e);
+		var v1 = e;
+		var v2 = (e+1) % 6;
+		this.addVertexReachable(i, j, v1);
+		this.addVertexReachable(i, j, v2);
+		edgeBuildingMap[s] = { owner: this.id, type: game.ROAD };
+		this.buildingCounts[game.ROAD]++;
+	};
+
+	// external ui updates
+	var o = canonicalEdge(i, j, e);
+	var x = vertexXY(i, j, e).x;
+	var y = vertexXY(i, j, e).y;
+	var road = document.createElement('img');
+	road.setAttribute('src', 'img/road' + o.e + '_' + this.id + '.gif');
+	road.style.position = 'absolute';
+	switch (o.e) {
+		case 0:
+			road.style.left = (x + game.XDELTA) + 'px';
+			road.style.top = (y-2 + game.YDELTA) + 'px';
+			break;
+		case 1:
+			road.style.left = (x + game.XDELTA) + 'px';
+			road.style.top = (y + game.YDELTA) + 'px';
+			break;
+		case 2:
+			road.style.left = (x-19 + game.XDELTA) + 'px';
+			road.style.top = (y+ game.YDELTA) + 'px';
+			break;
+	}
+	g('roads').appendChild(road);
+}
+
+Me.prototype.buildRoad = function(i, j, e, isFree, ignoreReachability) // FIXME: additional param "ignoreReachability" compared with Player.buildRoad ?
+{
+	if (!this.buildRoadCheck(i, j, e, ignoreReachability)) return false;
+	Player.prototype.buildRoad.call(this, i, j, e, isFree);
+	if (isFree)
+		sendRemoteMessage('build_road ' + myId + ' ' + i + ' ' + j + ' ' + e);
+	else
+		sendRemoteMessage('buy_road ' + myId + ' ' + i + ' ' + j + ' ' + e);
+	return true;
+}
+

@@ -67,6 +67,9 @@ function remoteMessageHandler(txt)
 	var a = txt.split(' ');
 	var cmd = a[0];
 	var pid = a[1];
+	if (game.players != undefined) {
+		var p = game.players[pid];
+	}
 
 	switch(cmd)
 	{
@@ -81,36 +84,36 @@ function remoteMessageHandler(txt)
 			pub_transferTurn(a[2], pid);
 			break;
 		case 'buy_road':
-			ui.writeLog(game.players[pid].name + ' built a road.');
+			ui.writeLog(p.name + ' built a road.');
 			if (pid == myId) return;
-			pub_buildRoad(parseInt(a[2]), parseInt(a[3]), parseInt(a[4]), false, pid);
+			p.buildRoad(parseInt(a[2]), parseInt(a[3]), parseInt(a[4]), false);
 			break;
 		case 'buy_sett':
-			ui.writeLog(game.players[pid].name + ' built a settlement.');
+			ui.writeLog(p.name + ' built a settlement.');
 			if (pid == myId) return;
 			pub_buildSett(parseInt(a[2]), parseInt(a[3]), parseInt(a[4]), false, pid);
 			break;
 
 		case 'buy_city':
-			ui.writeLog(game.players[pid].name + ' built a city.');
+			ui.writeLog(p.name + ' built a city.');
 			if (pid == myId) return;
 			pub_buildCity(parseInt(a[2]), parseInt(a[3]), parseInt(a[4]), pid);
 			break;
 
 		case 'buy_devcard':
-			ui.writeLog(game.players[pid].name + ' bought a development card.');
+			ui.writeLog(p.name + ' bought a development card.');
 			if (pid == myId) return;
 			pub_buyCard(parseInt(a[2]), pid);
 			break;
 
 		case 'build_road':
-			ui.writeLog(game.players[pid].name + ' built a road.');
+			ui.writeLog(p.name + ' built a road.');
 			if (pid == myId) return;
-			pub_buildRoad(parseInt(a[2]), parseInt(a[3]), parseInt(a[4]), true, pid);
+			p.buildRoad(parseInt(a[2]), parseInt(a[3]), parseInt(a[4]), true);
 			break;
 
 		case 'build_sett':
-			ui.writeLog(game.players[pid].name + ' built a settlement.');
+			ui.writeLog(p.name + ' built a settlement.');
 			if (pid == myId) return;
 			pub_buildSett(parseInt(a[2]), parseInt(a[3]), parseInt(a[4]), true, pid);
 			break;
@@ -126,22 +129,22 @@ function remoteMessageHandler(txt)
 			break;
 
 		case 'place_robber':
-			ui.writeLog(game.players[pid].name + ' moved the robber.');
+			ui.writeLog(p.name + ' moved the robber.');
 			if (pid == myId) return;
 			pub_placeRobber(parseInt(a[2]), parseInt(a[3]), pid);
 			break;
 
 		case 'steal':
 			if (myId == a[2] || pid == myId)
-				ui.writeLog(game.players[pid].name + ' stole 1 ' + game.resourceNames[parseInt(a[3])] + ' from ' + game.players[parseInt(a[2])].name + '.');
+				ui.writeLog(p.name + ' stole 1 ' + game.resourceNames[parseInt(a[3])] + ' from ' + game.players[parseInt(a[2])].name + '.');
 			else
-				ui.writeLog(game.players[pid].name + ' stole <i>something</i> from ' + game.players[parseInt(a[2])].name + '.');
+				ui.writeLog(p.name + ' stole <i>something</i> from ' + game.players[parseInt(a[2])].name + '.');
 			if (pid == myId) return;
 			pub_steal(parseInt(a[2]), parseInt(a[3]), pid);
 			break;
 		case 'use_card':
 			if (pid == myId) return;
-			ui.writeLog(game.players[pid].name + ' played ' + game.players[pid].devCards[parseInt(a[2])].name + '.');
+			ui.writeLog(p.name + ' played ' + p.devCards[parseInt(a[2])].name + '.');
 			pub_useCard(parseInt(a[2]), pid);
 			break;
 
@@ -160,7 +163,7 @@ function remoteMessageHandler(txt)
 			break;
 
 		case 'win':
-			ui.writeLog(game.players[pid].name + ' won with ' + a[2] + ' points.');
+			ui.writeLog(p.name + ' won with ' + a[2] + ' points.');
 			changeState('idle');
 			break;
 

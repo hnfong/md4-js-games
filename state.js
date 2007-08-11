@@ -108,7 +108,7 @@ function changeState(stateName) {
 		g('button_buy_road').value = 'Buy';
 	}
 	st.edgeHandler = function(i, j, e) {
-		if (priv_buildRoad(i, j, e, true)) {
+		if (game.me.buildRoad(i, j, e, true)) {
 			changeState('free');
 		}
 	};
@@ -179,7 +179,7 @@ function changeState(stateName) {
 	var st = new State('build_initial_road');
 	st.onEnter = function() { setImageMapMode(EDGEMODE); };
 	st.edgeHandler = function(i, j, e) {
-		if (priv_buildRoad(i, j, e, true, true)) { // free + ignore reachability
+		if (game.me.buildRoad(i, j, e, true, true)) { // free + ignore reachability
 			if (game.players[myId].buildingCounts[game.SETT] == 1) {
 				var next = (myId + 1) % game.numPlayers;
 				if (next == firstPlayer) // I am the last player, so build again

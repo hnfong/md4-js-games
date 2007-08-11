@@ -51,12 +51,18 @@ function Game(settings)
 	}
 }
 
-Game.prototype.start = function(players, mapData)
+Game.prototype.start = function(playerNames, mapData)
 {
-	this.numPlayers = players.length;
+	this.numPlayers = playerNames.length;
 	this.players = new Array();
-	for (var i = 0; i < players.length; ++i)
-		this.players.push(new Player(i, players[i]));
+	for (var i = 0; i < playerNames.length; ++i)
+		if (i == myId) {
+			this.players.push(new Me(i, playerNames[i]));
+		} else {
+			this.players.push(new Player(i, playerNames[i]));
+		}
+
+	this.me = this.players[myId];
 
 	if (mapData == null)
 		board.randomizeCells();
