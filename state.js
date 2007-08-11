@@ -181,13 +181,13 @@ function changeState(stateName) {
 	st.edgeHandler = function(i, j, e) {
 		if (priv_buildRoad(i, j, e, true, true)) { // free + ignore reachability
 			if (game.players[myId].buildingCounts[game.SETT] == 1) {
-				var next = (myId + 1) % this.numPlayers;
+				var next = (myId + 1) % game.numPlayers;
 				if (next == firstPlayer) // I am the last player, so build again
 					changeState('build_initial_sett');
 				else
 					priv_transferTurn(next);
 			} else { // 2 settlements
-				var next = (myId + this.numPlayers - 1) % this.numPlayers;
+				var next = (myId + game.numPlayers - 1) % game.numPlayers;
 				if (myId == firstPlayer)
 					changeState('roll');
 				else

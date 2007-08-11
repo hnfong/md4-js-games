@@ -98,12 +98,12 @@ function pub_rollForResources(a, pid) {
 		for (var j = 0; j < game.numResourceTypes; ++j)
 			gain[i][j] = 0;
 	}
-	var cells = outcomeCellMap[outcome];
+	var cells = board.outcomeCellMap[outcome];
 	if (!cells) return true;
 	for (var i = 0; i < cells.length; ++i) {
 		var o = cells[i];
 		if (o.i == robberPos.i && o.j == robberPos.j) continue;
-		var resType = cellResources[o.i][o.j];
+		var resType = board.cellResources[o.i][o.j];
 		if (resType < 0) continue;
 		for (var v = 0; v < 6; ++v) {
 			var b = vertexBuilding(o.i, o.j, v);
@@ -231,7 +231,7 @@ function pub_placeRobber(i, j, pid) {
 }
 
 function priv_placeRobber(i, j) {
-	if (robberPos.i < 0 || cellResources[i][j] >= 0 && (i != robberPos.i || j != robberPos.j)) {
+	if (robberPos.i < 0 || board.cellResources[i][j] >= 0 && (i != robberPos.i || j != robberPos.j)) {
 		sendRemoteMessage('place_robber ' + myId + ' ' + i + ' ' + j);
 		pub_placeRobber(i, j, myId);
 		return true;
@@ -309,16 +309,16 @@ function pub_getResources(gain, pid) {
 function priv_getInitialResources() {
 	var gain = create1DArray(game.numResourceTypes);
 	var i = initialSett.i, j = initialSett.j;
-	if (isValidCell(i, j) && cellResources[i][j] >= 0)
-		gain[cellResources[i][j]]++;
+	if (isValidCell(i, j) && board.cellResources[i][j] >= 0)
+		gain[board.cellResources[i][j]]++;
 	var i2 = i + commonVertex[initialSett.v][0].i;
 	var j2 = j + commonVertex[initialSett.v][0].j;
-	if (isValidCell(i2, j2) && cellResources[i2][j2] >= 0)
-		gain[cellResources[i2][j2]]++;
+	if (isValidCell(i2, j2) && board.cellResources[i2][j2] >= 0)
+		gain[board.cellResources[i2][j2]]++;
 	var i3 = i + commonVertex[initialSett.v][1].i;
 	var j3 = j + commonVertex[initialSett.v][1].j;
-	if (isValidCell(i3, j3) && cellResources[i3][j3] >= 0)
-		gain[cellResources[i3][j3]]++;
+	if (isValidCell(i3, j3) && board.cellResources[i3][j3] >= 0)
+		gain[board.cellResources[i3][j3]]++;
 	sendRemoteMessage('get_resources ' + myId + ' ' + dumpArray(gain));
 	pub_getResources(gain, myId);
 }
