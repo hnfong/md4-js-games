@@ -129,7 +129,7 @@ function changeState(stateName) {
 		g('button_buy_sett').value = 'Buy';
 	}
 	st.vertexHandler = function(i, j, v) {
-		if (priv_buildSett(i, j, v, true, false)) {
+		if (game.me.buildSett(i, j, v, true, false)) {
 			changeState('free');
 		}
 	};
@@ -166,7 +166,7 @@ function changeState(stateName) {
 	var st = new State('build_initial_sett');
 	st.onEnter = function() { setImageMapMode(vertexMODE); };
 	st.vertexHandler = function(i, j, v) {
-		if (priv_buildSett(i, j, v, true, true)) { // free + ignore reachability
+		if (game.me.buildSett(i, j, v, true, true)) { // free + ignore reachability
 			changeState('build_initial_road');
 			initialSett = { i: i, j: j, v: v };
 			if (game.players[myId].buildingCounts[game.SETT] == 2)

@@ -53,13 +53,6 @@ Me.prototype = new Player();
 		return true;
 	};
 
-	Player.prototype.buildSett = function(i, j, v) {
-		var s = vertexToString(i, j, v);
-		this.addVertexReachable(i, j, v);
-		vertexBuildingMap[s] = { owner: this.id, type: game.SETT };
-		this.buildingCounts[game.SETT]++;
-	};
-
 	Player.prototype.buildCityCheck = function(i, j, v) {
 		var s = vertexToString(i, j, v);
 		if (!vertexBuildingMap[s]) return false;
@@ -181,7 +174,7 @@ Player.prototype.buildRoad = function(i, j, e, isFree) {
 			break;
 	}
 	g('roads').appendChild(road);
-}
+};
 
 Me.prototype.buildRoad = function(i, j, e, isFree, ignoreReachability) // FIXME: additional param "ignoreReachability" compared with Player.buildRoad ?
 {
@@ -192,5 +185,44 @@ Me.prototype.buildRoad = function(i, j, e, isFree, ignoreReachability) // FIXME:
 	else
 		sendRemoteMessage('buy_road ' + myId + ' ' + i + ' ' + j + ' ' + e);
 	return true;
-}
+};
+
+
+Player.prototype.buildSett = function(i, j, v, isFree)
+{
+	if (!isFree)
+		this.subtractResources(game.settCost);
+
+	// internal data structure changes
+	{
+		var s = vertexToString(i, j, v);
+		this.addVertexReachable(i, j, v);
+		vertexBuildingMap[s] = { owner: this.id, type: game.SETT };
+		this.buildingCounts[game.SETT]++;
+	}
+
+	// ui changes
+	var x = vertexXY(i, j, v).x;
+	var y = vertexXY(i, j, v).y;
+	var sett = document.createElement('img');
+	sett.setAttribute('src', 'img/sett_' + this.id + '.gif');
+	sett.style.position = 'absolute';
+	sett.style.left = (x-10+game.XDELTA) + 'px';
+	sett.style.top = (y-10+game.YDELTA) + 'px';
+	sett.id = 'sett_id_' + vertexToString(i, j, v);
+	g('buildings').appendChild(sett);
+};
+
+
+Me.prototype.buildSett = function(i, j, v, isFree, ignoreReachability)
+{
+	if (!this.buildSettCheck(i, j, v, ignoreReachability)) return false;
+	if (isFree)
+		sendRemoteMessage('build_sett ' + myId + ' ' + i + ' ' + j + ' ' + v);
+	else
+		sendRemoteMessage('buy_sett ' + myId + ' ' + i + ' ' + j + ' ' + v);
+	
+	Player.prototype.buildSett.call(this, i, j, v, isFree);
+	return true;
+};
 

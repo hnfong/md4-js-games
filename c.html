@@ -135,33 +135,6 @@ function priv_rollForResources() {
 
 
 
-function pub_buildSett(i, j, v, isFree, pid) {
-	if (!isFree)
-		game.players[pid].subtractResources(game.settCost);
-	game.players[pid].buildSett(i, j, v);
-	var x = vertexXY(i, j, v).x;
-	var y = vertexXY(i, j, v).y;
-	var sett = document.createElement('img');
-	sett.setAttribute('src', 'img/sett_' + pid + '.gif');
-	sett.style.position = 'absolute';
-	sett.style.left = (x-10+game.XDELTA) + 'px';
-	sett.style.top = (y-10+game.YDELTA) + 'px';
-	sett.id = 'sett_id_' + vertexToString(i, j, v);
-	g('buildings').appendChild(sett);
-}
-
-
-function priv_buildSett(i, j, v, isFree, ignoreReachability) {
-	if (!game.players[myId].buildSettCheck(i, j, v, ignoreReachability)) return false;
-	if (isFree)
-		sendRemoteMessage('build_sett ' + myId + ' ' + i + ' ' + j + ' ' + v);
-	else
-		sendRemoteMessage('buy_sett ' + myId + ' ' + i + ' ' + j + ' ' + v);
-	pub_buildSett(i, j, v, isFree, myId);
-	return true;
-}
-
-
 function pub_buildCity(i, j, v, pid) {
 	game.players[pid].subtractResources(game.cityCost);
 	game.players[pid].buildCity(i, j, v);

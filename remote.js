@@ -91,7 +91,7 @@ function remoteMessageHandler(txt)
 		case 'buy_sett':
 			ui.writeLog(p.name + ' built a settlement.');
 			if (pid == myId) return;
-			pub_buildSett(parseInt(a[2]), parseInt(a[3]), parseInt(a[4]), false, pid);
+			p.buildSett(parseInt(a[2]), parseInt(a[3]), parseInt(a[4]), false);
 			break;
 
 		case 'buy_city':
@@ -115,7 +115,7 @@ function remoteMessageHandler(txt)
 		case 'build_sett':
 			ui.writeLog(p.name + ' built a settlement.');
 			if (pid == myId) return;
-			pub_buildSett(parseInt(a[2]), parseInt(a[3]), parseInt(a[4]), true, pid);
+			p.buildSett(parseInt(a[2]), parseInt(a[3]), parseInt(a[4]), true);
 			break;
 
 		case 'get_resources':
