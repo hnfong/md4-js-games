@@ -67,12 +67,12 @@ commonEdge[4] = { i: -1, j: 1, e: 1 };
 commonEdge[5] = { i: -1, j: 0, e: 2 };
 
 function isInRange(i, j) {
-	return i >= 0 && i < board_w && j >= 0 && j < board_h;
+	return i >= 0 && i < board.WIDTH && j >= 0 && j < board.HEIGHT;
 }
 
 
 function isValidCell(i, j) {
-	return isInRange(i, j) && board[i][j] == 1;
+	return isInRange(i, j) && board.data[i][j] == 1;
 }
 
 function isValidVertex(i, j, v) {
