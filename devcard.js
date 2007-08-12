@@ -25,7 +25,6 @@ SoldierCard.prototype.use = function(user) {
 function VPCard(id, name) { DevCard.prototype.construct.call(this, id, name, "Provides one victory point."); }
 VPCard.prototype = new DevCard();
 
-// TODO
 VPCard.prototype.use = function(user) {
 	user.extraPoints ++;
 };
@@ -35,7 +34,6 @@ VPCard.prototype.use = function(user) {
 function PlentyCard(id) { DevCard.prototype.construct.call(this, id, 'Year of Plenty', "Two free resources."); }
 PlentyCard.prototype = new DevCard();
 
-// TODO
 PlentyCard.prototype.use = function(user) {
 	if (user == game.me) {
 		plentyDialog.show();

@@ -161,11 +161,25 @@ Game.prototype.join = function(name)
 	}
 };
 
-// set up the game/board. used by "player 0" only
+// set up the game/board, and starts the game. used by "player 0" only
 Game.prototype.setup = function() {
 	board.randomizeCells();
 	devCards.shuffle();
 	game.start();
-	priv_sendMapData();
-	priv_startGame();
+	{ // send map data
+		var s = '';
+		s += 'map_data ' + game.myId + ' ' + board.WIDTH + ' ' + board.HEIGHT;
+		s += ' ' + dumpArray(board.data);
+		s += ' ' + dumpArray(board.cellResources);
+		s += ' ' + dumpArray(board.cellMarkers);
+		s += ' ' + board.robberPos.i + ' ' + board.robberPos.j;
+		sendRemoteMessage(s);
+
+		s = 'card_data';
+		for (var i = 0 ; i < devCards.length; i++){
+			s += ' ' + devCards[i].id;
+		}
+		sendRemoteMessage(s);
+	}
+	sendRemoteMessage('start_game 0');
 };

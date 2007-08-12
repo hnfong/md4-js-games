@@ -169,7 +169,7 @@ Player.prototype.buildRoad = function(i, j, e, isFree) {
 	g('roads').appendChild(road);
 };
 
-Me.prototype.buildRoad = function(i, j, e, isFree, ignoreReachability) // FIXME: additional param "ignoreReachability" compared with Player.buildRoad ?
+Me.prototype.buildRoad = function(i, j, e, isFree, ignoreReachability)
 {
 	if (!this.buildRoadCheck(i, j, e, ignoreReachability)) return false;
 	Player.prototype.buildRoad.call(this, i, j, e, isFree);

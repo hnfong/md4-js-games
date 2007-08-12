@@ -118,31 +118,10 @@ function cat_initRollFinishRound() {
 		return -1;
 }
 
-function priv_sendMapData() {
-	var s = '';
-	s += 'map_data ' + game.myId + ' ' + board.WIDTH + ' ' + board.HEIGHT;
-	s += ' ' + dumpArray(board.data);
-	s += ' ' + dumpArray(board.cellResources);
-	s += ' ' + dumpArray(board.cellMarkers);
-	s += ' ' + board.robberPos.i + ' ' + board.robberPos.j;
-	sendRemoteMessage(s);
-
-	s = 'card_data';
-	for (var i = 0 ; i < devCards.length; i++){
-		s += ' ' + devCards[i].id;
-	}
-	sendRemoteMessage(s);
-}
-
-function priv_startGame() {
-	sendRemoteMessage('start_game 0');
-}
-
-
 window.onload = function() {
 	devCardsStatic.populate();
-	receiveRemoteMessages();
 	dialog_init();
+	receiveRemoteMessages();
 };
 
 </script>
