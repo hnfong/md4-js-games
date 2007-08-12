@@ -67,6 +67,8 @@ function remoteMessageHandler(txt)
 	var a = txt.split(' ');
 	var cmd = a[0];
 	var pid = a[1];
+	var myId = game.myId;
+
 	if (game.players != undefined) {
 		var p = game.players[pid];
 	}

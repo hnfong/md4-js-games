@@ -63,7 +63,6 @@ var board = new Board();
 
 var preGamePlayerNames = new Array();
 
-var myId;
 var initRolls;
 var tiedPlayers;
 var firstPlayer;
@@ -118,7 +117,7 @@ function cat_initRollFinishRound() {
 
 function priv_sendMapData() {
 	var s = '';
-	s += 'map_data ' + myId + ' ' + board.WIDTH + ' ' + board.HEIGHT;
+	s += 'map_data ' + game.myId + ' ' + board.WIDTH + ' ' + board.HEIGHT;
 	s += ' ' + dumpArray(board.data);
 	s += ' ' + dumpArray(board.cellResources);
 	s += ' ' + dumpArray(board.cellMarkers);

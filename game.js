@@ -65,13 +65,13 @@ Game.prototype.start = function()
 	this.numPlayers = this.playerNames.length;
 	this.players = new Array();
 	for (var i = 0; i < this.playerNames.length; ++i)
-		if (i == myId) {
+		if (i == this.myId) {
 			this.players.push(new Me(i, this.playerNames[i]));
 		} else {
 			this.players.push(new Player(i, this.playerNames[i]));
 		}
 
-	this.me = this.players[myId];
+	this.me = this.players[this.myId];
 
 	board.drawBoard();
 	board.drawMarkers();
@@ -80,7 +80,7 @@ Game.prototype.start = function()
 	ui.initVertexMap();
 	ui.initEdgeMap();
 
-	ui.refreshWindows(myId);
+	ui.refreshWindows(this.myId);
 
 	vertexBuildingMap = new Array();
 	edgeBuildingMap = new Array();
@@ -157,7 +157,7 @@ Game.prototype.join = function(name)
 {
 	this.playerNames.push(name);
 	if (name == this.myName) {
-		myId = this.playerNames.length - 1;
+		this.myId = this.playerNames.length - 1;
 	}
 };
 

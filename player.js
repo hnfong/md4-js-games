@@ -174,9 +174,9 @@ Me.prototype.buildRoad = function(i, j, e, isFree, ignoreReachability) // FIXME:
 	if (!this.buildRoadCheck(i, j, e, ignoreReachability)) return false;
 	Player.prototype.buildRoad.call(this, i, j, e, isFree);
 	if (isFree)
-		sendRemoteMessage('build_road ' + myId + ' ' + i + ' ' + j + ' ' + e);
+		sendRemoteMessage('build_road ' + this.id + ' ' + i + ' ' + j + ' ' + e);
 	else
-		sendRemoteMessage('buy_road ' + myId + ' ' + i + ' ' + j + ' ' + e);
+		sendRemoteMessage('buy_road ' + this.id + ' ' + i + ' ' + j + ' ' + e);
 	return true;
 };
 
@@ -211,9 +211,9 @@ Me.prototype.buildSett = function(i, j, v, isFree, ignoreReachability)
 {
 	if (!this.buildSettCheck(i, j, v, ignoreReachability)) return false;
 	if (isFree)
-		sendRemoteMessage('build_sett ' + myId + ' ' + i + ' ' + j + ' ' + v);
+		sendRemoteMessage('build_sett ' + this.id + ' ' + i + ' ' + j + ' ' + v);
 	else
-		sendRemoteMessage('buy_sett ' + myId + ' ' + i + ' ' + j + ' ' + v);
+		sendRemoteMessage('buy_sett ' + this.id + ' ' + i + ' ' + j + ' ' + v);
 	
 	Player.prototype.buildSett.call(this, i, j, v, isFree);
 	return true;
@@ -247,7 +247,7 @@ Player.prototype.buildCity = function(i, j, v) {
 Me.prototype.buildCity = function(i, j, v) {
 	if (!this.buildCityCheck(i, j, v)) return false;
 	sendRemoteMessage('buy_city ' + this.id + ' ' + i + ' ' + j + ' ' + v);
-	Player.prototype.buildCity.call(this, i, j, v, myId);
+	Player.prototype.buildCity.call(this, i, j, v, this.id);
 	return true;
 };
 
@@ -262,7 +262,7 @@ Me.prototype.buyCard = function () {
 
 Me.prototype.placeRobber = function(i, j) {
 	if (board.robberPos.i < 0 || board.cellResources[i][j] >= 0 && (i != board.robberPos.i || j != board.robberPos.j)) {
-		sendRemoteMessage('place_robber ' + myId + ' ' + i + ' ' + j);
+		sendRemoteMessage('place_robber ' + this.id + ' ' + i + ' ' + j);
 		board.placeRobber(i, j);
 		return true;
 	}
@@ -290,7 +290,7 @@ Me.prototype.steal = function(victim) {
 
 Me.prototype.transferTurn = function(next) {
 	if (next == null)
-		next = (myId + 1) % game.numPlayers;
+		next = (this.id + 1) % game.numPlayers;
 
 	if (this.points() >= game.goalPoints)
 		sendRemoteMessage('win ' + this.id + ' ' + this.points());
