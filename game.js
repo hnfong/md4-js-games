@@ -57,20 +57,12 @@ function Game(settings)
 		this[k] = (settings[k] != undefined ? settings[k] : __game_defaults[k]);
 	}
 
-	this.playerNames = new Array();
+	this.players = new Array();
 }
 
 Game.prototype.start = function()
 {
-	this.numPlayers = this.playerNames.length;
-	this.players = new Array();
-	for (var i = 0; i < this.playerNames.length; ++i)
-		if (i == this.myId) {
-			this.players.push(new Me(i, this.playerNames[i]));
-		} else {
-			this.players.push(new Player(i, this.playerNames[i]));
-		}
-
+	this.numPlayers = this.players.length;
 	this.me = this.players[this.myId];
 
 	board.drawBoard();
@@ -155,9 +147,12 @@ Game.prototype.transferTurn = function (next) {
 
 Game.prototype.join = function(name)
 {
-	this.playerNames.push(name);
+	l = this.players.length;
 	if (name == this.myName) {
-		this.myId = this.playerNames.length - 1;
+		this.players.push(new Me(l, name));
+		this.myId = l;
+	} else {
+		this.players.push(new Player(l, name));
 	}
 };
 
