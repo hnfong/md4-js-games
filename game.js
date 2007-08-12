@@ -56,17 +56,19 @@ function Game(settings)
 	{
 		this[k] = (settings[k] != undefined ? settings[k] : __game_defaults[k]);
 	}
+
+	this.playerNames = new Array();
 }
 
-Game.prototype.start = function(playerNames, mapData, cardData)
+Game.prototype.start = function()
 {
-	this.numPlayers = playerNames.length;
+	this.numPlayers = this.playerNames.length;
 	this.players = new Array();
-	for (var i = 0; i < playerNames.length; ++i)
+	for (var i = 0; i < this.playerNames.length; ++i)
 		if (i == myId) {
-			this.players.push(new Me(i, playerNames[i]));
+			this.players.push(new Me(i, this.playerNames[i]));
 		} else {
-			this.players.push(new Player(i, playerNames[i]));
+			this.players.push(new Player(i, this.playerNames[i]));
 		}
 
 	this.me = this.players[myId];
@@ -151,3 +153,19 @@ Game.prototype.transferTurn = function (next) {
 	}
 };
 
+Game.prototype.join = function(name)
+{
+	this.playerNames.push(name);
+	if (name == this.myName) {
+		myId = this.playerNames.length - 1;
+	}
+};
+
+// set up the game/board. used by "player 0" only
+Game.prototype.setup = function() {
+	board.randomizeCells();
+	devCards.shuffle();
+	game.start();
+	priv_sendMapData();
+	priv_startGame();
+};

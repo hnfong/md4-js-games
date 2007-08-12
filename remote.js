@@ -165,14 +165,17 @@ function remoteMessageHandler(txt)
 		case 'start_game':
 			ui.writeLog('Game started!');
 			if (myId == pid) return;
-			game.start(new Array('cx', 'Si', 'phisho'));
+			game.start();
 			break;
 
 		// pre-game.start stuff. return instead of break
-		case 'register':
-			ui.writeLog('Player ' + pid + ' (' + a[2] + ') arrived.');
+		case 'join':
+			game.join(a[1]);
+			if (myId == 0) {
+				g('startgamebutton').disabled = false;
+			}
+			ui.writeLog('Player <i>' + a[1] + '</i> arrived.');
 			return;
-
 
 		case 'map_data':
 			if (myId == pid) return;

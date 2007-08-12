@@ -2,13 +2,14 @@
  <head>
   <title>Lonely Island</title>
   <link rel="stylesheet" href="default.css" type="text/css">
-  <script src="util.js" type="text/javascript"></script>
-  <script src="network.js" type="text/javascript"></script>
-  <script src="game.js" type="text/javascript"></script>
-  <script src="board.js" type="text/javascript"></script>
-  <script src="ui.js" type="text/javascript"></script>
-  <script src="player.js" type="text/javascript"></script>
+  <script type="text/javascript" src="util.js"></script>
+  <script type="text/javascript" src="network.js"></script>
+  <script type="text/javascript" src="game.js"></script>
+  <script type="text/javascript" src="board.js"></script>
+  <script type="text/javascript" src="ui.js"></script>
+  <script type="text/javascript" src="player.js"></script>
   <script type="text/javascript" src="geom.js"></script>
+  <script type="text/javascript" src="devcard.js"></script>
  </head>
 <body>
 
@@ -43,17 +44,15 @@
 
 <div id="status" class="window" style="left: 300px; top: 500px;">Status: idle</div>
 <div style="top: 500px; position: absolute">
-<div onmousedown="regPlayer('cx',0); board.randomizeCells(); devCards.shuffle(); game.start(new Array('cx', 'Si', 'phisho')); priv_sendMapData(); priv_startGame();">I am player 0</div>
-<div onmousedown="regPlayer('Si',1);">I am player 1</div>
-<div onmousedown="regPlayer('cychoi',2);">I am player 2</div>
-<div onmousedown="clearRemoteLog();">Clear Data</div>
+<input type="button" value="Join" onclick="join_game();">
+<input id="startgamebutton" type="button" value="Start" disabled="disabled" onclick="game.setup()">
+<input type="button" value="Clear Data" onclick="clearRemoteLog();">
 </div>
 
 </body>
 
 <script language="javascript" src="state.js"></script>
 <script language="javascript" src="remote.js"></script>
-<script language="javascript" src="devcard.js"></script>
 
 <script language="javascript">
 
@@ -71,7 +70,16 @@ var firstPlayer;
 var initialSett;
 
 
-//////////////////////////////////////////// BEGIN action functions
+function join_game() {
+	var name = '';
+	while (name.length == 0 || ! name.match(/^[a-zA-Z0-9]*$/)) {
+		name = prompt("Please enter your name:");
+	}
+
+	game.myName = name;
+	
+	sendRemoteMessage("join " + name);
+}
 
 function cat_initRoll(pid) {
 	var a = roll();
@@ -128,11 +136,6 @@ function priv_startGame() {
 	sendRemoteMessage('start_game 0');
 }
 
-
-function regPlayer(name, id) {
-	myId = id;
-	sendRemoteMessage('register ' + id + ' ' + name);
-}
 
 window.onload = function() {
 	devCardsStatic.populate();

@@ -31,6 +31,7 @@ VPCard.prototype.use = function(user) {
 };
 
 
+/****************** DevCards Initialization Functions ****************/
 var devCards = new Array();
 var devCardsStatic = new Array(); // for lookup of cid => card objects
 
