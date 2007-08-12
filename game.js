@@ -68,15 +68,15 @@ Game.prototype.start = function()
 	board.drawBoard();
 	board.drawMarkers();
 
+	vertexBuildingMap = new Array();
+	edgeBuildingMap = new Array();
+	vertexReachableMap = new Array();
+
 	ui.initCellMap();
 	ui.initVertexMap();
 	ui.initEdgeMap();
 
 	ui.refreshWindows(this.myId);
-
-	vertexBuildingMap = new Array();
-	edgeBuildingMap = new Array();
-	vertexReachableMap = new Array();
 
 	initRolls = create1DArray(this.numPlayers);
 	tiedPlayers = new Array();

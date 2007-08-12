@@ -108,6 +108,7 @@ ui.showPlayerWindow = function() {
 		else
 			txt += '<b>' + game.players[i].name + '</b><br/>';
 		txt += 'Points: ' + game.players[i].points() + '<br/>';
+		txt += 'Longest Road Length: ' + game.players[i].calcLongestRoad() + '<br/>';
 		txt += 'Resource cards: ' + game.players[i].numResources() + '<br/>';
 		txt += 'Development cards: ' + game.players[i].devCards.length + '</div>';
 		txt += '<hr/>';

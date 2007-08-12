@@ -15,6 +15,7 @@ Player.prototype.construct = function(id,name) {
 	this.devCards = new Array();
 	this.resources = create1DArray(game.numResourceTypes);
 	this.soldiers = 0;
+	this.longestRoadLength = 0;
 };
 
 function Me(id, name) { Player.prototype.construct.call(this, id, name); } // subclass of Player.
@@ -126,6 +127,59 @@ Me.prototype = new Player();
 		for (var i = 0; i < game.numResourceTypes; ++i)
 			total += this.resources[i];
 		return total;			
+	};
+
+	Player.prototype.calcLongestRoad = function() {
+		// find this player's edges
+		var roads = new Array();
+		for (var i = -1; i <= board.WIDTH; ++i)
+			for (var j = -1; j <= board.HEIGHT; ++j)
+				for (var e = 0; e < 3; ++e) {
+					var s = edgeToString(i, j, e);
+					if (edgeBuildingMap[s] != null && edgeBuildingMap[s].owner == this.id) {
+						var v0 = vertexToString(i, j, e);
+						var v1 = vertexToString(i, j, (e+1)%6);
+						roads.push( { a: v0, b: v1 } );
+					}
+				}
+		// build adjacency list
+		var adjList = new Array(roads.length * 2);
+		for (var i = 0; i < adjList.length; ++i) {
+			adjList[i] = new Array();
+			var x = (i < roads.length) ? roads[i].b : roads[i-roads.length].a;
+			for (var j = 0; j < adjList.length; ++j) {
+				if (i == j || Math.abs(i - j) == roads.length) continue;
+				var y = (j < roads.length) ? roads[j].a : roads[j-roads.length].b;
+				if (x != y) continue;
+				if (vertexBuildingMap[x] != null && vertexBuildingMap[x].owner != this.id) continue;
+				adjList[i].push(j);
+			}
+		}
+
+		var visited = create1DArray(adjList.length);
+
+		var dfs = function(v, len, adjList, visited) {
+			var maximum = len;
+			visited[v] = 1;
+			for (var j = 0; j < adjList[v].length; ++j) {
+				var k = adjList[v][j];
+				if (!visited[k] && !visited[(k + adjList.length/2) % adjList.length]) {
+					var retval = dfs(k, len+1, adjList, visited);
+					maximum = Math.max(retval, maximum);
+				}
+			}
+			visited[v] = 0;
+			return maximum;
+		};
+
+		this.longestRoadLength = 0;
+		for (var i = 0; i < adjList.length; ++i) {
+			var retval = dfs(i, 1, adjList, visited);
+			this.longestRoadLength = Math.max(retval, this.longestRoadLength);
+		}
+
+		return this.longestRoadLength;
+
 	};
 }
 
