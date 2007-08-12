@@ -1,3 +1,5 @@
+/* a collection of UI-related code */
+
 //IMAGE MAP CONSTANTS
 var NULLMODE = 0;
 var CELLMODE = 1;
@@ -182,3 +184,16 @@ ui.showDevCardWindow = function (pid) {
 	} 
 	g('devcard_window').innerHTML = txt;
 };
+
+ui.setImageMapMode = function(mapMode) {
+	var map;
+	switch (mapMode) {
+		case NULLMODE: map = ''; break;
+		case CELLMODE: map = '#cellmap'; break;
+		case vertexMODE: map = '#vertexmap'; break;
+		case EDGEMODE: map = '#edgemap'; break;
+		default: map = ''; break;
+	}
+	g('board_interface').useMap = map;
+};
+

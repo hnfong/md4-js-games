@@ -41,21 +41,6 @@ function hasEnoughResources(res, cost) {
 }
 
 
-function setImageMapMode(mapMode) {
-	var map;
-	switch (mapMode) {
-		case NULLMODE: map = ''; break;
-		case CELLMODE: map = '#cellmap'; break;
-		case vertexMODE: map = '#vertexmap'; break;
-		case EDGEMODE: map = '#edgemap'; break;
-		default: map = ''; break;
-	}
-	g('board_interface').useMap = map;
-}
-
-
-
-
 function vertexOwner(i, j, v) {
 	var s = vertexToString(i, j, v);
 	if (!vertexBuildingMap[s]) return -1;
