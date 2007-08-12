@@ -31,6 +31,18 @@ VPCard.prototype.use = function(user) {
 };
 
 
+/******************************* Plenty *******************************/
+function PlentyCard(id) { DevCard.prototype.construct.call(this, id, 'Year of Plenty', "Two free resources."); }
+PlentyCard.prototype = new DevCard();
+
+// TODO
+PlentyCard.prototype.use = function(user) {
+	if (user == game.me) {
+		plentyDialog.show();
+	}
+};
+
+
 /****************** DevCards Initialization Functions ****************/
 var devCards = new Array();
 var devCardsStatic = new Array(); // for lookup of cid => card objects
@@ -46,6 +58,9 @@ devCardsStatic.populate = function() {
 		this.push(new VPCard(cnt++, game.vpCardNames[i]));
 	};
 
+	for (var i = 0 ; i < game.numPlentyCards; i++) {
+		this.push(new PlentyCard(cnt++));
+	};
 };
 
 devCards.shuffle = function() {

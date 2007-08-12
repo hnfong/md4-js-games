@@ -22,3 +22,38 @@ body {
 img {
 	vertical-align: text-bottom;
 }
+
+.dialog_base {
+	background-color: #E0E0E0;
+	border: 1px solid #9090A8;
+	position: absolute;
+	font-size: 12px;
+	font-family: Arial, Sans;
+	visibility: hidden;
+	z-index: 200;
+}
+
+.dialog_title {
+	background-color: #D0D0D0;
+	border-width: 0px 0px 1px 0px;
+	border-style: solid;
+	border-color: #9090A8;
+	text-align: center;
+	font-weight: bold;
+	padding: 0.15em;
+}
+
+.dialog_main {
+	padding: 0.5em;
+}
+
+.dialog_main td {
+	font-size: 12px;
+	font-family: Tahoma, Sans;
+}
+
+.smallbutton {
+	font-size: 12px;
+	font-family: Tahoma, Arial, Sans;
+	border: 1px solid #606060;
+}

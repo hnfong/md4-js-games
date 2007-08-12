@@ -121,9 +121,10 @@ function remoteMessageHandler(txt)
 			break;
 
 		case 'get_resources':
+			a.shift();
+			a.shift();
+			ui.writeLog(p.name + ' got ' + resourcesToString(a) + '.');
 			if (pid == myId) return;
-			a.shift();
-			a.shift();
 			p.addResources(a);
 			break;
 
