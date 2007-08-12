@@ -302,11 +302,9 @@ Me.prototype.transferTurn = function(next) {
 
 Player.prototype.useCard = function(cid) {
 	var card = null;
-	debug('cid = ' + cid);
 
 	for (var i = 0 ; i < this.devCards.length; i++)
 	{
-		debug('i have card where id = ' + this.devCards[i].id);
 		if (this.devCards[i].id == cid) {
 			card = this.devCards[i];
 			this.devCards.splice(i,1);

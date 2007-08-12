@@ -71,11 +71,6 @@ Game.prototype.start = function(playerNames, mapData, cardData)
 
 	this.me = this.players[myId];
 
-	debug('hehe');
-	debug(game.players.length);
-	debug(myId);
-	debug('haha');
-
 	board.drawBoard();
 	board.drawMarkers();
 
