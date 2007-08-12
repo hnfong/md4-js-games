@@ -18,6 +18,7 @@ SoldierCard.prototype.use = function(user) {
 		changeState('place_robber');
 	}
 	user.soldiers++;
+	game.usedCard = 1;
 };
 
 
@@ -38,6 +39,7 @@ PlentyCard.prototype.use = function(user) {
 	if (user == game.me) {
 		plentyDialog.show();
 	}
+	game.usedCard = 1;
 };
 
 

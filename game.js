@@ -135,6 +135,7 @@ Game.prototype.rollForResources = function (a) {
 
 Game.prototype.transferTurn = function (next) {
 	this.currentTurn = next;
+	this.usedCard = 0;
 	if (this.currentTurn != game.me.id)
 		changeState('wait');
 	else {
