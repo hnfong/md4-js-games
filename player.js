@@ -322,15 +322,6 @@ Me.prototype.useCard = function(cid)
 	Player.prototype.useCard.call(this, cid);
 };
 
-Player.prototype.adjustExtraPoints = function(inc) {
-	this.extraPoints += inc;
-};
-
-Me.prototype.adjustExtraPoints = function(inc) {
-	sendRemoteMessage('adjust_extra ' +  this.id + ' ' + inc); // FIXME: really needed? isn't it simply a matter of checking state changes?
-	Player.prototype.adjustExtraPoints.call(this, inc);
-};
-
 Me.prototype.getInitialResources = function() {
 	var gain = create1DArray(game.numResourceTypes);
 	var i = initialSett.i, j = initialSett.j;

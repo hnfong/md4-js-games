@@ -101,7 +101,7 @@ ui.showPlayerWindow = function() {
 	var txt = '';
 	for (var i = 0; i < game.numPlayers; ++i) {
 		txt += '<div style="background-color:' + playerColors[i] + ';">';
-		if (currentTurn == i)
+		if (game.currentTurn == i)
 			txt += '<b><i><u>' + game.players[i].name + '</u></i></b><br/>';
 		else
 			txt += '<b>' + game.players[i].name + '</b><br/>';

@@ -140,8 +140,8 @@ Game.prototype.rollForResources = function (a) {
 };
 
 Game.prototype.transferTurn = function (next) {
-	currentTurn = next;
-	if (currentTurn != game.me.id)
+	this.currentTurn = next;
+	if (this.currentTurn != game.me.id)
 		changeState('wait');
 	else {
 		if (game.me.buildingCounts[game.ROAD] < 2)

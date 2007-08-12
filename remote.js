@@ -148,11 +148,6 @@ function remoteMessageHandler(txt)
 			p.useCard(parseInt(a[2]));
 			break;
 
-		case 'adjust_extra':
-			if (pid == myId) return;
-			p.adjustExtraPoints(parseInt(a[2]));
-			break;
-
 		case 'propose_trade':
 			break;
 

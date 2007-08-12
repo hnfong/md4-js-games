@@ -27,7 +27,7 @@ VPCard.prototype = new DevCard();
 
 // TODO
 VPCard.prototype.use = function(user) {
-	game.me.adjustExtraPoints(+1);
+	user.extraPoints ++;
 };
 
 
