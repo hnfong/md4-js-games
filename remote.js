@@ -173,7 +173,7 @@ function remoteMessageHandler(txt)
 		// pre-game.start stuff. return instead of break
 		case 'join':
 			game.join(a[1]);
-			if (myId == 0) {
+			if (this.myId == 0) {
 				g('startgamebutton').disabled = false;
 			}
 			ui.writeLog('Player <i>' + a[1] + '</i> arrived.');
