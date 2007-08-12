@@ -1,59 +1,82 @@
-var devCardBase = new Array();
+// abstract,base class
+function DevCard(id, name, description) { this.construct(id, name, description); }
 
-function DevCard(id, name, quantity) {
+DevCard.prototype.construct = function(id,name,description)
+{
 	this.id = id;
 	this.name = name;
-	this.quantity = quantity;
-	this.description = '';
-	this.use = function() {};
+	this.description = description;
+};
 
-	this.take = function() {
-		this.quantity--;
-		return this;
-	};
 
-	this.put = function() {
-		this.quantity++;
-	};
+/*************************** Soldier ***************************/
+function SoldierCard(id) { DevCard.prototype.construct.call(this, id, "Soldier", "SOLDIER CARD DESCRIPTION. FIXME."); }
+SoldierCard.prototype = new DevCard();
 
-}
-
-function remainingDevCards() {
-	var total = 0;
-	for (var i = 0; i < devCardBase.length; ++i)
-		total += devCardBase[i].quantity;
-	return total;
-}
-
-function drawDevCard() {
-	var total = remainingDevCards();
-	var r = randInt(total) + 1;
-	for (var i = 0; i < devCardBase.length; ++i) {
-		for (var j = 0; j < devCardBase[i].quantity; ++j) {
-			r--;
-			if (r == 0) {
-				r = i;
-				i = devCardBase.length;
-				break;
-			}
-		}
-	}
-	return r;
-}
-
-{
-	var soldier = new DevCard(0, 'Soldier', 14);
-	soldier.use = function() {
+SoldierCard.prototype.use = function(user) {
+	if (user == game.me) {
 		changeState('place_robber');
-	};
-	devCardBase.push(soldier);
-}
+	}
+	user.soldiers++;
+};
 
-{
-	var onepoint = new DevCard(1, 'One Victory Point', 5);
-	onepoint.use = function() {
-		game.me.adjustExtraPoints(+1);
+
+/*************************** Victory Point ***************************/
+function VPCard(id, name) { DevCard.prototype.construct.call(this, id, name, "Provides one victory point."); }
+VPCard.prototype = new DevCard();
+
+// TODO
+VPCard.prototype.use = function(user) {
+	game.me.adjustExtraPoints(+1);
+};
+
+
+var devCards = new Array();
+var devCardsStatic = new Array(); // for lookup of cid => card objects
+
+devCardsStatic.populate = function() {
+	var cnt = 0;
+
+	for (var i = 0 ; i < game.numSoldierCards; i++) {
+		this.push(new SoldierCard(cnt++));
 	};
-	devCardBase.push(onepoint);
-}
+
+	for (var i = 0 ; i < game.numVPCards; i++) {
+		this.push(new VPCard(cnt++, game.vpCardNames[i]));
+	};
+
+};
+
+devCards.shuffle = function() {
+	// clear
+	while (this.length > 0) this.pop();
+
+	// copy to devCards
+	for (var i = 0 ; i < devCardsStatic.length; i++) {
+		this.push(devCardsStatic[i]);
+	}
+
+	var n = this.length;
+	for (var i = 0 ; i < n*n ; i++) {
+		var a = randInt(n);
+		var b = randInt(n);
+
+		var t = this[a];
+		this[a] = this[b];
+		this[b] = t;
+	}
+};
+
+devCards.load = function( a ) {
+	// clear
+	while (this.length > 0) this.pop();
+
+	for (var i = 0 ; i < a.length ; i++) {
+		this.push( devCardsStatic[a[i]] );
+	}
+};
+
+devCards.draw = function() {
+	return this.pop();
+};
 

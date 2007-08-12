@@ -133,7 +133,7 @@ ui.showPurchaseWindow = function (pid) {
 		return s;
 	}
 
-	txt += 'Development Card <input type="button" id="button_buy_devcard" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_devcard\');return false;"/> (' + remainingDevCards() + ' left)<br/>' + dumpCost(game.cardCost) + '<br/><hr/>';
+	txt += 'Development Card <input type="button" id="button_buy_devcard" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_devcard\');return false;"/> (' + devCards.length + ' left)<br/>' + dumpCost(game.cardCost) + '<br/><hr/>';
 	txt += 'City <input type="button" id="button_buy_city" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_city\');return false;"/> (' + (game.maxCities-game.players[pid].buildingCounts[game.CITY]) + ' left)<br/>' + dumpCost(game.cityCost) + '<br/><hr/>';
 	txt += 'Settlement <input type="button" id="button_buy_sett" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_sett\');return false;"/> (' + (game.maxSetts-game.players[pid].buildingCounts[game.SETT]) + ' left)<br/>' + dumpCost(game.settCost) + '<br/><hr/>';
 	txt += 'Road <input type="button" id="button_buy_road" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_road\');return false;"/> (' + (game.maxRoads-game.players[pid].buildingCounts[game.ROAD]) + ' left)<br/>' + dumpCost(game.roadCost) + '<br/><hr/>';
@@ -175,9 +175,10 @@ ui.showStealWindow = function (pid) {
 
 ui.showDevCardWindow = function (pid) {
 	var txt = 'Development Cards:<br/>';
-	for (var i = 0; i < game.players[pid].devCards.length; ++i) {
-		var card = game.players[pid].devCards[i];
-		txt += '<a href="#" onmousedown="if(state.name!=\'free\')return false;game.me.useCard(' + i + ');ui.refreshWindows(' + pid + ');return false;">' + card.name + '</a><br/>';
+	var player = game.players[pid];
+	for (var i = 0; i < player.devCards.length; ++i) {
+		var card = player.devCards[i];
+		txt += '<a href="#" onmousedown="if(state.name!=\'free\')return false;game.me.useCard(' + card.id + ');ui.refreshWindows(' + pid + ');return false;">' + card.name + '</a><br/>';
 	} 
 	g('devcard_window').innerHTML = txt;
 };

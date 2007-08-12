@@ -43,7 +43,7 @@
 
 <div id="status" class="window" style="left: 300px; top: 500px;">Status: idle</div>
 <div style="top: 500px; position: absolute">
-<div onmousedown="regPlayer('cx',0); game.start(new Array('cx', 'Si', 'phisho')); priv_sendMapData(); priv_startGame();">I am player 0</div>
+<div onmousedown="regPlayer('cx',0); board.randomizeCells(); devCards.shuffle(); game.start(new Array('cx', 'Si', 'phisho')); priv_sendMapData(); priv_startGame();">I am player 0</div>
 <div onmousedown="regPlayer('Si',1);">I am player 1</div>
 <div onmousedown="regPlayer('cychoi',2);">I am player 2</div>
 <div onmousedown="clearRemoteLog();">Clear Data</div>
@@ -127,6 +127,12 @@ function priv_sendMapData() {
 	s += ' ' + dumpArray(board.cellMarkers);
 	s += ' ' + board.robberPos.i + ' ' + board.robberPos.j;
 	sendRemoteMessage(s);
+
+	s = 'card_data';
+	for (var i = 0 ; i < devCards.length; i++){
+		s += ' ' + devCards[i].id;
+	}
+	sendRemoteMessage(s);
 }
 
 function priv_startGame() {
@@ -139,7 +145,10 @@ function regPlayer(name, id) {
 	sendRemoteMessage('register ' + id + ' ' + name);
 }
 
-receiveRemoteMessages();
+window.onload = function() {
+	devCardsStatic.populate();
+	receiveRemoteMessages();
+};
 
 </script>
 

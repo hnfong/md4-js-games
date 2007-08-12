@@ -64,11 +64,11 @@ function changeState(stateName) {
 			changeState('build_city');
 
 		} else if (b == 'button_buy_devcard') {
-			if (remainingDevCards() <= 0) {
+			if (devCards.length <= 0) {
 				alert('No more development cards!');
 				return;
 			}
-			if (hasEnoughResources(game.players[myId].resources, game.cardCost)) {
+			if (hasEnoughResources(game.me.resources, game.cardCost)) {
 				alert('Not enough resources!');
 				return;
 			}

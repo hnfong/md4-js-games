@@ -14,6 +14,7 @@ Player.prototype.construct = function(id,name) {
 	this.buildingCounts = create1DArray(3); // roads, settlements, cities
 	this.devCards = new Array();
 	this.resources = create1DArray(game.numResourceTypes);
+	this.soldiers = 0;
 };
 
 function Me(id, name) { Player.prototype.construct.call(this, id, name); } // subclass of Player.
@@ -250,14 +251,13 @@ Me.prototype.buildCity = function(i, j, v) {
 	return true;
 };
 
-Player.prototype.buyCard = function(type) {
-	this.devCards.push(devCardBase[type].take());
+Player.prototype.buyCard = function() {
+	this.devCards.push(devCards.draw());
 };
 
 Me.prototype.buyCard = function () {
-	var index = drawDevCard();
-	sendRemoteMessage('buy_devcard ' + this.id + ' ' + index);
-	Player.prototype.buyCard.call(this, index);
+	sendRemoteMessage('buy_devcard ' + this.id);
+	Player.prototype.buyCard.call(this);
 };
 
 Me.prototype.placeRobber = function(i, j) {
@@ -300,18 +300,28 @@ Me.prototype.transferTurn = function(next) {
 	game.transferTurn(next);
 };
 
-Player.prototype.useCard = function(index) {
-	var card = this.devCards[index];
-	this.devCards.splice(index, 1);
+Player.prototype.useCard = function(cid) {
+	var card = null;
+	debug('cid = ' + cid);
+
+	for (var i = 0 ; i < this.devCards.length; i++)
+	{
+		debug('i have card where id = ' + this.devCards[i].id);
+		if (this.devCards[i].id == cid) {
+			card = this.devCards[i];
+			this.devCards.splice(i,1);
+		}
+	}
+
+	if (card == null) throw "useCard == null?! (cid = " + cid + ")";
+
+	card.use(this);
 };
 
-Me.prototype.useCard = function(index)
+Me.prototype.useCard = function(cid)
 {
-	var card = this.devCards[index];
-	sendRemoteMessage('use_card ' + this.id + ' ' + index);
-	ui.writeLog(this.name + ' played ' + card.name + '.'); // why is it here instead of Player.useCard()??!
-	Player.prototype.useCard.call(this, index);
-	// card.use(); // FIXME
+	sendRemoteMessage('use_card ' + this.id + ' ' + cid);
+	Player.prototype.useCard.call(this, cid);
 };
 
 Player.prototype.adjustExtraPoints = function(inc) {

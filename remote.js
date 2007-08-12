@@ -103,7 +103,7 @@ function remoteMessageHandler(txt)
 		case 'buy_devcard':
 			ui.writeLog(p.name + ' bought a development card.');
 			if (pid == myId) return;
-			p.buyCard(parseInt(a[2]));
+			p.buyCard();
 			break;
 
 		case 'build_road':
@@ -143,8 +143,8 @@ function remoteMessageHandler(txt)
 			p.steal(game.players[parseInt(a[2])], parseInt(a[3]));
 			break;
 		case 'use_card':
+			ui.writeLog(p.name + ' played ' + devCardsStatic[parseInt(a[2])].name + '.');
 			if (pid == myId) return;
-			ui.writeLog(p.name + ' played ' + p.devCards[parseInt(a[2])].name + '.');
 			p.useCard(parseInt(a[2]));
 			break;
 
@@ -167,23 +167,31 @@ function remoteMessageHandler(txt)
 			changeState('idle');
 			break;
 
+		case 'start_game':
+			ui.writeLog('Game started!');
+			if (myId == pid) return;
+			game.start(new Array('cx', 'Si', 'phisho'));
+			break;
+
+		// pre-game.start stuff. return instead of break
 		case 'register':
 			ui.writeLog('Player ' + pid + ' (' + a[2] + ') arrived.');
 			return;
-			break;
 
-		case 'start_game':
-			game.transferTurn(0);
-			firstPlayer = 0;
-			ui.writeLog('Game started!');
-			break;
 
 		case 'map_data':
 			if (myId == pid) return;
 			a.shift();
 			a.shift();
-			game.start(new Array('cx', 'Si', 'phisho'), a);
-			break;
+			board.loadMap(a);
+			return;
+
+		case 'card_data':
+			if (myId == pid) return;
+			a.shift();
+			a.shift();
+			devCards.load(a);
+			return;
 	}
 
 	ui.refreshWindows(myId);

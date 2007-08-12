@@ -24,6 +24,13 @@ var __game_defaults =
 	resourceCardLimit: 7,
 	robberOutcome: 7,
 
+	numSoldierCards: 14,
+	numVPCards: 5,
+	numRoadCards: 2,
+	numPlentyCards: 2,
+
+	vpCardNames: new Array('Library','Market','Cathedral','Town Hall','University'), // FIXME: what are the names?? (some are prob. incorrect since I merely recalled from vague memory)
+
 	roadCost : new Array(0, 0, 0, 1, 1),
 	settCost : new Array(1, 0, 1, 1, 1),
 	cityCost : new Array(0, 3, 2, 0, 0),
@@ -51,7 +58,7 @@ function Game(settings)
 	}
 }
 
-Game.prototype.start = function(playerNames, mapData)
+Game.prototype.start = function(playerNames, mapData, cardData)
 {
 	this.numPlayers = playerNames.length;
 	this.players = new Array();
@@ -64,10 +71,10 @@ Game.prototype.start = function(playerNames, mapData)
 
 	this.me = this.players[myId];
 
-	if (mapData == null)
-		board.randomizeCells();
-	else
-		board.loadMap(mapData);
+	debug('hehe');
+	debug(game.players.length);
+	debug(myId);
+	debug('haha');
 
 	board.drawBoard();
 	board.drawMarkers();
@@ -87,7 +94,8 @@ Game.prototype.start = function(playerNames, mapData)
 	for (var i = 0; i < this.numPlayers; ++i)
 		tiedPlayers.push(i);
 
-	changeState('wait');
+	firstPlayer = 0;
+	game.transferTurn(0);
 };
 
 Game.prototype.rollForResources = function (a) {
