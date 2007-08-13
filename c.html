@@ -28,10 +28,10 @@
 <map name="edgemap" id="edgemap"></map>
 
 <div id="tiles"></div>
-<div id="roads"></div>
-<div id="buildings"></div>
 <div id="markers"></div>
 <div id="ports"></div>
+<div id="roads"></div>
+<div id="buildings"></div>
 <div id="robber" style="position:absolute;visibility:hidden;"><img src="img/robber.gif"/></div>
 
 <div id="player_window" class="window" style="left: 600px; top: 20px;"></div>
@@ -40,7 +40,8 @@
 
 <div id="purchase_window" class="window" style="left: 770px; top: 20px;"></div>
 <div id="res_window" style="left: 770px; top: 250px;"></div>
-<input type="button" value="End Turn" class="window" style="left: 770px; top: 350px;" onclick="state.buttonHandler('button_end_turn');"/>
+<input type="button" value="Trade" class="window" style="left: 770px; top: 350px;" onclick="tradeProposeDialog.show();"/>
+<input type="button" value="End Turn" class="window" style="left: 820px; top: 350px;" onclick="state.buttonHandler('button_end_turn');"/>
 <div id="log_window" class="window" style="left: 770px; top: 380px; width: 200px; height: 100px; overflow: auto;">Welcome to Lonely Island~</div>
 <div id="devcard_window" class="window" style="left: 770px; top: 500px;">Development Cards:</div>
 

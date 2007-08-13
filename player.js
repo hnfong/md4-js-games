@@ -16,6 +16,9 @@ Player.prototype.construct = function(id,name) {
 	this.resources = create1DArray(game.numResourceTypes);
 	this.soldiers = 0;
 	this.longestRoadLength = 0;
+	this.tradeRates = new Array();
+	for (var i = 0; i < game.numResourceTypes; ++i)
+		this.tradeRates.push(4);
 };
 
 function Me(id, name) { Player.prototype.construct.call(this, id, name); } // subclass of Player.
@@ -248,6 +251,21 @@ Player.prototype.buildSett = function(i, j, v, isFree)
 		this.buildingCounts[game.SETT]++;
 	}
 
+	// update trade rates
+	{
+		var s = vertexToString(i, j, v);
+		if (board.vertexPortMap[s]) {
+			var type = board.vertexPortMap[s].type;
+			var rate = board.vertexPortMap[s].rate;
+			if (type == board.WILDCARD_PORT) {
+				for (var k = 0; k < game.numResourceTypes; ++k)
+					this.tradeRates[k] = Math.min(this.tradeRates[k],  rate);
+			} else {
+				this.tradeRates[type] = Math.min(this.tradeRates[type], rate);
+			}
+		}
+	}
+	
 	// ui changes
 	var x = vertexXY(i, j, v).x;
 	var y = vertexXY(i, j, v).y;

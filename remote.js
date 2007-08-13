@@ -166,6 +166,21 @@ function remoteMessageHandler(txt)
 			p.useCard(parseInt(a[2]));
 			break;
 
+		case 'trade_self':
+			var give = new Array();
+			var get = new Array();
+			a.shift();
+			a.shift();
+			for (var i = 0; i < game.numResourceTypes; ++i)
+				give.push(parseInt(a.shift()));
+			for (var i = 0; i < game.numResourceTypes; ++i)
+				get.push(parseInt(a.shift()));
+			ui.writeLog(p.name + ' traded ' + resourcesToString(give) + ' for ' + resourcesToString(get) + '.');
+			if (pid == myId) return;
+			p.subtractResources(give);
+			p.addResources(get);
+			break;
+
 		case 'propose_trade':
 			break;
 

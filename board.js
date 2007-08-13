@@ -131,8 +131,10 @@ Board.prototype.loadMap = function(mapData) {
 			var dir = parseInt(mapData.shift());
 			var rate = parseInt(mapData.shift());
 			this.cellPorts[i][j] = { type: type, dir: dir, rate: rate };
-			this.vertexPortMap[vertexToString(i, j, dir)] = { type: type, rate: rate };
-			this.vertexPortMap[vertexToString(i, j, (dir+1)%6)] = { type: type, rate: rate };			
+			if (this.data[i][j] == this.PORT) {
+				this.vertexPortMap[vertexToString(i, j, dir)] = { type: type, rate: rate };
+				this.vertexPortMap[vertexToString(i, j, (dir+1)%6)] = { type: type, rate: rate };			
+			}
 		}
 
 	var x = mapData.shift();
