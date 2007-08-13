@@ -65,7 +65,7 @@ function isInRange(i, j) {
 
 
 function isValidCell(i, j) {
-	return isInRange(i, j) && board.data[i][j] == 1;
+	return isInRange(i, j) && board.data[i][j] == board.LAND;
 }
 
 function isValidVertex(i, j, v) {

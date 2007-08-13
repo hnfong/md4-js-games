@@ -67,6 +67,7 @@ Game.prototype.start = function()
 
 	board.drawBoard();
 	board.drawMarkers();
+	board.drawPorts();
 
 	vertexBuildingMap = new Array();
 	edgeBuildingMap = new Array();
@@ -173,6 +174,12 @@ Game.prototype.setup = function() {
 		s += ' ' + dumpArray(board.data);
 		s += ' ' + dumpArray(board.cellResources);
 		s += ' ' + dumpArray(board.cellMarkers);
+		for (var i = 0; i < board.WIDTH; ++i)
+			for (var j = 0; j < board.HEIGHT; ++j)
+				if (board.data[i][j] == board.PORT)
+					s += ' ' + board.cellPorts[i][j].type + ' ' + board.cellPorts[i][j].dir + ' ' + board.cellPorts[i][j].rate;
+				else
+					s += ' 0 0 0';
 		s += ' ' + board.robberPos.i + ' ' + board.robberPos.j;
 		sendRemoteMessage(s);
 
