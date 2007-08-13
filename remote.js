@@ -129,6 +129,20 @@ function remoteMessageHandler(txt)
 			break;
 
 		case 'discard':
+			a.shift();
+			a.shift();
+			ui.writeLog(p.name + ' discarded ' + resourcesToString(a) + '.');
+			if (game.currentTurn == game.me.id) {
+				game.hasDiscarded[pid] = true;
+				var allDiscarded = true;
+				for (var i = 0; i < game.numPlayers; ++i)
+					allDiscarded = allDiscarded && game.hasDiscarded[i];
+				if (allDiscarded)
+					changeState('place_robber');
+			} else if (pid == myId)
+				changeState('wait'); // TODO dialog onExit
+			if (pid == myId) return;
+			p.subtractResources(a);
 			break;
 
 		case 'place_robber':
@@ -145,6 +159,7 @@ function remoteMessageHandler(txt)
 			if (pid == myId) return;
 			p.steal(game.players[parseInt(a[2])], parseInt(a[3]));
 			break;
+
 		case 'use_card':
 			ui.writeLog(p.name + ' played ' + devCardsStatic[parseInt(a[2])].name + '.');
 			if (pid == myId) return;

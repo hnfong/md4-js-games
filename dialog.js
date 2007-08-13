@@ -96,6 +96,77 @@ function plentyDialog_init() {
 	};
 }
 
+var discardDialog;
+
+function discardDialog_init() {
+	var content = '';
+
+	content += '<table cellspaing="6" cellpadding="0" border="0">';
+	content += '<tr>';
+	for (var i = 0; i < game.resourceNames.length; ++i) {
+		content += '<td><img onclick="discardDialog.inc(' + i + ');" src="img/' + game.resourceNames[i] + '_small.gif">&nbsp;<span id="discard_' + i + '_value">0</span>&nbsp;&nbsp;</td>';
+	}
+	content += '</tr>';
+	content += '</table>';
+	content += '<div align="center"><input type="button" class="smallbutton" onclick="discardDialog.clear()" value="Clear"> <input type="button" class="smallbutton" onclick="discardDialog.confirm()" value="Confirm"></div>';
+
+	var title = 'Discard <span id="discard_num_cards">0</span> resource cards';
+	discardDialog = new Dialog(title, content);
+	discardDialog.create();
+	discardDialog.obj.style.top = "100px";
+	discardDialog.obj.style.left = "100px";
+
+	discardDialog.show = function(numCards) {
+		this.obj.style.visibility = 'visible';
+		this.numCards = numCards;
+		g('discard_num_cards').innerHTML = numCards;
+		this.clear();
+	};
+
+	discardDialog.hide = function() {
+		this.obj.style.visibility = 'hidden';
+	};
+
+	discardDialog.refresh = function(res) {
+		for (var i = 0 ; i < game.numResourceTypes; ++i) {
+			g('discard_' + i + '_value').innerHTML = this.resources[i];
+		}
+	};
+
+	discardDialog.count = function() {
+		var z = 0;
+		for (var i = 0; i < game.numResourceTypes; ++i) {
+			z += this.resources[i];
+		}
+		return z;
+	};
+
+	discardDialog.inc = function(res) {
+		this.resources[res] = (this.resources[res] + 1) % (game.me.resources[res] + 1);
+		this.refresh();
+	};
+
+	discardDialog.clear = function() {
+		discardDialog.resources = new Array();
+		for (var i = 0; i < game.numResourceTypes; ++i) {
+			discardDialog.resources.push(0);
+		}
+		this.refresh();
+	}
+
+	discardDialog.confirm = function() {
+		if (this.count() != this.numCards) {
+			alert('You must discard ' + this.numCards + ' resource cards!');
+			return false;
+		}
+		sendRemoteMessage("discard " + game.me.id + " " + dumpArray(this.resources));
+		game.me.subtractResources(this.resources);
+		ui.refreshWindows(game.me.id);
+		this.hide();
+	}
+}
+
 function dialog_init() {
 	plentyDialog_init();
+	discardDialog_init();
 }

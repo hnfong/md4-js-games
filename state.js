@@ -93,8 +93,21 @@ function changeState(stateName) {
 	st.diceHandler = function() {
 		if (game.me.rollForResources())
 			changeState('free');
-		else
-			changeState('place_robber');
+		else {
+			var someDiscard = false;
+			game.hasDiscarded = create1DArray(game.numPlayers);
+			for (var i = 0; i < game.numPlayers; ++i)
+				if (game.players[i].numResources() <= game.resourceCardLimit)
+					game.hasDiscarded[i] = true;
+				else
+					someDiscard = true;
+			if (game.me.numResources() > game.resourceCardLimit)
+				changeState('discard');
+			else if (someDiscard)
+				changeState('wait');
+			else
+				changeState('place_robber');
+		}
 	};
 	states['roll'] = st;
 }
@@ -231,6 +244,17 @@ function changeState(stateName) {
 			changeState('free');
 	};
 	states['steal'] = st;
+}
+{ // discard
+	var st = new State('discard');
+	st.onEnter = function() {
+		ui.setImageMapMode(NULLMODE);
+		discardDialog.show(Math.floor(game.me.numResources() / 2));
+	};
+	st.onLeave = function() {
+		discardDialog.hide();
+	}
+	states['discard'] = st;
 }
 { // idle
 	var st = new State('idle');

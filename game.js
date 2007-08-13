@@ -78,6 +78,8 @@ Game.prototype.start = function()
 
 	ui.refreshWindows(this.myId);
 
+	this.hasDiscarded = create1DArray(this.numPlayers);
+
 	initRolls = create1DArray(this.numPlayers);
 	tiedPlayers = new Array();
 	for (var i = 0; i < this.numPlayers; ++i)
@@ -93,8 +95,11 @@ Game.prototype.rollForResources = function (a) {
 	for (var i = 0; i < game.numDice; ++i)
 		outcome += parseInt(a[i]);
 
-	if (outcome == game.robberOutcome)
+	if (outcome == game.robberOutcome) {
+		if (game.me.numResources() > game.resourceCardLimit)
+			changeState('discard');
 		return false;
+	}
 
 	// initialize "gain"
 	var gain = new Array(game.numPlayers);
