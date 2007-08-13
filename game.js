@@ -171,7 +171,7 @@ Game.prototype.setup = function() {
 		s += ' ' + board.robberPos.i + ' ' + board.robberPos.j;
 		sendRemoteMessage(s);
 
-		s = 'card_data ' + game.myId;
+		s = 'card_data';
 		for (var i = 0 ; i < devCards.length; i++){
 			s += ' ' + devCards[i].id;
 		}

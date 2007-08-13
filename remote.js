@@ -190,7 +190,6 @@ function remoteMessageHandler(txt)
 		case 'card_data':
 			if (myId == pid) return;
 			a.shift();
-			a.shift();
 			devCards.load(a);
 			return;
 	}
