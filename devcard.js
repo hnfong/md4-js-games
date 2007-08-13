@@ -13,6 +13,8 @@ DevCard.prototype.construct = function(id,name,description)
 function SoldierCard(id) { DevCard.prototype.construct.call(this, id, "Soldier", "SOLDIER CARD DESCRIPTION. FIXME."); }
 SoldierCard.prototype = new DevCard();
 
+SoldierCard.prototype.type = 'soldier';
+
 SoldierCard.prototype.use = function(user) {
 	if (user == game.me) {
 		changeState('place_robber');
@@ -26,6 +28,8 @@ SoldierCard.prototype.use = function(user) {
 function VPCard(id, name) { DevCard.prototype.construct.call(this, id, name, "Provides one victory point."); }
 VPCard.prototype = new DevCard();
 
+VPCard.prototype.type = 'vp';
+
 VPCard.prototype.use = function(user) {
 	user.extraPoints ++;
 };
@@ -34,6 +38,8 @@ VPCard.prototype.use = function(user) {
 /******************************* Plenty *******************************/
 function PlentyCard(id) { DevCard.prototype.construct.call(this, id, 'Year of Plenty', "Two free resources."); }
 PlentyCard.prototype = new DevCard();
+
+PlentyCard.prototype.type = 'plenty';
 
 PlentyCard.prototype.use = function(user) {
 	if (user == game.me) {

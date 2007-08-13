@@ -372,6 +372,14 @@ Player.prototype.useCard = function(cid) {
 
 Me.prototype.useCard = function(cid)
 {
+	if (game.usedCard == 1)
+	{
+		if (devCardsStatic[cid].type != 'vp')
+		{
+			alert("You may only use one development card per turn.");
+			return false;
+		}
+	}
 	sendRemoteMessage('use_card ' + this.id + ' ' + cid);
 	Player.prototype.useCard.call(this, cid);
 };

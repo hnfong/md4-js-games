@@ -181,7 +181,7 @@ ui.showDevCardWindow = function (pid) {
 	var player = game.players[pid];
 	for (var i = 0; i < player.devCards.length; ++i) {
 		var card = player.devCards[i];
-		txt += '<a href="#" onmousedown="if(state.name!=\'free\')return false; if(game.usedCard!=0){ alert(\'You can only use one development card per turn!\'); return false; } game.me.useCard(' + card.id + ');ui.refreshWindows(' + pid + ');return false;">' + card.name + '</a><br/>';
+		txt += '<a href="#" onclick="if(state.name!=\'free\')return false; game.me.useCard(' + card.id + ');ui.refreshWindows(' + pid + ');return false;">' + card.name + '</a><br/>';
 	} 
 	g('devcard_window').innerHTML = txt;
 };
