@@ -210,6 +210,19 @@ function changeState(stateName) {
 	};
 	states['build_initial_road'] = st;
 }
+{ // build_two_free_roads: state due to "build two roads" card.
+	var st = new State('build_two_free_roads');
+	st.onEnter = function() { ui.setImageMapMode(EDGEMODE); this.numFree = 2; };
+	st.edgeHandler = function(i, j, e) {
+		if (game.me.buildRoad(i, j, e, true, false)) { // free + don't ignore reachability
+				this.numFree--;
+				if (this.numFree == 0) {
+					changeState('free');
+				}
+		}
+	};
+	states['build_two_free_roads'] = st;
+}
 { // place_robber
 	var st = new State('place_robber');
 	st.onEnter = function() { ui.setImageMapMode(CELLMODE); };

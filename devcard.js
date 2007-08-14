@@ -31,7 +31,7 @@ VPCard.prototype = new DevCard();
 VPCard.prototype.type = 'vp';
 
 VPCard.prototype.use = function(user) {
-	user.extraPoints ++;
+	user.vpcardPoints ++;
 };
 
 
@@ -44,6 +44,20 @@ PlentyCard.prototype.type = 'plenty';
 PlentyCard.prototype.use = function(user) {
 	if (user == game.me) {
 		plentyDialog.show();
+	}
+	game.usedCard = 1;
+};
+
+
+/******************************* Road *******************************/
+function RoadCard(id) { DevCard.prototype.construct.call(this, id, 'Build Two Roads', "Build two roads."); }
+RoadCard.prototype = new DevCard();
+
+RoadCard.prototype.type = 'road';
+
+RoadCard.prototype.use = function(user) {
+	if (user == game.me) {
+		changeState('build_two_free_roads');
 	}
 	game.usedCard = 1;
 };
@@ -66,6 +80,10 @@ devCardsStatic.populate = function() {
 
 	for (var i = 0 ; i < game.numPlentyCards; i++) {
 		this.push(new PlentyCard(cnt++));
+	};
+
+	for (var i = 0 ; i < game.numRoadCards; i++) {
+		this.push(new RoadCard(cnt++));
 	};
 };
 

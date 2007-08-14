@@ -10,7 +10,7 @@ Player.prototype.construct = function(id,name) {
 	this.name = name;
 	if (!name)
 		this.name = 'Player #' + this.id;
-	this.extraPoints = 0;
+	this.vpcardPoints = 0;
 	this.buildingCounts = create1DArray(3); // roads, settlements, cities
 	this.devCards = new Array();
 	this.resources = create1DArray(game.numResourceTypes);
@@ -122,7 +122,8 @@ Me.prototype = new Player();
 	};
 
 	Player.prototype.points = function() {
-		return this.buildingCounts[game.SETT] + this.buildingCounts[game.CITY] * 2 + this.extraPoints;
+		var roadPoints = 0;
+		return this.buildingCounts[game.SETT] + this.buildingCounts[game.CITY] * 2 + this.vpcardPoints;
 	};
 
 	Player.prototype.numResources = function() {
