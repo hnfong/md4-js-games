@@ -48,7 +48,7 @@ var playerColors = new Array('blue', 'red', 'green', 'orange');
 
 
 // settings is a dictionary of settings that overrides the defaults. if none, defaults are used.
-function Game(settings)
+function Game(room, settings)
 {
 	if (settings == undefined || settings == null) settings = {};
 
@@ -57,6 +57,7 @@ function Game(settings)
 		this[k] = (settings[k] != undefined ? settings[k] : __game_defaults[k]);
 	}
 
+	this.room = room;
 	this.players = new Array();
 }
 

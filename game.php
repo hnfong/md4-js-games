@@ -1,7 +1,15 @@
+<?php
+ $name = $_POST['nick'];
+ $room = $_POST['room'];
+?>
 <html>
  <head>
   <title>Lonely Island</title>
   <link rel="stylesheet" href="default.css" type="text/css">
+  <script type="text/javascript">
+   var myName = '<?php echo $name; ?>';
+   var myRoom = '<?php echo $room; ?>';
+  </script>
   <script type="text/javascript" src="util.js"></script>
   <script type="text/javascript" src="network.js"></script>
   <script type="text/javascript" src="game.js"></script>
@@ -13,7 +21,6 @@
   <script type="text/javascript" src="dialog.js"></script>
  </head>
 <body>
-
 
 <table>
  <tr>
@@ -63,7 +70,7 @@
 
 //////////////////////////////////////////////////////// BEGIN CONFIG AND CONSTANTS
 
-var game = new Game();
+var game = new Game(myRoom);
 var board = new Board();
 
 var preGamePlayerNames = new Array();
@@ -72,18 +79,6 @@ var initRolls;
 var tiedPlayers;
 var firstPlayer;
 var initialSett;
-
-
-function join_game() {
-	var name = '';
-	while (name.length == 0 || ! name.match(/^[a-zA-Z0-9]*$/)) {
-		name = prompt("Please enter your name:");
-	}
-
-	game.myName = name;
-	
-	sendRemoteMessage("join " + name);
-}
 
 function cat_initRoll(pid) {
 	var a = roll();
@@ -124,6 +119,8 @@ window.onload = function() {
 	devCardsStatic.populate();
 	dialog_init();
 	receiveRemoteMessages();
+	game.myName = myName;
+	sendRemoteMessage("join " + game.myName);
 };
 
 </script>

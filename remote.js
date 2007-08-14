@@ -21,13 +21,14 @@ function sendRemoteMessage(txt) {
 	}
 	sendingMsgs = false; // FIXME: shouldn't be here
 
-	var postdata = 'msg='+ encodeURIComponent( s );
+	var postdata = 'room='+game.room+'&msg='+ encodeURIComponent( s );
+
 	__idplay__ajax_async('x.php', postdata, function(x){});
 	lastTime = new Date().getTime();
 }
 
 function clearRemoteLog() {
-	var postdata = 'cmd=clear';
+	var postdata = 'room='+game.room+'&cmd=clear';
 	__idplay__ajax_async('x.php', postdata, function(x){});
 }
 
@@ -46,7 +47,7 @@ function receiveRemoteMessages() {
 			processMessages();
 		}
 	};
-	__idplay__ajax_async('xxx.html', '', f);
+	__idplay__ajax_async('rooms/' + game.room, '', f);
 }
 
 
