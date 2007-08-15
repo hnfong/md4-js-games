@@ -1,6 +1,23 @@
 <?php
  $name = $_POST['nick'];
  $room = $_POST['room'];
+
+ if (!preg_match('/^[a-zA-Z0-9]+$/', $name))
+ {
+  echo "invalid name";
+  exit;
+ }
+ if (!preg_match('/^[a-zA-Z0-9]+$/', $room))
+ {
+  echo "invalid room";
+  exit;
+ }
+ if ($room == "0") {
+  $room = $name;
+  // clear the file
+  $fp = fopen("rooms/$room", "w");
+  fclose($fp);
+ }
 ?>
 <html>
  <head>
