@@ -24,6 +24,11 @@ Dialog.prototype.create = function()
 	return b;
 }
 
+Dialog.prototype.dispose = function() {
+	var x = g('dialogs');
+	x.removeChild(this.obj);
+}
+
 var plentyDialog;
 
 function plentyDialog_init() {
@@ -187,12 +192,11 @@ function tradeProposeDialog_init() {
 	content += '</tr>';
 	content += '</table><br/>';
 	content += '<b>Send to:</b><br/>';
-	content += '<div align="center">';
 	for (var i = 0; i < game.numPlayers; ++i)
 		if (i != game.me.id)
 			content += '<input type="checkbox" id="trade_propose_' + i + '_check"> ' + game.players[i].name + '<br/>';
 	content += '<br/>';
-	content += '<input type="button" class="smallbutton" onclick="tradeProposeDialog.clear()" value="Clear"> <input type="button" class="smallbutton" onclick="tradeProposeDialog.tradePlayer()" value="Trade"> <input type="button" class="smallbutton" onclick="tradeProposeDialog.tradeBankPort();" value="Bank/Port"> <input type="button" class="smallbutton" onclick="tradeProposeDialog.hide();" value="Cancel"></div>';
+	content += '<div align="center"><input type="button" class="smallbutton" onclick="tradeProposeDialog.clear()" value="Clear"> <input type="button" class="smallbutton" onclick="tradeProposeDialog.tradePlayer();" value="Trade"> <input type="button" class="smallbutton" onclick="tradeProposeDialog.tradeBankPort();" value="Bank/Port"> <input type="button" class="smallbutton" onclick="tradeProposeDialog.hide();" value="Cancel"></div>';
 
 	tradeProposeDialog = new Dialog('Trade', content);
 	tradeProposeDialog.create();
@@ -274,13 +278,44 @@ function tradeProposeDialog_init() {
 	};
 
 	tradeProposeDialog.tradePlayer = function() {
-		// TODO
+		{
+			var empty = true;
+			for (var i = 0; i < game.numResourceTypes; ++i)
+				if (this.give[i] > 0)
+					empty = false;
+			if (empty) {
+				alert('Both parties must give something!');
+				return false;
+			}
+		}
+		{
+			var empty = true;
+			for (var i = 0; i < game.numResourceTypes; ++i)
+				if (this.get[i] > 0)
+					empty = false;
+			if (empty) {
+				alert('Both parties must give something!');
+				return false;
+			}
+		}
+		var recipients = new Array();
+		for (var i = 0; i < game.numPlayers; ++i) {
+			if (i != game.me.id && g('trade_propose_' + i + '_check').checked)
+				recipients.push(i);
+}
+		if (recipients.length == 0) {
+			alert('You must specify at least one recipient!');
+			return false;
+		}
+		game.me.proposeTrade(this.give, this.get, recipients);
+		ui.refreshWindows(game.me.id);
+		this.hide();
 	};
 }
 
 function dialog_init() {
+	// tradeProposeDialog gets initialized in game.start()
 	plentyDialog_init();
 	discardDialog_init();
-	tradeProposeDialog_init();
 }
 

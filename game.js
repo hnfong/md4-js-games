@@ -78,6 +78,8 @@ Game.prototype.start = function()
 	ui.initVertexMap();
 	ui.initEdgeMap();
 
+	tradeProposeDialog_init();
+
 	ui.refreshWindows(this.myId);
 
 	this.hasDiscarded = create1DArray(this.numPlayers);

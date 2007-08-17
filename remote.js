@@ -83,6 +83,7 @@ function remoteMessageHandler(txt)
 			game.rollForResources(a);
 			break;
 		case 'transfer':
+			game.me.clearTrades();
 			if (pid == myId) return;
 			game.transferTurn(a[2]);
 			break;
@@ -182,10 +183,63 @@ function remoteMessageHandler(txt)
 			p.addResources(get);
 			break;
 
-		case 'propose_trade':
+		case 'trade_propose':
+			a.shift();
+			a.shift();
+			var tid = parseInt(a.shift());
+			var rec = parseInt(a.shift());
+			if (rec != myId) return;
+			var myGet = new Array();
+			var myGive = new Array();
+			for (var i = 0; i < game.numResourceTypes; ++i)
+				myGet.push(parseInt(a.shift()));
+			for (var i = 0; i < game.numResourceTypes; ++i)
+				myGive.push(parseInt(a.shift()));
+			var trade = new IncomingTrade(tid, myId, pid);
+			trade.setContract(myGive, myGet);
+			trade.makeDialog();
+			game.me.incomingTrades.push(trade);
 			break;
 
-		case 'respond_trade':
+		case 'trade_accept':
+			var from = parseInt(a[3]);
+			if (from != myId) return;
+			var tid = parseInt(a[2]);
+			for (var i = 0; i < game.me.outgoingTrades.length; ++i)
+				if (game.me.outgoingTrades[i].id == tid)
+					game.me.outgoingTrades[i].accepted(pid);
+			break;
+
+		case 'trade_reject':
+			var from = parseInt(a[3]);
+			if (from != myId) return;
+			var tid = parseInt(a[2]);
+			for (var i = 0; i < game.me.outgoingTrades.length; ++i)
+				if (game.me.outgoingTrades[i].id == tid)
+					game.me.outgoingTrades[i].rejected(pid);
+			break;
+
+		case 'trade_cancel':
+			var tid = parseInt(a[2]);
+			for (var i = 0; i < game.me.incomingTrades.length; ++i)
+				if (game.me.incomingTrades[i].id == tid)
+					game.me.incomingTrades[i].canceled();
+			break;
+
+		case 'trade':
+			var to = parseInt(a[2]);
+			var give = new Array();
+			var get = new Array();
+			a.shift();
+			a.shift();
+			a.shift();
+			for (var i = 0; i < game.numResourceTypes; ++i)
+				give.push(parseInt(a.shift()));
+			for (var i = 0; i < game.numResourceTypes; ++i)
+				get.push(parseInt(a.shift()));
+			ui.writeLog(p.name + ' traded with ' + game.players[to].name + ': ' + resourcesToString(give) + ' vs ' + resourcesToString(get) + '.');
+			if (pid == myId) return;
+			p.trade(game.players[to], give, get);
 			break;
 
 		case 'init_roll':

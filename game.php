@@ -36,6 +36,7 @@
   <script type="text/javascript" src="geom.js"></script>
   <script type="text/javascript" src="devcard.js"></script>
   <script type="text/javascript" src="dialog.js"></script>
+  <script type="text/javascript" src="trade.js"></script>
  </head>
 <body>
 
@@ -64,7 +65,7 @@
 
 <div id="purchase_window" class="window" style="left: 770px; top: 20px;"></div>
 <div id="res_window" style="left: 770px; top: 250px;"></div>
-<input type="button" value="Trade" class="window" style="left: 770px; top: 350px;" onclick="tradeProposeDialog.show();"/>
+<input type="button" value="Trade" class="window" style="left: 770px; top: 350px;" onclick="state.buttonHandler('button_trade');"/>
 <input type="button" value="End Turn" class="window" style="left: 820px; top: 350px;" onclick="state.buttonHandler('button_end_turn');"/>
 <div id="log_window" class="window" style="left: 770px; top: 380px; width: 200px; height: 100px; overflow: auto;">Welcome to Lonely Island~</div>
 <div id="devcard_window" class="window" style="left: 770px; top: 500px;">Development Cards:</div>

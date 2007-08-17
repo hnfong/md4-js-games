@@ -23,6 +23,8 @@ Player.prototype.construct = function(id,name) {
 
 function Me(id, name) { Player.prototype.construct.call(this, id, name); } // subclass of Player.
 Me.prototype = new Player();
+Me.prototype.outgoingTrades = new Array();
+Me.prototype.incomingTrades = new Array();
 
 {
 	Player.prototype.buildRoadCheck = function(i, j, e, ignoreReachability) {
@@ -185,6 +187,7 @@ Me.prototype = new Player();
 		return this.longestRoadLength;
 
 	};
+
 }
 
 
@@ -361,6 +364,40 @@ Me.prototype.steal = function(victim) {
 	return true;
 };
 
+Player.prototype.trade = function(p, give, get) {
+	p.addResources(give);
+	p.subtractResources(get);
+	this.addResources(get);
+	this.subtractResources(give);
+};
+
+Me.prototype.trade = function(tid, pid) {
+	var give = null;
+	var get = null;
+	var tr = null;
+	for (var i = 0; i < this.outgoingTrades.length; ++i) {
+		var t = this.outgoingTrades[i];
+		if (t.id == tid) {
+			tr = t;
+			give = t.give;
+			get = t.get;
+		}
+	}
+	if (!hasEnoughResources(game.me.resources, give)) {
+		alert('You do not have enough resources!');
+		return false;
+	}
+	if (!hasEnoughResources(game.players[pid].resources, get)) {
+		alert('The player does not have enough resources!');
+		return false;
+	}
+	sendRemoteMessage('trade ' + game.me.id + ' ' + pid + ' ' + dumpArray(give) + ' ' + dumpArray(get));
+	Player.prototype.trade.call(this, game.players[pid], give, get);
+	ui.refreshWindows(game.me.id);
+	tr.finish();
+	return true;
+};
+
 Me.prototype.transferTurn = function(next) {
 	if (next == null)
 		next = (this.id + 1) % game.numPlayers;
@@ -420,3 +457,53 @@ Me.prototype.getInitialResources = function() {
 	this.addResources(gain);
 };
 
+Me.prototype.proposeTrade = function(give, get, recipients) {
+	var maxid = this.id * 1000000;
+	for (var i = 0; i < this.outgoingTrades.length; ++i)
+		maxid = Math.max(maxid, this.outgoingTrades[i].id);
+	var tid = maxid + randInt(100);
+	var trade = new OutgoingTrade(tid, this.id);
+	trade.setRecipients(recipients);
+	trade.setContract(give, get);
+	trade.makeDialog();
+	game.me.outgoingTrades.push(trade);
+	trade.propose();
+};
+
+Me.prototype.clearTrades = function() {
+	for (var i = 0; i < this.outgoingTrades.length; ++i)
+		this.outgoingTrades[i].dialog.dispose();
+	this.outgoingTrades = new Array();
+	for (var i = 0; i < this.incomingTrades.length; ++i)
+		this.incomingTrades[i].dialog.dispose();
+	this.incomingTrades = new Array();
+};
+
+Me.prototype.acceptTrade = function(tid) {
+	for (var i = 0; i < this.incomingTrades.length; ++i)
+		if (this.incomingTrades[i].id == tid) {
+			if (!hasEnoughResources(this.resources, this.incomingTrades[i].give)) {
+				alert('You do not have enough resources!');
+				return false;
+			}
+			this.incomingTrades[i].accept();
+		}
+};
+
+Me.prototype.rejectTrade = function(tid) {
+	for (var i = 0; i < this.incomingTrades.length; ++i)
+		if (this.incomingTrades[i].id == tid)
+			this.incomingTrades[i].reject();
+};
+
+Me.prototype.counterTrade = function(tid) {
+	for (var i = 0; i < this.incomingTrades.length; ++i)
+		if (this.incomingTrades[i].id == tid)
+			this.incomingTrades[i].counter();
+};
+
+Me.prototype.cancelTrade = function(tid) {
+	for (var i = 0; i < this.outgoingTrades.length; ++i)
+		if (this.outgoingTrades[i].id == tid)
+			this.outgoingTrades[i].cancel();
+};

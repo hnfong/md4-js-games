@@ -75,6 +75,9 @@ function changeState(stateName) {
 			game.me.buyCard();
 			changeState('free');
 
+		} else if (b == 'button_trade') {
+			tradeProposeDialog.show();
+
 		} else if (b == 'button_end_turn') {
 			game.me.transferTurn();
 
