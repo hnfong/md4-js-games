@@ -265,9 +265,9 @@ function tradeProposeDialog_init() {
 			alert('You must specify at least one type of resources!');
 			return false;
 		}
-		var rate = game.me.tradeRates[getWhat];
-		if (this.give[giveWhat] < this.get[getWhat] * rate) {
-			alert('You have to give at least ' + (this.get[getWhat] * rate) + ' ' + game.resourceNames[giveWhat] + '!');
+		var rate = game.me.tradeRates[giveWhat];
+		if (this.give[giveWhat] != this.get[getWhat] * rate) {
+			alert('You have to give ' + (this.get[getWhat] * rate) + ' ' + game.resourceNames[giveWhat] + '!');
 			return false;
 		}
 		sendRemoteMessage("trade_self " + game.me.id + " " + dumpArray(this.give) + " " + dumpArray(this.get));

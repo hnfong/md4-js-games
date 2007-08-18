@@ -215,11 +215,11 @@ function changeState(stateName) {
 }
 { // build_two_free_roads: state due to "build two roads" card.
 	var st = new State('build_two_free_roads');
-	st.onEnter = function() { ui.setImageMapMode(EDGEMODE); this.numFree = 2; };
+	st.onEnter = function() { ui.setImageMapMode(EDGEMODE); this.numFree = 2; if (game.me.buildingCounts[game.ROAD] >= game.maxRoads) changeState('free'); };
 	st.edgeHandler = function(i, j, e) {
 		if (game.me.buildRoad(i, j, e, true, false)) { // free + don't ignore reachability
 				this.numFree--;
-				if (this.numFree == 0) {
+				if (this.numFree == 0 || game.me.buildingCounts[game.ROAD] >= game.maxRoads) {
 					changeState('free');
 				}
 		}
