@@ -35,7 +35,7 @@ function changeState(stateName) {
 				alert('No more roads!');
 				return;
 			}
-			if (hasEnoughResources(game.me.resources, game.roadCost)) {
+			if (!hasEnoughResources(game.me.resources, game.roadCost)) {
 				alert('Not enough resources!');
 				return;
 			}
@@ -46,7 +46,7 @@ function changeState(stateName) {
 				alert('No more settlements!');
 				return;
 			}
-			if (hasEnoughResources(game.me.resources, game.settCost)) {
+			if (!hasEnoughResources(game.me.resources, game.settCost)) {
 				alert('Not enough resources!');
 				return;
 			}
@@ -57,7 +57,7 @@ function changeState(stateName) {
 				alert('No more cities!');
 				return;
 			}
-			if (hasEnoughResources(game.me.resources, game.cityCost)) {
+			if (!hasEnoughResources(game.me.resources, game.cityCost)) {
 				alert('Not enough resources!');
 				return;
 			}
@@ -68,7 +68,7 @@ function changeState(stateName) {
 				alert('No more development cards!');
 				return;
 			}
-			if (hasEnoughResources(game.me.resources, game.cardCost)) {
+			if (!hasEnoughResources(game.me.resources, game.cardCost)) {
 				alert('Not enough resources!');
 				return;
 			}
