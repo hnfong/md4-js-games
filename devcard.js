@@ -31,7 +31,7 @@ VPCard.prototype = new DevCard();
 VPCard.prototype.type = 'vp';
 
 VPCard.prototype.use = function(user) {
-	user.vpcardPoints ++;
+	user.vpcard();
 };
 
 

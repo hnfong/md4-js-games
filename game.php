@@ -72,7 +72,6 @@
 
 <div id="status" class="window" style="left: 300px; top: 500px;">Status: idle</div>
 <div style="top: 500px; position: absolute">
-<input type="button" value="Join" onclick="join_game();">
 <input id="startgamebutton" type="button" value="Start" disabled="disabled" onclick="game.setup()">
 <input type="button" value="Clear Data" onclick="clearRemoteLog();">
 </div>
@@ -136,8 +135,8 @@ function cat_initRollFinishRound() {
 window.onload = function() {
 	devCardsStatic.populate();
 	dialog_init();
-	receiveRemoteMessages();
 	game.myName = myName;
+	receiveRemoteMessages();
 	sendRemoteMessage("join " + game.myName);
 };
 

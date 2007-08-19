@@ -188,6 +188,10 @@ Me.prototype.incomingTrades = new Array();
 
 	};
 
+	Player.prototype.vpcard = function() {
+		this.vpcardPoints++;
+		ui.showPlayerWindow();
+	};
 }
 
 
@@ -329,6 +333,7 @@ Me.prototype.buildCity = function(i, j, v) {
 
 Player.prototype.buyCard = function() {
 	this.devCards.push(devCards.draw());
+	this.subtractResources(game.cardCost);
 };
 
 Me.prototype.buyCard = function () {

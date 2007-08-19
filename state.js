@@ -124,7 +124,7 @@ function changeState(stateName) {
 		g('button_buy_road').value = 'Buy';
 	}
 	st.edgeHandler = function(i, j, e) {
-		if (game.me.buildRoad(i, j, e, true)) {
+		if (game.me.buildRoad(i, j, e, false)) {
 			changeState('free');
 		}
 	};
@@ -145,7 +145,7 @@ function changeState(stateName) {
 		g('button_buy_sett').value = 'Buy';
 	}
 	st.vertexHandler = function(i, j, v) {
-		if (game.me.buildSett(i, j, v, true, false)) {
+		if (game.me.buildSett(i, j, v, false, false)) {
 			changeState('free');
 		}
 	};

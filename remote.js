@@ -14,6 +14,7 @@ function sendRemoteMessage(txt) {
 		setTimeout("sendRemoteMessage()", 300);
 		return;
 	}
+	lastTime = new Date().getTime();
 	sendingMsgs = true;
 	var s = '';
 	while (msgBuffer.length > 0) {
@@ -24,7 +25,6 @@ function sendRemoteMessage(txt) {
 	var postdata = 'room='+game.room+'&msg='+ encodeURIComponent( s );
 
 	__idplay__ajax_async('x.php', postdata, function(x){});
-	lastTime = new Date().getTime();
 }
 
 function clearRemoteLog() {
