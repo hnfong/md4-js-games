@@ -16,6 +16,10 @@ Player.prototype.construct = function(id,name) {
 	this.resources = create1DArray(game.numResourceTypes);
 	this.soldiers = 0;
 	this.longestRoadLength = 0;
+
+	this.hasLongestRoad = false;
+	this.hasLargestArmy = false;
+
 	this.tradeRates = new Array();
 	for (var i = 0; i < game.numResourceTypes; ++i)
 		this.tradeRates.push(4);
@@ -123,11 +127,6 @@ Me.prototype.incomingTrades = new Array();
 		return edgeBuildingMap[s].type;
 	};
 
-	Player.prototype.points = function() {
-		var roadPoints = 0;
-		return this.buildingCounts[game.SETT] + this.buildingCounts[game.CITY] * 2 + this.vpcardPoints;
-	};
-
 	Player.prototype.numResources = function() {
 		var total = 0;
 		for (var i = 0; i < game.numResourceTypes; ++i)
@@ -192,6 +191,18 @@ Me.prototype.incomingTrades = new Array();
 		this.vpcardPoints++;
 		ui.showPlayerWindow();
 	};
+
+	Player.prototype.points = function()
+	{
+		var points = 0;
+		points += this.vpcardPoints;
+		points += this.buildingCounts[game.SETT];
+		points += this.buildingCounts[game.CITY] * 2;
+		points += (this.hasLongestRoad?2:0);
+		points += (this.hasLargestArmy?2:0);
+
+		return points;
+	};
 }
 
 
@@ -232,6 +243,9 @@ Player.prototype.buildRoad = function(i, j, e, isFree) {
 			break;
 	}
 	g('roads').appendChild(road);
+
+	this.calcLongestRoad();
+	game.updateLongestRoad();
 };
 
 Me.prototype.buildRoad = function(i, j, e, isFree, ignoreReachability)
