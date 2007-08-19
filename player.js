@@ -196,10 +196,10 @@ Me.prototype.incomingTrades = new Array();
 	{
 		var points = 0;
 		points += this.vpcardPoints;
-		points += this.buildingCounts[game.SETT];
-		points += this.buildingCounts[game.CITY] * 2;
-		points += (this.hasLongestRoad?2:0);
-		points += (this.hasLargestArmy?2:0);
+		points += this.buildingCounts[game.SETT] * game.settBonus;
+		points += this.buildingCounts[game.CITY] * game.cityBonus;
+		points += (this.hasLongestRoad?game.longestRoadBonus:0);
+		points += (this.hasLargestArmy?game.largestArmyBonus:0);
 
 		return points;
 	};
