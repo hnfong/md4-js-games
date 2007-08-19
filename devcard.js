@@ -21,6 +21,7 @@ SoldierCard.prototype.use = function(user) {
 	}
 	user.soldiers++;
 	game.usedCard = 1;
+	game.updateLargestArmy();
 };
 
 

@@ -245,6 +245,14 @@ function remoteMessageHandler(txt)
 		case 'init_roll':
 			break;
 
+		case 'largest_army':
+			ui.writeLog(p.name + ' has the largest army');
+			break;
+
+		case 'longest_road':
+			ui.writeLog(p.name + ' has the longest road');
+			break;
+
 		case 'win':
 			ui.writeLog(p.name + ' won with ' + a[2] + ' points.');
 			changeState('idle');

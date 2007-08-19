@@ -222,6 +222,41 @@ Game.prototype.updateLongestRoad = function()
 				for (var j = 0 ; j < this.players.length; j++)
 					this.players[j].hasLongestRoad = false;
 				p.hasLongestRoad = true;
+				sendRemoteMessage("longest_road " + p.id);
+			}
+		}
+	}
+};
+
+// update (if required) the player with largest army status
+Game.prototype.updateLargestArmy = function()
+{
+	for (var i = 0 ; i < this.players.length; i++)
+	{
+		var p = this.players[i];
+		if (p.soldiers >= 3)
+		{
+			// check whether the player has a road length strictly greater than other players
+			var iamlargest = true; 
+			for (var j = 0 ; j < this.players.length; j++)
+			{
+				var p2 = this.players[j];
+				if (p == p2) continue;
+				if (p2.soldiers >= p.soldiers)
+				{
+					iamlargest = false;
+					break;
+				}
+			}
+
+			if (iamlargest)
+			{ 
+				// p gets longest road. others don't.
+				for (var j = 0 ; j < this.players.length; j++)
+					this.players[j].hasLargestArmy = false;
+				p.hasLargestArmy = true;
+
+				sendRemoteMessage("largest_army " + p.id);
 			}
 		}
 	}
