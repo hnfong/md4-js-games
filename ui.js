@@ -148,9 +148,11 @@ ui.showPurchaseWindow = function (pid) {
 
 ui.refreshWindows = function (pid) {
 	ui.showPlayerWindow();
-	ui.showResourceWindow(pid);
-	ui.showPurchaseWindow(pid);
-	ui.showDevCardWindow(pid)
+	if (pid >= 0) {
+		ui.showResourceWindow(pid);
+		ui.showPurchaseWindow(pid);
+		ui.showDevCardWindow(pid);
+	}
 };
 
 ui.showStealWindow = function (pid) {

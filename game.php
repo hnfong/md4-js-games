@@ -135,6 +135,8 @@ function cat_initRollFinishRound() {
 window.onload = function() {
 	devCardsStatic.populate();
 	dialog_init();
+	game.started = false;
+	game.myId = -1;
 	game.myName = myName;
 	receiveRemoteMessages();
 	sendRemoteMessage("join " + game.myName);

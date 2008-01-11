@@ -64,8 +64,12 @@ function Game(room, settings)
 
 Game.prototype.start = function()
 {
+	this.started = true;
 	this.numPlayers = this.players.length;
-	this.me = this.players[this.myId];
+	if (this.myId >= 0)
+		this.me = this.players[this.myId];
+	else
+		this.me = new Me(this.myId, name);
 
 	board.drawBoard();
 	board.drawMarkers();
@@ -158,6 +162,7 @@ Game.prototype.transferTurn = function (next) {
 
 Game.prototype.join = function(name)
 {
+	if (this.started) return;
 	l = this.players.length;
 	if (name == this.myName) {
 		this.players.push(new Me(l, name));
