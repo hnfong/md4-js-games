@@ -162,6 +162,12 @@ function remoteMessageHandler(txt)
 			p.steal(game.players[parseInt(a[2])], parseInt(a[3]));
 			break;
 
+		case 'monopoly':
+			ui.writeLog(p.name + ' took ' + parseInt(a[4]) + ' ' + game.resourceNames[parseInt(a[3])] + ' from ' + game.players[parseInt(a[2])].name + '.');
+			if (pid == myId) return;
+			p.monopoly(game.players[parseInt(a[2])], parseInt(a[3]), parseInt(a[4]));
+			break;
+
 		case 'use_card':
 			ui.writeLog(p.name + ' played ' + devCardsStatic[parseInt(a[2])].name + '.');
 			if (pid == myId) return;

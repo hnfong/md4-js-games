@@ -10,7 +10,7 @@ DevCard.prototype.construct = function(id,name,description)
 
 
 /*************************** Soldier ***************************/
-function SoldierCard(id) { DevCard.prototype.construct.call(this, id, "Soldier", "SOLDIER CARD DESCRIPTION. FIXME."); }
+function SoldierCard(id) { DevCard.prototype.construct.call(this, id, "Soldier", "Move the robber and steal one resource."); }
 SoldierCard.prototype = new DevCard();
 
 SoldierCard.prototype.type = 'soldier';
@@ -50,6 +50,20 @@ PlentyCard.prototype.use = function(user) {
 };
 
 
+/******************************* Monopoly *******************************/
+function MonopolyCard(id) { DevCard.prototype.construct.call(this, id, 'Monopoly', "Take away all of 1 type of resource from other players."); }
+MonopolyCard.prototype = new DevCard();
+
+MonopolyCard.prototype.type = 'monopoly';
+
+MonopolyCard.prototype.use = function(user) {
+	if (user == game.me) {
+		monopolyDialog.show();
+	}
+	game.usedCard = 1;
+};
+
+
 /******************************* Road *******************************/
 function RoadCard(id) { DevCard.prototype.construct.call(this, id, 'Build Two Roads', "Build two roads."); }
 RoadCard.prototype = new DevCard();
@@ -81,6 +95,10 @@ devCardsStatic.populate = function() {
 
 	for (var i = 0 ; i < game.numPlentyCards; i++) {
 		this.push(new PlentyCard(cnt++));
+	};
+
+	for (var i = 0 ; i < game.numMonopolyCards; i++) {
+		this.push(new MonopolyCard(cnt++));
 	};
 
 	for (var i = 0 ; i < game.numRoadCards; i++) {

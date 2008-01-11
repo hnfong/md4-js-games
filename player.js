@@ -383,6 +383,12 @@ Me.prototype.steal = function(victim) {
 	return true;
 };
 
+Player.prototype.monopoly = function(victim, type, count) {
+	victim.resources[type] -= count;
+	this.resources[type] += count;
+	return count;
+};
+
 Player.prototype.trade = function(p, give, get) {
 	p.addResources(give);
 	p.subtractResources(get);

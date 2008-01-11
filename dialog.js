@@ -101,6 +101,85 @@ function plentyDialog_init() {
 	};
 }
 
+var monopolyDialog;
+
+function monopolyDialog_init() {
+	var content = '';
+	content += '<table cellspacing="6" cellpadding="0" border="0">';
+	content +=  '<tr>';
+	for (var i = 0 ; i < game.resourceNames.length; i++)
+	{
+		content += '<td><img onclick="monopolyDialog.choose('+i+');" src="img/'+game.resourceNames[i]+'_small.gif">&nbsp;<span id="monopoly_'+i+'_value">0</span>&nbsp;&nbsp;</td>';
+	}
+	content +=  '</tr>';
+	content += '</table>';
+	content += '<div align="center"><input type="button" class="smallbutton" onclick="monopolyDialog.clear()" value="Clear"> <input type="button" class="smallbutton" onclick="monopolyDialog.confirm()" value="Confirm"></div>';
+	monopolyDialog = new Dialog('Choose a resource type to monopoly', content);
+	monopolyDialog.create();
+	monopolyDialog.obj.style.top = "100px";
+	monopolyDialog.obj.style.left = "100px";
+
+	monopolyDialog.show = function() {
+		monopolyDialog.obj.style.visibility = 'visible';
+		this.clear();
+	};
+
+	monopolyDialog.hide = function() {
+		this.obj.style.visibility = 'hidden';
+	};
+
+	monopolyDialog.refresh = function(res) {
+		for (var i = 0 ; i < game.numResourceTypes; i++) {
+			g('monopoly_' + i + '_value').innerHTML = this.resources[i];
+		}
+	};
+
+	monopolyDialog.count = function() {
+		var z = 0;
+		for (var i = 0 ; i < game.numResourceTypes; i++) {
+			z += this.resources[i];
+		}
+		return z;
+	};
+
+	monopolyDialog.choose = function(res) {
+		for (var i = 0 ; i < game.numResourceTypes; i++) {
+			this.resources[i] = 0;
+		}
+		this.resources[res] ++;
+		this.refresh();
+	};
+
+	monopolyDialog.clear = function() {
+		monopolyDialog.resources = new Array();
+		for (var i = 0 ; i < game.numResourceTypes; i++) {
+			monopolyDialog.resources.push(0);
+		}
+		this.refresh();
+	};
+
+	monopolyDialog.confirm = function() {
+		if (this.count() != 1) {
+			alert("You must choose a resource type!");
+			return false;
+		}
+		var type = -1;
+		for (var i = 0 ; i < game.numResourceTypes; i++) {
+			if (this.resources[i] > 0) type = i;
+		}
+		for (var i = 0; i < game.numPlayers; ++i) {
+			var victim = game.players[i];
+			if (game.me.id == victim.id) continue;
+			var count = victim.resources[type];
+			if (count <= 0) continue;
+			sendRemoteMessage('monopoly ' + game.me.id + ' ' + victim.id + ' ' + type + ' ' + count);
+			game.me.monopoly(victim, type, count);
+		}
+		ui.refreshWindows(game.me.id);
+		this.hide();
+	};
+}
+
 var discardDialog;
 
 function discardDialog_init() {
@@ -316,6 +395,7 @@ function tradeProposeDialog_init() {
 function dialog_init() {
 	// tradeProposeDialog gets initialized in game.start()
 	plentyDialog_init();
+	monopolyDialog_init();
 	discardDialog_init();
 }
 

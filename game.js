@@ -28,6 +28,7 @@ var __game_defaults =
 	numVPCards: 5,
 	numRoadCards: 2,
 	numPlentyCards: 2,
+	numMonopolyCards: 2,
 
 	vpCardNames: new Array('Library','Market','Cathedral','Town Hall','University'), // FIXME: what are the names?? (some are prob. incorrect since I merely recalled from vague memory)
 
