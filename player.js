@@ -461,6 +461,12 @@ Me.prototype.useCard = function(cid)
 			return false;
 		}
 	}
+	if (devCardsStatic[cid].just_bought) {
+		if (devCardsStatic[cid].type != 'vp') {
+			alert("You cannot use the card you just bought in this turn.");
+			return false;
+		}
+	}
 	sendRemoteMessage('use_card ' + this.id + ' ' + cid);
 	Player.prototype.useCard.call(this, cid);
 };

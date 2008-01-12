@@ -60,7 +60,7 @@
 <div id="robber" style="position:absolute;visibility:hidden;"><img src="img/robber.gif"/></div>
 
 <div id="player_window" class="window" style="left: 600px; top: 20px;"></div>
-<div id="dice" class="dice" style="left: 700px; top: 300px;" onmousedown="state.diceHandler();"><img src="img/dice1.png"><img src="img/dice6.png"></div>
+<div id="dice" class="dice" style="left: 900px; top: 300px;" onmousedown="state.diceHandler();"><img src="img/dice1.png"><img src="img/dice6.png"></div>
 <div id="steal_window" class="window" style="left: 700px; top: 500px;visibility:hidden;">Steal from:</div>
 
 <div id="purchase_window" class="window" style="left: 770px; top: 20px;"></div>

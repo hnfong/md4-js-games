@@ -1,11 +1,12 @@
 // abstract,base class
-function DevCard(id, name, description) { this.construct(id, name, description); }
+function DevCard(id, name, description, usable) { this.construct(id, name, description, usable); }
 
 DevCard.prototype.construct = function(id,name,description)
 {
 	this.id = id;
 	this.name = name;
 	this.description = description;
+	this.just_bought = true;
 };
 
 

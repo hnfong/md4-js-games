@@ -150,6 +150,9 @@ Game.prototype.rollForResources = function (a) {
 Game.prototype.transferTurn = function (next) {
 	this.currentTurn = next;
 	this.usedCard = 0;
+	for (var i = 0; i < game.players[this.currentTurn].devCards.length; ++i) {
+		game.players[this.currentTurn].devCards[i].just_bought = false;
+	}
 	if (this.currentTurn != game.me.id)
 		changeState('wait');
 	else {
