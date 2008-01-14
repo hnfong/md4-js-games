@@ -73,7 +73,7 @@
 <input type="button" id="id_button_endturn" value="End Turn" class="button" style="left: 660px; top: 200px;" onclick="state.buttonHandler('button_end_turn');"/>
 <div id="log_window" class="window" style="left: 500px; top: 280px; width: 325px; height: 160px; overflow: auto;">Welcome to Lonely Island~</div>
 <div id="devcard_window" class="window" style="left: 500px; top: 460px;">Development Cards:</div>
-<div id="steal_window" class="window" style="left: 670px; top: 460px;">Steal from:</div>
+<div id="steal_window" class="window" style="left: 670px; top: 460px; visibility: hidden;">Steal from:</div>
 
 <div id="status" class="statuswindow" style="left: 600px; top: 170px;">Status: idle</div>
 <div style="top: 500px; position: absolute">
