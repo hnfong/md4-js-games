@@ -251,11 +251,11 @@ Player.prototype.buildRoad = function(i, j, e, isFree) {
 Me.prototype.buildRoad = function(i, j, e, isFree, ignoreReachability)
 {
 	if (!this.buildRoadCheck(i, j, e, ignoreReachability)) return false;
-	Player.prototype.buildRoad.call(this, i, j, e, isFree);
 	if (isFree)
 		sendRemoteMessage('build_road ' + this.id + ' ' + i + ' ' + j + ' ' + e);
 	else
 		sendRemoteMessage('buy_road ' + this.id + ' ' + i + ' ' + j + ' ' + e);
+	Player.prototype.buildRoad.call(this, i, j, e, isFree);
 	return true;
 };
 

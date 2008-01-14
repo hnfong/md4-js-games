@@ -260,6 +260,9 @@ function remoteMessageHandler(txt)
 			break;
 
 		case 'longest_road':
+			for (var j = 0 ; j < game.players.length; j++)
+				game.players[j].hasLongestRoad = false;
+			p.hasLongestRoad = true;
 			ui.writeLog(p.name + ' has the longest road');
 			break;
 

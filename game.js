@@ -212,26 +212,21 @@ Game.prototype.updateLongestRoad = function()
 		if (p.longestRoadLength >= 5)
 		{
 			// check whether the player has a road length strictly greater than other players
-			var iamlongest = true; 
+			var pislongest = true; 
 			for (var j = 0 ; j < this.players.length; j++)
 			{
 				var p2 = this.players[j];
 				if (p == p2) continue;
 				if (p2.longestRoadLength >= p.longestRoadLength)
 				{
-					iamlongest = false;
+					pislongest = false;
 					break;
 				}
 			}
 
-			if (iamlongest)
-			{ 
-				// p gets longest road. others don't.
-				for (var j = 0 ; j < this.players.length; j++)
-					this.players[j].hasLongestRoad = false;
-				p.hasLongestRoad = true;
+			/* declare to have longest road */
+			if (pislongest && ! p.hasLongestRoad && p.id == game.myId)
 				sendRemoteMessage("longest_road " + p.id);
-			}
 		}
 	}
 };
