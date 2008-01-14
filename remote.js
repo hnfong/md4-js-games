@@ -256,6 +256,9 @@ function remoteMessageHandler(txt)
 			break;
 
 		case 'largest_army':
+			for (var j = 0 ; j < game.players.length; j++)
+				game.players[j].hasLargestArmy = false;
+			p.hasLargestArmy = true;
 			ui.writeLog(p.name + ' has the largest army');
 			break;
 

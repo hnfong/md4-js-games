@@ -240,27 +240,21 @@ Game.prototype.updateLargestArmy = function()
 		if (p.soldiers >= 3)
 		{
 			// check whether the player has a road length strictly greater than other players
-			var iamlargest = true; 
+			var pislargest = true; 
 			for (var j = 0 ; j < this.players.length; j++)
 			{
 				var p2 = this.players[j];
 				if (p == p2) continue;
 				if (p2.soldiers >= p.soldiers)
 				{
-					iamlargest = false;
+					pislargest = false;
 					break;
 				}
 			}
 
-			if (iamlargest)
-			{ 
-				// p gets longest road. others don't.
-				for (var j = 0 ; j < this.players.length; j++)
-					this.players[j].hasLargestArmy = false;
-				p.hasLargestArmy = true;
-
+			/* declare to have largest army */
+			if (pislargest && ! p.hasLargestArmy && p.id == game.myId)
 				sendRemoteMessage("largest_army " + p.id);
-			}
 		}
 	}
 };
