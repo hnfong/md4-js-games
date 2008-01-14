@@ -41,12 +41,11 @@ var __game_defaults =
 	cityBonus : 2,
 	longestRoadBonus : 2,
 	largestArmyBonus : 2,
+
+	// Note: to change the player colors, you need to edit images as well
+	playerColors : new Array('#4040FF', '#FF4000', '#008000', '#FFA500'),
+	playerColors2: new Array('#202080', '#883000', '#004000', '#806000'), /* darker colors of playerColors2, currently used for border */
 };
-
-
-// Note: need to edit images as well
-var playerColors = new Array('blue', 'red', 'green', 'orange');
-
 
 // settings is a dictionary of settings that overrides the defaults. if none, defaults are used.
 function Game(room, settings)

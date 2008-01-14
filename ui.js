@@ -109,7 +109,7 @@ ui.writeLog = function (txt) {
 ui.showPlayerWindow = function() {
 	var txt = '';
 	for (var i = 0; i < game.numPlayers; ++i) {
-		txt += '<div style="background-color:' + playerColors[i] + ';">';
+		txt += '<div class="playerwindow" style="background-color:' + game.playerColors[i] + '; border-color: '+game.playerColors2[i]+'">';
 		if (game.currentTurn == i)
 			txt += '<b><i><u>' + game.players[i].name + '</u></i></b><br/>';
 		else
@@ -119,7 +119,6 @@ ui.showPlayerWindow = function() {
 		txt += 'Longest Road Length: ' + game.players[i].calcLongestRoad() + '<br/>';
 		txt += 'Resource cards: ' + game.players[i].numResources() + '<br/>';
 		txt += 'Development cards: ' + game.players[i].devCards.length + '</div>';
-		txt += '<hr/>';
 	}
 	g('player_window').innerHTML = txt;
 };
@@ -130,26 +129,15 @@ ui.showResourceWindow = function(pid) {
 	for (var i = 0; i < game.numResourceTypes; ++i)
 		txt += '<img src="img/'+game.resourceNames[i]+'_small.gif"> ' + game.resourceNames[i]  + ": " + p.resources[i] + "<br/>";
 	g('res_window').innerHTML = txt;
+	g('res_window').style.visibility = 'visible';
 };
 
 ui.showPurchaseWindow = function (pid) {
-	var p = game.players[pid];
-	var txt = '';
-
-	function dumpCost(a) {
-		var s = '';
-		for (var i = 0; i < game.numResourceTypes; ++i)
-			if (a[i] > 0)
-				s += '<img src="img/'+game.resourceNames[i]+'_small.gif">' + ' x' + a[i] + '&nbsp;';
-		return s;
-	}
-
-	txt += 'Development Card <input type="button" id="button_buy_devcard" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_devcard\');return false;"/> (' + devCards.length + ' left)<br/>' + dumpCost(game.cardCost) + '<br/><hr/>';
-	txt += 'City <input type="button" id="button_buy_city" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_city\');return false;"/> (' + (game.maxCities-game.players[pid].buildingCounts[game.CITY]) + ' left)<br/>' + dumpCost(game.cityCost) + '<br/><hr/>';
-	txt += 'Settlement <input type="button" id="button_buy_sett" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_sett\');return false;"/> (' + (game.maxSetts-game.players[pid].buildingCounts[game.SETT]) + ' left)<br/>' + dumpCost(game.settCost) + '<br/><hr/>';
-	txt += 'Road <input type="button" id="button_buy_road" value="Buy" style="border:1px solid black;" onclick="state.buttonHandler(\'button_buy_road\');return false;"/> (' + (game.maxRoads-game.players[pid].buildingCounts[game.ROAD]) + ' left)<br/>' + dumpCost(game.roadCost) + '<br/><hr/>';
-
-	g('purchase_window').innerHTML = txt;
+	g('id_remain_devcard').innerHTML = devCards.length;
+	g('id_remain_city').innerHTML = (game.maxCities-game.players[pid].buildingCounts[game.CITY]);
+	g('id_remain_sett').innerHTML = (game.maxSetts-game.players[pid].buildingCounts[game.SETT]);
+	g('id_remain_road').innerHTML = (game.maxRoads-game.players[pid].buildingCounts[game.ROAD]);
+	g('purchase_window').style.visibility = 'visible';
 };
 
 

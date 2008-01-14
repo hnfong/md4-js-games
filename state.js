@@ -28,7 +28,8 @@ function changeState(stateName) {
 
 { // free: my turn, do whatever i want
 	var st = new State('free');
-	st.onEnter = function() { ui.setImageMapMode(NULLMODE); };
+	st.onEnter = function() { ui.setImageMapMode(NULLMODE); g('id_button_endturn').disabled = false; g('id_button_trade').disabled = false; };
+	st.onLeave = function() { g('id_button_endturn').disabled = true; g('id_button_trade').disabled = true; };
 	st.buttonHandler = function(b) {
 		if (b == 'button_buy_road') {
 			if (game.me.buildingCounts[game.ROAD] >= game.maxRoads) {

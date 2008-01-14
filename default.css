@@ -1,6 +1,14 @@
 .window {
-	border:1px solid #404040;
+	border:1px solid #808080;
 	position: absolute; 
+	padding: 3px;
+	background: #E8E8E8;
+}
+
+.playerwindow {
+	border:1px solid #606060;
+	padding: 3px;
+	margin: 0px 0px 3px 0px;
 }
 
 .dice {
@@ -14,9 +22,7 @@ body {
 }
 
 #res_window {
-	border:1px solid #404040;
-	position: absolute; 
-	padding: 5px;
+	padding: 5px 8px;
 }
 
 img {
@@ -56,4 +62,22 @@ img {
 	font-size: 12px;
 	font-family: Tahoma, Arial, Sans;
 	border: 1px solid #606060;
+}
+
+.buybutton {
+	border:1px solid #282828;
+	background-color: #F0F4F0;
+	color: #000;
+}
+
+.button {
+	position: absolute;
+	border:1px solid #282828;
+	background-color: #F0F4F0;
+	padding: 2px 4px;
+}
+
+.statuswindow {
+	position: absolute; 
+	padding: 3px;
 }

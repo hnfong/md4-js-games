@@ -55,15 +55,18 @@ function receiveRemoteMessages() {
 function processMessages() {
 	if (processing || recvBuffer.length == 0) return;
 	processing = true;
+	var need_refresh = false;
 	while (recvBuffer.length > 0) {
-		remoteMessageHandler(recvBuffer[0]);
+		var r = remoteMessageHandler(recvBuffer[0]);
+		need_refresh = need_refresh || r;
 		recvBuffer.shift();
 		startMsgId++;
 	}
+	if (need_refresh) ui.refreshWindows(game.myId);
 	processing = false;
-	ui.refreshWindows(game.myId);
 }
 
+/* returns whether need to refreshWindows */
 function remoteMessageHandler(txt)
 {
 	var a = txt.split(' ');
@@ -274,24 +277,24 @@ function remoteMessageHandler(txt)
 		// pre-game.start stuff. return instead of break
 		case 'join':
 			game.join(a[1]);
-			if (game.myId == 0) {
-				g('startgamebutton').disabled = false;
-			}
+			if (game.myId == 0) g('startgamebutton').disabled = false;
 			ui.writeLog('Player <i>' + a[1] + '</i> arrived.');
-			return;
+			return false;
 
 		case 'map_data':
 			if (myId == pid) return;
 			a.shift();
 			a.shift();
 			board.loadMap(a);
-			return;
+			return false;
 
 		case 'card_data':
 			if (myId == pid) return;
 			a.shift();
 			devCards.load(a);
-			return;
+			return false;
 	}
+
+	return true;
 
 }
