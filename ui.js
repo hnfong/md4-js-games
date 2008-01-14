@@ -96,7 +96,10 @@ ui.hideStealWindow = function() {
 };
 
 ui.writeLog = function (txt) {
-	g('log_window').innerHTML = txt + '<br/>' + g('log_window').innerHTML;
+	var logger = g('log_window');
+	var div = document.createElement("DIV");
+	div.innerHTML = txt;
+	logger.insertBefore(div, logger.firstChild);
 };
 
 ui.showPlayerWindow = function() {
