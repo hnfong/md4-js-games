@@ -61,6 +61,7 @@ function processMessages() {
 		startMsgId++;
 	}
 	processing = false;
+	ui.refreshWindows(game.myId);
 }
 
 function remoteMessageHandler(txt)
@@ -293,5 +294,4 @@ function remoteMessageHandler(txt)
 			return;
 	}
 
-	ui.refreshWindows(myId);
 }

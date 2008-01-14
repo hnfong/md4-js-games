@@ -92,7 +92,7 @@ function changeState(stateName) {
 }
 { // roll: roll for resources
 	var st = new State('roll');
-	st.onEnter = function() { ui.setImageMapMode(NULLMODE); };
+	st.onEnter = function() { ui.setImageMapMode(NULLMODE); ui.rollingDice(); };
 	st.diceHandler = function() {
 		if (game.me.rollForResources())
 			changeState('free');

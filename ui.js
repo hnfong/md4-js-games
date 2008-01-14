@@ -90,6 +90,10 @@ ui.drawDice = function(a) {
 	g('dice').innerHTML = txt;
 };
 
+ui.rollingDice = function() {
+	g('dice').innerHTML = '<img src="img/dice_ani1.gif"><img src="img/dice_ani2.gif">';
+};
+
 
 ui.hideStealWindow = function() {
 	g('steal_window').style.visibility = 'hidden';	
