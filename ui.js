@@ -23,7 +23,7 @@ ui.initCellMap = function() {
 		                            (x+52) + ',' + (y+63) + ',' +
 		                            (x+18) + ',' + (y+63) + ',' +
 		                            (x) + ',' + (y+31));
-		area.onmousedown = function() { state.cellHandler(i,j); return false; };
+		area.setAttribute('onmousedown', 'state.cellHandler('+i+','+j+');return false;');
 		document.getElementById('cellmap').appendChild(area);
 	}
 };
@@ -40,7 +40,7 @@ ui.initVertexMap = function() {
 		area.setAttribute('shape', 'rect');
 		area.setAttribute('coords', (x-12) + ',' + (y-12) + ',' +
 		                            (x+12) + ',' + (y+12));
-		area.onmousedown = function() { state.vertexHandler(i,j,v);return false; };
+		area.setAttribute('onmousedown', 'state.vertexHandler('+i+','+j+','+v+');return false;');
 		document.getElementById('vertexmap').appendChild(area);
 	}
 };
@@ -77,7 +77,7 @@ ui.initEdgeMap = function() {
 				                            (x1-9) + ',' + (y1+2));
 				break;
 		}
-		area.onmousedown = function() { state.edgeHandler(i,j,e);return false; };
+		area.setAttribute('onmousedown', 'state.edgeHandler('+i+','+j+','+e+');return false;');
 		document.getElementById('edgemap').appendChild(area);
 	}
 };
