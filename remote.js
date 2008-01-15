@@ -276,6 +276,7 @@ function remoteMessageHandler(txt)
 
 		case 'start_game':
 			ui.writeLog('Game started!');
+			g('startgamebutton').disabled = true;
 			if (myId == pid) return;
 			game.start();
 			break;
