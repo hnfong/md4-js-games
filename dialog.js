@@ -9,7 +9,7 @@ Dialog.prototype.create = function()
 	var x = g('dialogs');
 
 	var b = document.createElement("DIV");
-	b.setAttribute('class', 'dialog_base');
+	b.className = 'dialog_base';
 
 	x.appendChild(b);
 
