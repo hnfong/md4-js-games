@@ -84,6 +84,11 @@ function remoteMessageHandler(txt)
 			if (pid == myId) return;
 			a.shift();
 			a.shift();
+			var sum = 0;
+			for (var i = 0;  i < game.numDice; i++) {
+				sum += parseInt(a[1]);
+			}
+			ui.writeLog(p.name + ' rolled &lt;' + sum + "&gt;." );
 			game.rollForResources(a);
 			break;
 		case 'transfer':

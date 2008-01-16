@@ -316,8 +316,12 @@ Me.prototype.buildSett = function(i, j, v, isFree, ignoreReachability)
 Me.prototype.rollForResources = function() {
 	var a = roll();
 	var txt = '';
-	for (var i = 0; i < game.numDice; ++i)
+	var sum = 0;
+	for (var i = 0; i < game.numDice; ++i) {
 		txt += ' ' + a[i];
+		sum += parseInt(a[i]);
+	}
+	ui.writeLog(this.name + ' rolled &lt;' + sum + "&gt;." );
 	sendRemoteMessage('roll ' + this.id + txt);
 	return game.rollForResources(a);
 };
