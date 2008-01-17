@@ -282,10 +282,8 @@ function tradeProposeDialog_init() {
 	tradeProposeDialog.obj.style.top = "100px";
 	tradeProposeDialog.obj.style.left = "100px";
 
-	tradeProposeDialog.show = function(numCards) {
+	tradeProposeDialog.show = function() {
 		this.obj.style.visibility = 'visible';
-		this.numCards = numCards;
-		g('discard_num_cards').innerHTML = numCards;
 		this.clear();
 	};
 
@@ -392,8 +390,110 @@ function tradeProposeDialog_init() {
 	};
 }
 
+var counterProposeDialog;
+
+function counterProposeDialog_init() {
+	var content = '';
+	content += '<b>I give:</b><br/>';
+	content += '<table cellspaing="6" cellpadding="0" border="0">';
+	content += '<tr>';
+	for (var i = 0; i < game.resourceNames.length; ++i) {
+		content += '<td><img onclick="counterProposeDialog.incGive(' + i + ');" src="img/' + game.resourceNames[i] + '_small.gif">&nbsp;<span id="counter_propose_give_' + i + '_value">0</span>&nbsp;&nbsp;</td>';
+	}
+	content += '</tr>';
+	content += '</table><br/>';
+	content += '<b>I get:</b><br/>';
+	content += '<table cellspaing="6" cellpadding="0" border="0">';
+	content += '<tr>';
+	for (var i = 0; i < game.resourceNames.length; ++i) {
+		content += '<td><img onclick="counterProposeDialog.incGet(' + i + ');" src="img/' + game.resourceNames[i] + '_small.gif">&nbsp;<span id="counter_propose_get_' + i + '_value">0</span>&nbsp;&nbsp;</td>';
+	}
+	content += '</tr>';
+	content += '</table><br/>';
+	content += '<div align="center"><input type="button" class="smallbutton" onclick="counterProposeDialog.clear()" value="Clear"> <input type="button" class="smallbutton" onclick="counterProposeDialog.tradePlayer();" value="Trade"> <input type="button" class="smallbutton" onclick="counterProposeDialog.cancel();" value="Cancel"></div>';
+
+	counterProposeDialog = new Dialog('Counter Proposal', content);
+	counterProposeDialog.create();
+	counterProposeDialog.obj.style.top = "100px";
+	counterProposeDialog.obj.style.left = "100px";
+
+	counterProposeDialog.show = function(parent, from, id, to) {
+		this.obj.style.visibility = 'visible';
+		this.parent = parent;
+		this.from = from;
+		this.id = id;
+		this.to = to;
+		this.clear();
+	};
+
+	counterProposeDialog.hide = function() {
+		this.obj.style.visibility = 'hidden';
+	};
+
+	counterProposeDialog.refresh = function(res) {
+		for (var i = 0 ; i < game.numResourceTypes; ++i) {
+			g('counter_propose_give_' + i + '_value').innerHTML = this.give[i];
+			g('counter_propose_get_' + i + '_value').innerHTML = this.get[i];
+		}
+	};
+
+	counterProposeDialog.incGive = function(res) {
+		if (this.give[res] < game.me.resources[res])
+			this.give[res]++;
+		this.refresh();
+	};
+
+	counterProposeDialog.incGet = function(res) {
+		this.get[res]++;
+		this.refresh();
+	};
+
+	counterProposeDialog.clear = function() {
+		this.give = new Array();
+		this.get = new Array();
+		for (var i = 0; i < game.numResourceTypes; ++i) {
+			this.give.push(0);
+			this.get.push(0);
+		}
+		this.refresh();
+	}
+
+	counterProposeDialog.tradePlayer = function() {
+		{
+			var empty = true;
+			for (var i = 0; i < game.numResourceTypes; ++i)
+				if (this.give[i] > 0)
+					empty = false;
+			if (empty) {
+				alert('Both parties must give something!');
+				return false;
+			}
+		}
+		{
+			var empty = true;
+			for (var i = 0; i < game.numResourceTypes; ++i)
+				if (this.get[i] > 0)
+					empty = false;
+			if (empty) {
+				alert('Both parties must give something!');
+				return false;
+			}
+		}
+		var recipients = new Array();
+		sendRemoteMessage('counter_propose ' + this.from + ' ' + this.id + ' ' + this.to + ' ' + dumpArray(this.give) + ' ' + dumpArray(this.get));
+		ui.refreshWindows(game.me.id);
+		this.parent.setContract(this.give, this.get);
+		this.hide();
+	};
+
+	counterProposeDialog.cancel = function() {
+		this.hide();
+		this.parent.show();
+	};
+}
+
 function dialog_init() {
-	// tradeProposeDialog gets initialized in game.start()
+	// tradeProposeDialog & counterProposeDialog gets initialized in game.start()
 	plentyDialog_init();
 	monopolyDialog_init();
 	discardDialog_init();

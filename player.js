@@ -542,3 +542,67 @@ Me.prototype.cancelTrade = function(tid) {
 		if (this.outgoingTrades[i].id == tid)
 			this.outgoingTrades[i].cancel();
 };
+
+Me.prototype.show_counter_detail = function(tid, pid) {
+	var give = null;
+	var get = null;
+	var tr = null;
+	for (var i = 0; i < this.outgoingTrades.length; ++i) {
+		var t = this.outgoingTrades[i];
+		if (t.id == tid) {
+			tr = t;
+			for (var j = 0; j < t.recipients.length; ++j)
+				if (t.recipients[j] == pid) {
+					give = t.counter_give[j];
+					get  = t.counter_get[j];
+				}
+		}
+	}
+	var counter = new IncomingCounter(tid, game.me.id, pid, tr);
+	counter.setContract(give, get);
+	tr.counter_dialog = counter;
+	counter.makeDialog();
+	tr.hide();
+};
+
+Me.prototype.acceptCounter = function(tid, pid) {
+	var give = null;
+	var get = null;
+	var tr = null;
+	for (var i = 0; i < this.outgoingTrades.length; ++i) {
+		var t = this.outgoingTrades[i];
+		if (t.id == tid) {
+			tr = t;
+			for (var j = 0; j < t.recipients.length; ++j)
+				if (t.recipients[j] == pid) {
+					give = t.counter_give[j];
+					get  = t.counter_get[j];
+				}
+		}
+	}
+	if (!hasEnoughResources(game.me.resources, give)) {
+		alert('You do not have enough resources!');
+		return false;
+	}
+	if (!hasEnoughResources(game.players[pid].resources, get)) {
+		alert('The player does not have enough resources!');
+		return false;
+	}
+	sendRemoteMessage('trade ' + game.me.id + ' ' + pid + ' ' + dumpArray(give) + ' ' + dumpArray(get));
+	Player.prototype.trade.call(this, game.players[pid], give, get);
+	ui.refreshWindows(game.me.id);
+	tr.finish();
+	tr.counter_dialog.hide();
+	return true;
+};
+
+Me.prototype.cancelCounter = function(tid, pid) {
+	for (var i = 0; i < this.outgoingTrades.length; ++i) {
+		var t = this.outgoingTrades[i];
+		if (t.id == tid) {
+			tr = t;
+		}
+	}
+	tr.counter_dialog.hide();
+	tr.show();
+};

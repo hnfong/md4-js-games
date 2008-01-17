@@ -234,6 +234,23 @@ function remoteMessageHandler(txt)
 					game.me.outgoingTrades[i].rejected(pid);
 			break;
 
+		case 'counter_propose':
+			a.shift();
+			a.shift();
+			var tid = parseInt(a.shift());
+			var rec = parseInt(a.shift());
+			if (rec != myId) return;
+			var myGet = new Array();
+			var myGive = new Array();
+			for (var i = 0; i < game.numResourceTypes; ++i)
+				myGet.push(parseInt(a.shift()));
+			for (var i = 0; i < game.numResourceTypes; ++i)
+				myGive.push(parseInt(a.shift()));
+			for (var i = 0; i < game.me.outgoingTrades.length; ++i)
+				if (game.me.outgoingTrades[i].id == tid)
+					game.me.outgoingTrades[i].counter(pid, myGive, myGet);
+			break;
+
 		case 'trade_cancel':
 			var tid = parseInt(a[2]);
 			for (var i = 0; i < game.me.incomingTrades.length; ++i)

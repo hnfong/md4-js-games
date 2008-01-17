@@ -83,6 +83,7 @@ Game.prototype.start = function()
 	ui.initEdgeMap();
 
 	tradeProposeDialog_init();
+	counterProposeDialog_init();
 
 	ui.refreshWindows(this.myId);
 
