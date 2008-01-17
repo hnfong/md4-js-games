@@ -86,7 +86,7 @@ function remoteMessageHandler(txt)
 			a.shift();
 			var sum = 0;
 			for (var i = 0;  i < game.numDice; i++) {
-				sum += parseInt(a[1]);
+				sum += parseInt(a[i]);
 			}
 			ui.writeLog(p.name + ' rolled &lt;' + sum + "&gt;." );
 			game.rollForResources(a);
