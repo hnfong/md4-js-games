@@ -166,7 +166,11 @@ Board.prototype.drawMarkers = function () {
 	for (var j = 0; j < this.HEIGHT; ++j) 
 	if (this.cellMarkers[i][j] > 0) {
 		var marker = document.createElement('div');
-		marker.style.backgroundColor = '#ffffff';
+		marker.style.backgroundColor = '#ffffff';			
+		if (this.cellMarkers[i][j] == 6 || this.cellMarkers[i][j] == 8) {
+			marker.style.color = '#ff0000';
+			marker.style.fontWeight = 'bold';
+		}
 		marker.style.position = 'absolute';
 		marker.style.left = (cellXY(i,j).x + 30 + game.XDELTA) + 'px';
 		marker.style.top = (cellXY(i,j).y + 20 + game.YDELTA) + 'px';
