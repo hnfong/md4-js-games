@@ -32,6 +32,6 @@ include_once("rooms.inc.php");
    </table>
   </form>
 
-  <p>Due to lack of interest from the developers (at least for now), only Firefox 2+ is supported. Get <a href="http://www.mozilla.org/firefox/">Firefox</a> now! (Sorry .__.)</p>
+  <p>Tested (and supposedly functional) on <a href="http://www.mozilla.org/firefox/">Firefox 2+</a> (Recommended) and IE6.</p>
  </body>
 </html>
