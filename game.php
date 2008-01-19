@@ -60,10 +60,10 @@
 <div id="buildings"></div>
 <div id="robber" style="position:absolute;visibility:hidden;"><img src="img/robber.gif"/></div>
 
-<div id="player_window" style="position: absolute; left: 850px; top: 20px;"></div>
-<div id="dice" class="dice" style="left: 600px; top: 230px;" onmousedown="state.diceHandler();"><img src="img/dice1.png"><img src="img/dice6.png"></div>
+<div id="player_window" style="position: absolute; left: 850px; top: 20px; width: 170px"></div>
+<div id="dice" class="dice" style="width: 52px; left: 600px; top: 230px;" onmousedown="state.diceHandler();"><img src="img/dice1.png"><img src="img/dice6.png"></div>
 
-<div id="purchase_window" class="window" style="left: 500px; top: 20px; padding: 5px 3px; visibility: hidden; ">
+<div id="purchase_window" class="window" style="width: 340px; left: 500px; top: 20px; padding: 5px 3px; visibility: hidden; ">
 	Development Card (<span id="id_remain_devcard"></span> left) <span id="id_cost_devcard"></span><input type="button" id="button_buy_devcard" value="Buy" class="buybutton" onclick="state.buttonHandler('button_buy_devcard');return false;"/><hr/>
 	City (<span id="id_remain_city"></span> left) <span id="id_cost_city"></span><input type="button" id="button_buy_city" value="Buy" class="buybutton" onclick="state.buttonHandler('button_buy_city');return false;"/><hr/>
 	Settlement (<span id="id_remain_sett"></span> left) <span id="id_cost_sett"></span><input type="button" id="button_buy_sett" value="Buy" class="buybutton" onclick="state.buttonHandler('button_buy_sett');return false;"/><hr/>
@@ -73,10 +73,10 @@
 <input type="button" id="id_button_trade" value="Trade" class="button" style="left: 600px; top: 200px;" onclick="state.buttonHandler('button_trade');"/>
 <input type="button" id="id_button_endturn" value="End Turn" class="button" style="left: 660px; top: 200px;" onclick="state.buttonHandler('button_end_turn');"/>
 <div id="log_window" class="window" style="left: 500px; top: 280px; width: 325px; height: 160px; overflow: auto;">Welcome to Lonely Island~</div>
-<div id="devcard_window" class="window" style="left: 500px; top: 460px;">Development Cards:</div>
+<div id="devcard_window" class="window" style="left: 500px; top: 460px; width: 140px;">Development Cards:</div>
 <div id="steal_window" class="window" style="left: 670px; top: 460px; visibility: hidden;">Steal from:</div>
 
-<div id="status" class="statuswindow" style="left: 600px; top: 170px;">Status: idle</div>
+<div id="status" class="statuswindow" style="width: 200px; left: 600px; top: 170px;">Status: idle</div>
 <div style="top: 500px; position: absolute">
 <input id="startgamebutton" type="button" value="Start" disabled="disabled" onclick="game.setup()">
 </div>

@@ -75,6 +75,8 @@ img {
 	border:1px solid #282828;
 	background-color: #F0F4F0;
 	padding: 2px 4px;
+	// padding: 0px 0px !important; /* XXX some ugly IE workaround XXX */
+	font-family: Verdana, Sans;
 }
 
 .statuswindow {
