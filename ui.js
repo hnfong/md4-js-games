@@ -23,7 +23,10 @@ ui.initCellMap = function() {
 		                            (x+52) + ',' + (y+63) + ',' +
 		                            (x+18) + ',' + (y+63) + ',' +
 		                            (x) + ',' + (y+31));
-		area.setAttribute('onmousedown', 'state.cellHandler('+i+','+j+');return false;');
+
+		area.__i = i;
+		area.__j = j;
+		area.onmousedown = function() { state.cellHandler( this.__i, this.__j ); return false; };
 		document.getElementById('cellmap').appendChild(area);
 	}
 };
@@ -40,7 +43,11 @@ ui.initVertexMap = function() {
 		area.setAttribute('shape', 'rect');
 		area.setAttribute('coords', (x-12) + ',' + (y-12) + ',' +
 		                            (x+12) + ',' + (y+12));
-		area.setAttribute('onmousedown', 'state.vertexHandler('+i+','+j+','+v+');return false;');
+
+		area.__i = i;
+		area.__j = j;
+		area.__v = v;
+		area.onmousedown = function() { state.vertexHandler( this.__i, this.__j, this.__v ); return false; };
 		document.getElementById('vertexmap').appendChild(area);
 	}
 };
@@ -77,7 +84,10 @@ ui.initEdgeMap = function() {
 				                            (x1-9) + ',' + (y1+2));
 				break;
 		}
-		area.setAttribute('onmousedown', 'state.edgeHandler('+i+','+j+','+e+');return false;');
+		area.__i = i;
+		area.__j = j;
+		area.__e = e;
+		area.onmousedown = function () { state.edgeHandler( this.__i , this.__j , this.__e ); };
 		document.getElementById('edgemap').appendChild(area);
 	}
 };
