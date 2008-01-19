@@ -50,11 +50,11 @@ var __game_defaults =
 // settings is a dictionary of settings that overrides the defaults. if none, defaults are used.
 function Game(room, settings)
 {
-	if (settings == undefined || settings == null) settings = {};
+	if (typeof settings == 'undefined' || settings == null) settings = {};
 
 	for (var k in __game_defaults)
 	{
-		this[k] = (settings[k] != undefined ? settings[k] : __game_defaults[k]);
+		this[k] = ( (typeof settings[k] != 'undefined') ? settings[k] : __game_defaults[k]);
 	}
 
 	this.room = room;

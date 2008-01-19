@@ -3,15 +3,19 @@ function DevCard(id, name, description, usable) { this.construct(id, name, descr
 
 DevCard.prototype.construct = function(id,name,description)
 {
-	this.id = id;
-	this.name = name;
-	this.description = description;
-	this.just_bought = true;
+	DevCard.construct(this,id,name,description);
 };
 
+/* this is a "static" function to workaround js's problem of not calling super() */
+DevCard.construct = function(obj,id,name,description) {
+	obj.id = id;
+	obj.name = name;
+	obj.description = description;
+	obj.just_bought = true;
+};
 
 /*************************** Soldier ***************************/
-function SoldierCard(id) { DevCard.prototype.construct.call(this, id, "Soldier", "Move the robber and steal one resource."); }
+function SoldierCard(id) { DevCard.construct(this, id, "Soldier", "Move the robber and steal one resource."); }
 SoldierCard.prototype = new DevCard();
 
 SoldierCard.prototype.type = 'soldier';
@@ -27,7 +31,7 @@ SoldierCard.prototype.use = function(user) {
 
 
 /*************************** Victory Point ***************************/
-function VPCard(id, name) { DevCard.prototype.construct.call(this, id, name, "Provides one victory point."); }
+function VPCard(id, name) { DevCard.construct(this, id, name, "Provides one victory point."); }
 VPCard.prototype = new DevCard();
 
 VPCard.prototype.type = 'vp';
@@ -38,7 +42,7 @@ VPCard.prototype.use = function(user) {
 
 
 /******************************* Plenty *******************************/
-function PlentyCard(id) { DevCard.prototype.construct.call(this, id, 'Year of Plenty', "Two free resources."); }
+function PlentyCard(id) { DevCard.construct(this, id, 'Year of Plenty', "Two free resources."); }
 PlentyCard.prototype = new DevCard();
 
 PlentyCard.prototype.type = 'plenty';
@@ -52,7 +56,7 @@ PlentyCard.prototype.use = function(user) {
 
 
 /******************************* Monopoly *******************************/
-function MonopolyCard(id) { DevCard.prototype.construct.call(this, id, 'Monopoly', "Take away all of 1 type of resource from other players."); }
+function MonopolyCard(id) { DevCard.construct(this, id, 'Monopoly', "Take away all of 1 type of resource from other players."); }
 MonopolyCard.prototype = new DevCard();
 
 MonopolyCard.prototype.type = 'monopoly';
@@ -66,7 +70,7 @@ MonopolyCard.prototype.use = function(user) {
 
 
 /******************************* Road *******************************/
-function RoadCard(id) { DevCard.prototype.construct.call(this, id, 'Build Two Roads', "Build two roads."); }
+function RoadCard(id) { DevCard.construct(this, id, 'Build Two Roads', "Build two roads."); }
 RoadCard.prototype = new DevCard();
 
 RoadCard.prototype.type = 'road';

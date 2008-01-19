@@ -74,7 +74,7 @@ function remoteMessageHandler(txt)
 	var pid = a[1];
 	var myId = game.myId;
 
-	if (game.players != undefined) {
+	if (typeof game.players != 'undefined') {
 		var p = game.players[pid];
 	}
 

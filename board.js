@@ -21,15 +21,15 @@ function Board()
 	this.data[5] = new Array(2, 1, 1, 1, 3, 0, 0);
 	this.data[6] = new Array(3, 2, 3, 2, 0, 0, 0);
 
-	this.cellResources = undefined; // 2D array (same size as board)
-	this.cellMarkers = undefined; // 2D array (same size as board)
-	this.outcomeCellMap = undefined; // 2D array (outcome -> cell)
-	this.robberPos = undefined;
-	this.vertexBuildingMap = undefined; // coordinates->building
-	this.edgeBuildingMap = undefined; // coordinates->building
-	this.vertexReachableMap = undefined; // coordinates->array of player IDs
-	this.cellPorts = undefined // 2D array (same size as board)
-	this.vertexPortMap = undefined; // coordinates->port
+	this.cellResources = null; // 2D array (same size as board)
+	this.cellMarkers = null; // 2D array (same size as board)
+	this.outcomeCellMap = null; // 2D array (outcome -> cell)
+	this.robberPos = null;
+	this.vertexBuildingMap = null; // coordinates->building
+	this.edgeBuildingMap = null; // coordinates->building
+	this.vertexReachableMap = null; // coordinates->array of player IDs
+	this.cellPorts = null // 2D array (same size as board)
+	this.vertexPortMap = null; // coordinates->port
 }
 
 Board.prototype.randomizeCells = function () {

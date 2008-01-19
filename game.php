@@ -27,6 +27,7 @@
    var myName = '<?php echo $name; ?>';
    var myRoom = '<?php echo $room; ?>';
   </script>
+  <script type="text/javascript" src="protocrap.js"></script>
   <script type="text/javascript" src="util.js"></script>
   <script type="text/javascript" src="network.js"></script>
   <script type="text/javascript" src="game.js"></script>
@@ -135,6 +136,7 @@ function cat_initRollFinishRound() {
 	else
 		return -1;
 }
+
 
 window.onload = function() {
 	devCardsStatic.populate();

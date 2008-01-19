@@ -3,29 +3,31 @@
    http://truecode.blogspot.com/2006/08/object-oriented-super-class-method.html
 */
 
-function Player(id, name) { this.construct(id,name); }
-Player.prototype.construct = function(id,name) {
-	if (id == undefined) return; // this is for the Me.prototype as shown below. ugly, but i dunno any workarounds
-	this.id = id;
-	this.name = name;
+function Player(id, name) { Player.construct(this,id,name); }
+
+/* this is a "static" function to workaround js's problem of not calling super() */
+Player.construct = function(obj,id,name) {
+	if (id == null) return; // this is for the Me.prototype as shown below. ugly, but i dunno any workarounds
+	obj.id = id;
+	obj.name = name;
 	if (!name)
-		this.name = 'Player #' + this.id;
-	this.vpcardPoints = 0;
-	this.buildingCounts = create1DArray(3); // roads, settlements, cities
-	this.devCards = new Array();
-	this.resources = create1DArray(game.numResourceTypes);
-	this.soldiers = 0;
-	this.longestRoadLength = 0;
+		obj.name = 'Player #' + obj.id;
+	obj.vpcardPoints = 0;
+	obj.buildingCounts = create1DArray(3); // roads, settlements, cities
+	obj.devCards = new Array();
+	obj.resources = create1DArray(game.numResourceTypes);
+	obj.soldiers = 0;
+	obj.longestRoadLength = 0;
 
-	this.hasLongestRoad = false;
-	this.hasLargestArmy = false;
+	obj.hasLongestRoad = false;
+	obj.hasLargestArmy = false;
 
-	this.tradeRates = new Array();
+	obj.tradeRates = new Array();
 	for (var i = 0; i < game.numResourceTypes; ++i)
-		this.tradeRates.push(4);
+		obj.tradeRates.push(4);
 };
 
-function Me(id, name) { Player.prototype.construct.call(this, id, name); } // subclass of Player.
+function Me(id, name) { Player.construct(this, id, name); } // subclass of Player.
 Me.prototype = new Player();
 Me.prototype.outgoingTrades = new Array();
 Me.prototype.incomingTrades = new Array();
