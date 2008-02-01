@@ -1,8 +1,3 @@
-/*
-   Some inheritance techniques may have been borrowed from:
-   http://truecode.blogspot.com/2006/08/object-oriented-super-class-method.html
-*/
-
 function Player(id, name) { Player.construct(this,id,name); }
 
 /* this is a "static" function to workaround js's problem of not calling super() */
@@ -249,15 +244,12 @@ Player.prototype.buildRoad = function(i, j, e, isFree) {
 	this.calcLongestRoad();
 	game.updateLongestRoad();
 };
+Player.prototype._buildRoad = Player.prototype.buildRoad; /* FIXME: this is a temporary hack to get to the parent class from outside */
 
 Me.prototype.buildRoad = function(i, j, e, isFree, ignoreReachability)
 {
 	if (!this.buildRoadCheck(i, j, e, ignoreReachability)) return false;
-	if (isFree)
-		sendRemoteMessage('build_road ' + this.id + ' ' + i + ' ' + j + ' ' + e);
-	else
-		sendRemoteMessage('buy_road ' + this.id + ' ' + i + ' ' + j + ' ' + e);
-	Player.prototype.buildRoad.call(this, i, j, e, isFree);
+	dispatchMessage('road', [i,j,e,isFree?1:0]);
 	return true;
 };
 
@@ -302,30 +294,23 @@ Player.prototype.buildSett = function(i, j, v, isFree)
 	g('buildings').appendChild(sett);
 };
 
+Player.prototype._buildSett = Player.prototype.buildSett; /* FIXME: this is a temporary hack to get to the parent class from outside */
 
 Me.prototype.buildSett = function(i, j, v, isFree, ignoreReachability)
 {
 	if (!this.buildSettCheck(i, j, v, ignoreReachability)) return false;
-	if (isFree)
-		sendRemoteMessage('build_sett ' + this.id + ' ' + i + ' ' + j + ' ' + v);
-	else
-		sendRemoteMessage('buy_sett ' + this.id + ' ' + i + ' ' + j + ' ' + v);
-	
-	Player.prototype.buildSett.call(this, i, j, v, isFree);
+	dispatchMessage('sett', [ i, j, v, isFree?1:0 ]);
 	return true;
 };
 
 Me.prototype.rollForResources = function() {
-	var a = roll();
-	var txt = '';
-	var sum = 0;
-	for (var i = 0; i < game.numDice; ++i) {
-		txt += ' ' + a[i];
-		sum += parseInt(a[i]);
+	var a = util.roll();
+	dispatchMessage('roll', a);
+	var sum  = 0;
+	for (var i = 0 ; i < a.length; i++) {
+		sum += a[i];
 	}
-	ui.writeLog(this.name + ' rolled &lt;' + sum + "&gt;." );
-	sendRemoteMessage('roll ' + this.id + txt);
-	return game.rollForResources(a);
+	return sum;
 };
 
 Player.prototype.buildCity = function(i, j, v) {
@@ -344,10 +329,11 @@ Player.prototype.buildCity = function(i, j, v) {
 	img.src = 'img/city_' + this.id+ '.gif';
 };
 
+Player.prototype._buildCity = Player.prototype.buildCity; /* FIXME: this is a temporary hack to get to the parent class from outside */
+
 Me.prototype.buildCity = function(i, j, v) {
 	if (!this.buildCityCheck(i, j, v)) return false;
-	sendRemoteMessage('buy_city ' + this.id + ' ' + i + ' ' + j + ' ' + v);
-	Player.prototype.buildCity.call(this, i, j, v, this.id);
+	dispatchMessage('city', [i,j,v]);
 	return true;
 };
 
@@ -356,15 +342,15 @@ Player.prototype.buyCard = function() {
 	this.subtractResources(game.cardCost);
 };
 
+Player.prototype._buyCard = Player.prototype.buyCard;
+
 Me.prototype.buyCard = function () {
-	sendRemoteMessage('buy_devcard ' + this.id);
-	Player.prototype.buyCard.call(this);
+	dispatchMessage('buy_card');
 };
 
 Me.prototype.placeRobber = function(i, j) {
 	if (board.robberPos.i < 0 || board.cellResources[i][j] >= 0 && (i != board.robberPos.i || j != board.robberPos.j)) {
-		sendRemoteMessage('place_robber ' + this.id + ' ' + i + ' ' + j);
-		board.placeRobber(i, j);
+		dispatchMessage('place_robber', [i, j]);
 		return true;
 	}
 	alert('Cannot put the robber here!');
@@ -377,6 +363,8 @@ Player.prototype.steal = function(victim, type) {
 	return type;
 };
 
+Player.prototype._steal = Player.prototype.steal; /* FIXME: this is a temporary hack to get to the parent class from outside */
+
 Me.prototype.steal = function(victim) {
 	var a = new Array();
 	for (var i = 0; i < game.numResourceTypes; ++i)
@@ -384,15 +372,20 @@ Me.prototype.steal = function(victim) {
 			a.push(i);
 	var k = randInt(a.length);
 	var type = a[k];
-	sendRemoteMessage('steal ' + this.id + ' ' + victim.id + ' ' + type);
-	var t = Player.prototype.steal.call(this, victim, type);
+	dispatchMessage('steal', [ victim.id, type ]);
 	return true;
 };
 
-Player.prototype.monopoly = function(victim, type, count) {
-	victim.resources[type] -= count;
-	this.resources[type] += count;
-	return count;
+Player.prototype.monopoly = function(type) {
+	for (var i = 0 ; i < game.numPlayers; i++) {
+		var victim = game.players[i];
+		if (victim == this) continue;
+		var count = victim.resources[type];
+		if (count <= 0) continue;
+		victim.resources[type] -= count;
+		this.resources[type] += count;
+		ui.writeLog(this.name + ' took ' + count + ' ' + game.resourceNames[type] + ' from ' + victim.name);
+	}
 };
 
 Player.prototype.trade = function(p, give, get) {
@@ -401,6 +394,8 @@ Player.prototype.trade = function(p, give, get) {
 	this.addResources(get);
 	this.subtractResources(give);
 };
+
+Player.prototype._trade = Player.prototype.trade; /* FIXME: this is a temporary hack to get to the parent class from outside */
 
 Me.prototype.trade = function(tid, pid) {
 	var give = null;
@@ -422,9 +417,10 @@ Me.prototype.trade = function(tid, pid) {
 		alert('The player does not have enough resources!');
 		return false;
 	}
-	sendRemoteMessage('trade ' + game.me.id + ' ' + pid + ' ' + dumpArray(give) + ' ' + dumpArray(get));
-	Player.prototype.trade.call(this, game.players[pid], give, get);
-	ui.refreshWindows(game.me.id);
+	var a = [pid];
+	util.concat_array(a, give);
+	util.concat_array(a, get);
+	dispatchMessage('trade', a);
 	tr.finish();
 	return true;
 };
@@ -434,11 +430,9 @@ Me.prototype.transferTurn = function(next) {
 		next = (this.id + 1) % game.numPlayers;
 
 	if (this.points() >= game.goalPoints)
-		sendRemoteMessage('win ' + this.id + ' ' + this.points());
+		dispatchMessage('win', [this.points()]);
 	else
-		sendRemoteMessage('transfer ' + this.id + ' ' + next);
-
-	game.transferTurn(next);
+		dispatchMessage('transfer', [ next ]);
 };
 
 Player.prototype.useCard = function(cid) {
@@ -457,6 +451,8 @@ Player.prototype.useCard = function(cid) {
 	card.use(this);
 };
 
+Player.prototype._useCard = Player.prototype.useCard; /* FIXME: this is a temporary hack to get to the parent class from outside */
+
 Me.prototype.useCard = function(cid)
 {
 	if (game.usedCard == 1)
@@ -473,8 +469,7 @@ Me.prototype.useCard = function(cid)
 			return false;
 		}
 	}
-	sendRemoteMessage('use_card ' + this.id + ' ' + cid);
-	Player.prototype.useCard.call(this, cid);
+	dispatchMessage('use_card', [cid]);
 };
 
 Me.prototype.getInitialResources = function() {
@@ -490,8 +485,7 @@ Me.prototype.getInitialResources = function() {
 	var j3 = j + commonVertex[initialSett.v][1].j;
 	if (isValidCell(i3, j3) && board.cellResources[i3][j3] >= 0)
 		gain[board.cellResources[i3][j3]]++;
-	sendRemoteMessage('get_resources ' + this.id + ' ' + dumpArray(gain));
-	this.addResources(gain);
+	dispatchMessage('get_resources', gain);
 };
 
 Me.prototype.proposeTrade = function(give, get, recipients) {
@@ -590,9 +584,10 @@ Me.prototype.acceptCounter = function(tid, pid) {
 		alert('The player does not have enough resources!');
 		return false;
 	}
-	sendRemoteMessage('trade ' + game.me.id + ' ' + pid + ' ' + dumpArray(give) + ' ' + dumpArray(get));
-	Player.prototype.trade.call(this, game.players[pid], give, get);
-	ui.refreshWindows(game.me.id);
+	var a = [pid];
+	util.concat_array(a, give);
+	util.concat_array(a, get);
+	dispatchMessage('trade', a);
 	tr.finish();
 	tr.counter_dialog.hide();
 	return true;

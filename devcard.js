@@ -15,7 +15,7 @@ DevCard.construct = function(obj,id,name,description) {
 };
 
 /*************************** Soldier ***************************/
-function SoldierCard(id) { DevCard.construct(this, id, "Soldier", "Move the robber and steal one resource."); }
+function SoldierCard(id) { DevCard.construct(this, id, "Soldier", "Move the robber to another hex and steal one resource from an adjacent player."); }
 SoldierCard.prototype = new DevCard();
 
 SoldierCard.prototype.type = 'soldier';
@@ -31,7 +31,7 @@ SoldierCard.prototype.use = function(user) {
 
 
 /*************************** Victory Point ***************************/
-function VPCard(id, name) { DevCard.construct(this, id, name, "Provides one victory point."); }
+function VPCard(id, name) { DevCard.construct(this, id, name, "Provides one victory point. You may play this card at any time during your turn."); }
 VPCard.prototype = new DevCard();
 
 VPCard.prototype.type = 'vp';
@@ -42,7 +42,7 @@ VPCard.prototype.use = function(user) {
 
 
 /******************************* Plenty *******************************/
-function PlentyCard(id) { DevCard.construct(this, id, 'Year of Plenty', "Two free resources."); }
+function PlentyCard(id) { DevCard.construct(this, id, 'Year of Plenty', "Obtain two free resources of any type(s)."); }
 PlentyCard.prototype = new DevCard();
 
 PlentyCard.prototype.type = 'plenty';
@@ -56,7 +56,7 @@ PlentyCard.prototype.use = function(user) {
 
 
 /******************************* Monopoly *******************************/
-function MonopolyCard(id) { DevCard.construct(this, id, 'Monopoly', "Take away all of 1 type of resource from other players."); }
+function MonopolyCard(id) { DevCard.construct(this, id, 'Monopoly', "Monopolize any one type of resource by compelling other players to turn over all their resources of that type."); }
 MonopolyCard.prototype = new DevCard();
 
 MonopolyCard.prototype.type = 'monopoly';
@@ -70,7 +70,7 @@ MonopolyCard.prototype.use = function(user) {
 
 
 /******************************* Road *******************************/
-function RoadCard(id) { DevCard.construct(this, id, 'Build Two Roads', "Build two roads."); }
+function RoadCard(id) { DevCard.construct(this, id, 'Build Two Roads', "Build two roads for free."); }
 RoadCard.prototype = new DevCard();
 
 RoadCard.prototype.type = 'road';

@@ -6,32 +6,278 @@ var startMsgId = -1;
 var processing = false;
 var lastTime = new Date().getTime();
 
-function sendRemoteMessage(txt) {
-	if (txt != null) msgBuffer.push(txt);
-	if (msgBuffer.length == 0 || sendingMsgs) return;
-	var now = new Date().getTime();
-	if (now - lastTime < 300) {
-		setTimeout("sendRemoteMessage()", 300);
+var my_next_seq = 0;
+var send_queue = [];
+var send_lock = false; /* javascript basically runs on a single thread, so it's
+                          ok to just use a crappy variable to do locking,
+                          provided the locking logic is correct */
+
+var player_seq = new Object();
+var player_seq_data = new Object();
+
+function dispatchMessage(cmd, args)
+{
+	var a = [];
+
+	if (typeof my_next_seq == 'undefined') {
+		alert('Known bug of unknown cause encountered. Please refresh or report.');
 		return;
 	}
-	lastTime = new Date().getTime();
-	sendingMsgs = true;
-	var s = '';
-	while (msgBuffer.length > 0) {
-		s += msgBuffer.shift() + '\n';
+
+	a.push(my_next_seq++);
+	a.push(game.myId);
+	a.push(cmd);
+	if (typeof args != 'undefined' && args != null) 
+		for (var i = 0 ; i < args.length; i++) a.push(args[i]);
+	var txt = a.join(" ");
+
+	queueRemoteMessage(txt); /* dispatch to remote "players" */
+	var need_refresh = messageHandler(txt); /* also dispatch to "localhost" */
+	if (need_refresh) ui.refreshWindows(game.myId);
+}
+
+function queueRemoteMessage(txt, flush)
+{
+	if (typeof flush == 'undefined') flush = true;
+	send_queue.push(txt);
+	if (flush) sendRemoteMessages();
+}
+
+function sendRemoteMessages()
+{
+	if (send_lock) setTimeout("sendRemoteMessages()", 100);
+	if (send_queue.length == 0) return;
+	send_lock = true;
+	var s = send_queue.join("\n") + "\n";
+	while (true) {
+		var a = send_queue.shift()
+		if (typeof a == 'undefined') break;
 	}
-	sendingMsgs = false; // FIXME: shouldn't be here
-
-	var postdata = 'room='+game.room+'&msg='+ encodeURIComponent( s );
-
-	__idplay__ajax_async('x.php', postdata, function(x){});
+	var postdata = 'room='+game.room+'&msg='+ encodeURIComponent(s);
+	__idplay__ajax_async('x.php', postdata, function(x) { send_lock = false; });
 }
 
-function clearRemoteLog() {
-	var postdata = 'room='+game.room+'&cmd=clear';
-	__idplay__ajax_async('x.php', postdata, function(x){});
+/* return value states whether refreshWindows is required */
+var cmdHandlers = new Object(); /* "hash" */
+
+cmdHandlers['transfer'] = function(p, args) {
+	game.me.clearTrades();
+	game.transferTurn(parseInt(args.shift()));
+	return true;
+};
+
+cmdHandlers['roll'] = function(p,args) {
+	var sum = 0;
+	for (var i = 0;  i < game.numDice; i++)
+		sum += parseInt(args[i]);
+	ui.writeLog(p.name + ' rolled &lt;' + sum + "&gt;." );
+	game.rollForResources(args);
+	return true;
+};
+
+cmdHandlers['get_resources'] = function(p, args) {
+	ui.writeLog(p.name + ' got ' + resourcesToString(args) + '.');
+	p.addResources(args);
+	return true;
+};
+
+cmdHandlers['start_game'] = function(p, args) {
+	ui.writeLog('Game started!');
+	game.start();
+};
+
+cmdHandlers['map_data'] = function(p, args) {
+	board.loadMap(args);
+	return false;
+};
+
+cmdHandlers['card_data'] = function(p, args) {
+	devCards.load(args);
+	return false;
+};
+
+cmdHandlers['sett'] = function(p, args) {
+	ui.writeLog(p.name + ' built a settlement.');
+	p._buildSett(parseInt(args[0]), parseInt(args[1]), parseInt(args[2]), parseInt(args[3]));
+	return true;
+};
+
+cmdHandlers['road'] = function(p, args) {
+	ui.writeLog(p.name + ' built a road.');
+	p._buildRoad(parseInt(args[0]), parseInt(args[1]), parseInt(args[2]), parseInt(args[3]));
+	return true;
+};
+
+cmdHandlers['city'] = function(p, args) {
+	ui.writeLog(p.name + ' built a city.');
+	p._buildCity(parseInt(args[0]), parseInt(args[1]), parseInt(args[2]));
+	return true;
+};
+
+cmdHandlers['buy_card'] = function(p, args) {
+	ui.writeLog(p.name + ' bought a development card.');
+	p._buyCard();
+	return true;
 }
 
+cmdHandlers['place_robber'] = function(p, args) {
+	ui.writeLog(p.name + ' moved the robber.');
+	board.placeRobber(parseInt(args[0]), parseInt(args[1]));
+	return true;
+};
+
+cmdHandlers['discard'] = function(p, args) {
+	ui.writeLog(p.name + ' discarded ' + resourcesToString(args) + '.');
+	p.subtractResources(args);
+	if (game.currentTurn == game.me.id) {
+		game.hasDiscarded[p.id] = true;
+		var allDiscarded = true;
+		for (var i = 0; i < game.numPlayers; ++i)
+			allDiscarded = allDiscarded && game.hasDiscarded[i];
+		if (allDiscarded)
+			changeState('place_robber');
+	} else if (p.id == game.myId) /* FIXME: why is this here? */
+		changeState('wait'); // TODO dialog onExit (note: this comment is by cmliu, i have no idea what it means -- Si)
+	return true;
+};
+
+cmdHandlers['steal'] = function(p, args) {
+	var myId = game.myId;
+
+	var victim = game.players[parseInt(args[0])];
+	var type   = parseInt(args[1]);
+
+	if (args[0] == myId || p.id == myId)
+		ui.writeLog(p.name + ' stole 1 ' + game.resourceNames[type] + ' from ' + victim.name + '.');
+	else
+		ui.writeLog(p.name + ' stole <i>something</i> from ' + victim.name + '.');
+	p._steal(victim, type);
+	return true;
+};
+
+cmdHandlers['use_card'] = function(p, args) {
+	ui.writeLog(p.name + ' played ' + devCardsStatic[parseInt(args[0])].name + '.');
+	p._useCard(parseInt(args[0]));
+	return true;
+};
+
+cmdHandlers['monopoly'] = function(p, args) {
+	ui.writeLog(p.name + ' has monopoly over ' + game.resourceNames[parseInt(args[0])]);
+	p.monopoly(parseInt(args[0]));
+	return true;
+};
+
+cmdHandlers['trade_self'] = function(p, args) {
+	var give = new Array();
+	var get = new Array();
+	for (var i = 0; i < game.numResourceTypes; ++i)
+		give.push(parseInt(args.shift()));
+	for (var i = 0; i < game.numResourceTypes; ++i)
+		get.push(parseInt(args.shift()));
+	ui.writeLog(p.name + ' traded ' + resourcesToString(give) + ' for ' + resourcesToString(get) + '.');
+	p.subtractResources(give);
+	p.addResources(get);
+	return true;
+};
+
+cmdHandlers['trade_propose'] = function(p, args) {
+	var tid = parseInt(args.shift());
+	var rec = parseInt(args.shift());
+	if (rec != game.myId) return;
+	var myGet = new Array();
+	var myGive = new Array();
+	for (var i = 0; i < game.numResourceTypes; ++i)
+		myGet.push(parseInt(args.shift()));
+	for (var i = 0; i < game.numResourceTypes; ++i)
+		myGive.push(parseInt(args.shift()));
+	var trade = new IncomingTrade(tid, game.myId, p.id);
+	trade.setContract(myGive, myGet);
+	trade.makeDialog();
+	game.me.incomingTrades.push(trade);
+	return false;
+};
+
+cmdHandlers['trade_cancel'] = function(p, args) {
+	var tid = parseInt(args[0]);
+	for (var i = 0; i < game.me.incomingTrades.length; ++i)
+		if (game.me.incomingTrades[i].id == tid)
+			game.me.incomingTrades[i].canceled();
+	return false;
+};
+
+cmdHandlers['trade'] = function(p, args) {
+	var to = game.players[parseInt(args.shift())];
+	var give = new Array();
+	var get = new Array();
+	for (var i = 0; i < game.numResourceTypes; ++i)
+		give.push(parseInt(args.shift()));
+	for (var i = 0; i < game.numResourceTypes; ++i)
+		get.push(parseInt(args.shift()));
+	ui.writeLog(p.name + ' traded with ' + to.name + ': ' + resourcesToString(give) + ' vs ' + resourcesToString(get) + '.');
+	p._trade(to, give, get);
+	return true;
+};
+
+cmdHandlers['trade_accept'] = function(p, args) {
+	var pid = parseInt(args.shift());
+	var tid = parseInt(args.shift());
+	var from = parseInt(args.shift());
+	if (from != game.myId) return;
+	for (var i = 0; i < game.me.outgoingTrades.length; ++i)
+		if (game.me.outgoingTrades[i].id == tid)
+			game.me.outgoingTrades[i].accepted(pid);
+	return false;
+};
+
+cmdHandlers['trade_reject'] = function(p, args) {
+	var pid = parseInt(args.shift());
+	var tid = parseInt(args.shift());
+	var from = parseInt(args.shift());
+	if (from != game.myId) return;
+	for (var i = 0; i < game.me.outgoingTrades.length; ++i)
+		if (game.me.outgoingTrades[i].id == tid)
+			game.me.outgoingTrades[i].rejected(pid);
+	return false;
+};
+
+cmdHandlers['counter_propose'] = function(p, args) {
+	var tid = parseInt(args.shift());
+	var rec = parseInt(args.shift());
+	if (rec != game.myId) return;
+	var myGet = new Array();
+	var myGive = new Array();
+	for (var i = 0; i < game.numResourceTypes; ++i)
+		myGet.push(parseInt(args.shift()));
+	for (var i = 0; i < game.numResourceTypes; ++i)
+		myGive.push(parseInt(args.shift()));
+	for (var i = 0; i < game.me.outgoingTrades.length; ++i)
+		if (game.me.outgoingTrades[i].id == tid)
+			game.me.outgoingTrades[i].counter(p.id, myGive, myGet);
+	return false;
+};
+
+cmdHandlers['largest_army'] = function(p, args) {
+	for (var j = 0 ; j < game.players.length; j++)
+		game.players[j].hasLargestArmy = false;
+	p.hasLargestArmy = true;
+	ui.writeLog(p.name + ' has the largest army');
+	return true;
+};
+
+cmdHandlers['longest_road'] = function(p, args) {
+	for (var j = 0 ; j < game.players.length; j++)
+		game.players[j].hasLongestRoad = false;
+	p.hasLongestRoad = true;
+	ui.writeLog(p.name + ' has the longest road');
+	return false;
+	// return true;
+};
+
+cmdHandlers['win'] = function(p, args) {
+	ui.writeLog(p.name + ' won with ' + args[0] + ' points.');
+	changeState('idle');
+	return true;
+};
 
 function receiveRemoteMessages() {
 	setTimeout('receiveRemoteMessages()', 2000);
@@ -57,7 +303,7 @@ function processMessages() {
 	processing = true;
 	var need_refresh = false;
 	while (recvBuffer.length > 0) {
-		var r = remoteMessageHandler(recvBuffer[0]);
+		var r = messageHandler(recvBuffer[0]);
 		need_refresh = need_refresh || r;
 		recvBuffer.shift();
 		startMsgId++;
@@ -67,263 +313,44 @@ function processMessages() {
 }
 
 /* returns whether need to refreshWindows */
-function remoteMessageHandler(txt)
+function messageHandler(txt)
 {
 	var a = txt.split(' ');
-	var cmd = a[0];
-	var pid = a[1];
-	var myId = game.myId;
-
-	if (typeof game.players != 'undefined') {
-		var p = game.players[pid];
+	/* this is a hack for the join command */
+	if (a[2] == 'join') {
+		game.join(a[3]);
+		if (game.myId == 0) g('startgamebutton').disabled = false;
+		ui.writeLog('Player <i>' + a[3] + '</i> arrived.');
+		return false;
 	}
 
-	switch(cmd)
-	{
-		case 'roll':
-			if (pid == myId) return;
-			a.shift();
-			a.shift();
-			var sum = 0;
-			for (var i = 0;  i < game.numDice; i++) {
-				sum += parseInt(a[i]);
-			}
-			ui.writeLog(p.name + ' rolled &lt;' + sum + "&gt;." );
-			game.rollForResources(a);
-			break;
-		case 'transfer':
-			game.me.clearTrades();
-			if (pid == myId) return;
-			game.transferTurn(a[2]);
-			break;
-		case 'buy_road':
-			ui.writeLog(p.name + ' built a road.');
-			if (pid == myId) return;
-			p.buildRoad(parseInt(a[2]), parseInt(a[3]), parseInt(a[4]), false);
-			break;
-		case 'buy_sett':
-			ui.writeLog(p.name + ' built a settlement.');
-			if (pid == myId) return;
-			p.buildSett(parseInt(a[2]), parseInt(a[3]), parseInt(a[4]), false);
-			break;
+	var seq = parseInt(a.shift());
+	var pid = a.shift();
+	var cmd = a.shift();
+	var p = game.players[pid];
 
-		case 'buy_city':
-			ui.writeLog(p.name + ' built a city.');
-			if (pid == myId) return;
-			p.buildCity(parseInt(a[2]), parseInt(a[3]), parseInt(a[4]));
-			break;
-
-		case 'buy_devcard':
-			ui.writeLog(p.name + ' bought a development card.');
-			if (pid == myId) return;
-			p.buyCard();
-			break;
-
-		case 'build_road':
-			ui.writeLog(p.name + ' built a road.');
-			if (pid == myId) return;
-			p.buildRoad(parseInt(a[2]), parseInt(a[3]), parseInt(a[4]), true);
-			break;
-
-		case 'build_sett':
-			ui.writeLog(p.name + ' built a settlement.');
-			if (pid == myId) return;
-			p.buildSett(parseInt(a[2]), parseInt(a[3]), parseInt(a[4]), true);
-			break;
-
-		case 'get_resources':
-			a.shift();
-			a.shift();
-			ui.writeLog(p.name + ' got ' + resourcesToString(a) + '.');
-			if (pid == myId) return;
-			p.addResources(a);
-			break;
-
-		case 'discard':
-			a.shift();
-			a.shift();
-			ui.writeLog(p.name + ' discarded ' + resourcesToString(a) + '.');
-			if (game.currentTurn == game.me.id) {
-				game.hasDiscarded[pid] = true;
-				var allDiscarded = true;
-				for (var i = 0; i < game.numPlayers; ++i)
-					allDiscarded = allDiscarded && game.hasDiscarded[i];
-				if (allDiscarded)
-					changeState('place_robber');
-			} else if (pid == myId)
-				changeState('wait'); // TODO dialog onExit
-			if (pid == myId) return;
-			p.subtractResources(a);
-			break;
-
-		case 'place_robber':
-			ui.writeLog(p.name + ' moved the robber.');
-			if (pid == myId) return;
-			board.placeRobber(parseInt(a[2]), parseInt(a[3]));
-			break;
-
-		case 'steal':
-			if (myId == a[2] || pid == myId)
-				ui.writeLog(p.name + ' stole 1 ' + game.resourceNames[parseInt(a[3])] + ' from ' + game.players[parseInt(a[2])].name + '.');
-			else
-				ui.writeLog(p.name + ' stole <i>something</i> from ' + game.players[parseInt(a[2])].name + '.');
-			if (pid == myId) return;
-			p.steal(game.players[parseInt(a[2])], parseInt(a[3]));
-			break;
-
-		case 'monopoly':
-			ui.writeLog(p.name + ' took ' + parseInt(a[4]) + ' ' + game.resourceNames[parseInt(a[3])] + ' from ' + game.players[parseInt(a[2])].name + '.');
-			if (pid == myId) return;
-			p.monopoly(game.players[parseInt(a[2])], parseInt(a[3]), parseInt(a[4]));
-			break;
-
-		case 'use_card':
-			ui.writeLog(p.name + ' played ' + devCardsStatic[parseInt(a[2])].name + '.');
-			if (pid == myId) return;
-			p.useCard(parseInt(a[2]));
-			break;
-
-		case 'trade_self':
-			var give = new Array();
-			var get = new Array();
-			a.shift();
-			a.shift();
-			for (var i = 0; i < game.numResourceTypes; ++i)
-				give.push(parseInt(a.shift()));
-			for (var i = 0; i < game.numResourceTypes; ++i)
-				get.push(parseInt(a.shift()));
-			ui.writeLog(p.name + ' traded ' + resourcesToString(give) + ' for ' + resourcesToString(get) + '.');
-			if (pid == myId) return;
-			p.subtractResources(give);
-			p.addResources(get);
-			break;
-
-		case 'trade_propose':
-			a.shift();
-			a.shift();
-			var tid = parseInt(a.shift());
-			var rec = parseInt(a.shift());
-			if (rec != myId) return;
-			var myGet = new Array();
-			var myGive = new Array();
-			for (var i = 0; i < game.numResourceTypes; ++i)
-				myGet.push(parseInt(a.shift()));
-			for (var i = 0; i < game.numResourceTypes; ++i)
-				myGive.push(parseInt(a.shift()));
-			var trade = new IncomingTrade(tid, myId, pid);
-			trade.setContract(myGive, myGet);
-			trade.makeDialog();
-			game.me.incomingTrades.push(trade);
-			break;
-
-		case 'trade_accept':
-			var from = parseInt(a[3]);
-			if (from != myId) return;
-			var tid = parseInt(a[2]);
-			for (var i = 0; i < game.me.outgoingTrades.length; ++i)
-				if (game.me.outgoingTrades[i].id == tid)
-					game.me.outgoingTrades[i].accepted(pid);
-			break;
-
-		case 'trade_reject':
-			var from = parseInt(a[3]);
-			if (from != myId) return;
-			var tid = parseInt(a[2]);
-			for (var i = 0; i < game.me.outgoingTrades.length; ++i)
-				if (game.me.outgoingTrades[i].id == tid)
-					game.me.outgoingTrades[i].rejected(pid);
-			break;
-
-		case 'counter_propose':
-			a.shift();
-			a.shift();
-			var tid = parseInt(a.shift());
-			var rec = parseInt(a.shift());
-			if (rec != myId) return;
-			var myGet = new Array();
-			var myGive = new Array();
-			for (var i = 0; i < game.numResourceTypes; ++i)
-				myGet.push(parseInt(a.shift()));
-			for (var i = 0; i < game.numResourceTypes; ++i)
-				myGive.push(parseInt(a.shift()));
-			for (var i = 0; i < game.me.outgoingTrades.length; ++i)
-				if (game.me.outgoingTrades[i].id == tid)
-					game.me.outgoingTrades[i].counter(pid, myGive, myGet);
-			break;
-
-		case 'trade_cancel':
-			var tid = parseInt(a[2]);
-			for (var i = 0; i < game.me.incomingTrades.length; ++i)
-				if (game.me.incomingTrades[i].id == tid)
-					game.me.incomingTrades[i].canceled();
-			break;
-
-		case 'trade':
-			var to = parseInt(a[2]);
-			var give = new Array();
-			var get = new Array();
-			a.shift();
-			a.shift();
-			a.shift();
-			for (var i = 0; i < game.numResourceTypes; ++i)
-				give.push(parseInt(a.shift()));
-			for (var i = 0; i < game.numResourceTypes; ++i)
-				get.push(parseInt(a.shift()));
-			ui.writeLog(p.name + ' traded with ' + game.players[to].name + ': ' + resourcesToString(give) + ' vs ' + resourcesToString(get) + '.');
-			if (pid == myId) return;
-			p.trade(game.players[to], give, get);
-			break;
-
-		case 'init_roll':
-			break;
-
-		case 'largest_army':
-			for (var j = 0 ; j < game.players.length; j++)
-				game.players[j].hasLargestArmy = false;
-			p.hasLargestArmy = true;
-			ui.writeLog(p.name + ' has the largest army');
-			break;
-
-		case 'longest_road':
-			for (var j = 0 ; j < game.players.length; j++)
-				game.players[j].hasLongestRoad = false;
-			p.hasLongestRoad = true;
-			ui.writeLog(p.name + ' has the longest road');
-			break;
-
-		case 'win':
-			ui.writeLog(p.name + ' won with ' + a[2] + ' points.');
-			changeState('idle');
-			break;
-
-		case 'start_game':
-			ui.writeLog('Game started!');
-			g('startgamebutton').disabled = true;
-			if (myId == pid) return;
-			game.start();
-			break;
-
-		// pre-game.start stuff. return instead of break
-		case 'join':
-			game.join(a[1]);
-			if (game.myId == 0) g('startgamebutton').disabled = false;
-			ui.writeLog('Player <i>' + a[1] + '</i> arrived.');
-			return false;
-
-		case 'map_data':
-			if (myId == pid) return;
-			a.shift();
-			a.shift();
-			board.loadMap(a);
-			return false;
-
-		case 'card_data':
-			if (myId == pid) return;
-			a.shift();
-			devCards.load(a);
-			return false;
+	if (typeof player_seq[pid] == 'undefined') {
+		player_seq[pid] = -1;
+		player_seq_data[pid] = new Object();
 	}
 
-	return true;
+	if (seq <= player_seq[pid]) return false;
 
+	/* save it to be played later */
+	player_seq_data[pid][seq] = {cmd:cmd,p:p,a:a};
+
+	var ret = false;
+	var k;
+	for (k = player_seq[pid]+1; typeof player_seq_data[pid][k] != 'undefined'; k++) {
+		player_seq[pid] = k;
+		var s = player_seq_data[pid][k];
+		if (typeof cmdHandlers[s.cmd] != 'undefined') {
+			ret = cmdHandlers[s.cmd](s.p, s.a) || ret;
+		} else {
+			debug('unhandled command: ' + s.cmd);
+		}
+		delete player_seq_data[pid][k];
+	}
+
+	return ret;
 }

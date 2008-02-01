@@ -65,10 +65,7 @@ Game.prototype.start = function()
 {
 	this.started = true;
 	this.numPlayers = this.players.length;
-	if (this.myId >= 0)
-		this.me = this.players[this.myId];
-	else
-		this.me = new Me(this.myId, name);
+	if (this.myId == -1) this.me = new Me(this.myId, name);
 
 	board.drawBoard();
 	board.drawMarkers();
@@ -165,10 +162,25 @@ Game.prototype.transferTurn = function (next) {
 
 Game.prototype.join = function(name)
 {
-	if (this.started) return;
-	l = this.players.length;
+	if (this.started)
+	{
+		/* FIXME: HACK - this is hackish code which is supposed to work but shouldn't be here! */
+		if (name == this.myName && typeof this.me != 'undefined' ) {
+			my_next_seq = player_seq[this.myId] + 1;
+		}
+		return;
+	}
+
+	var already_exist = false;
+	for (var i = 0 ; i < this.players.length; i ++) {
+		if (this.players[i].name == name) already_exist = true;
+	}
+	if (already_exist) return;
+
+	var l = this.players.length;
 	if (name == this.myName) {
-		this.players.push(new Me(l, name));
+		this.me = new Me(l, name);
+		this.players.push(this.me);
 		this.myId = l;
 	} else {
 		this.players.push(new Player(l, name));
@@ -177,31 +189,38 @@ Game.prototype.join = function(name)
 
 // set up the game/board, and starts the game. used by "player 0" only
 Game.prototype.setup = function() {
+	g('startgamebutton').disabled = true;
 	board.randomizeCells();
 	devCards.shuffle();
-	game.start();
 	{ // send map data
-		var s = '';
-		s += 'map_data ' + game.myId + ' ' + board.WIDTH + ' ' + board.HEIGHT;
-		s += ' ' + dumpArray(board.data);
-		s += ' ' + dumpArray(board.cellResources);
-		s += ' ' + dumpArray(board.cellMarkers);
+		var mapdata = [];
+		mapdata.push(board.WIDTH);
+		mapdata.push(board.HEIGHT);
+		util.concat_array(mapdata, board.data);
+		util.concat_array(mapdata, board.cellResources);
+		util.concat_array(mapdata, board.cellMarkers);
+
 		for (var i = 0; i < board.WIDTH; ++i)
 			for (var j = 0; j < board.HEIGHT; ++j)
-				if (board.data[i][j] == board.PORT)
-					s += ' ' + board.cellPorts[i][j].type + ' ' + board.cellPorts[i][j].dir + ' ' + board.cellPorts[i][j].rate;
-				else
-					s += ' 0 0 0';
-		s += ' ' + board.robberPos.i + ' ' + board.robberPos.j;
-		sendRemoteMessage(s);
+				if (board.data[i][j] == board.PORT) {
+					mapdata.push(board.cellPorts[i][j].type);
+					mapdata.push(board.cellPorts[i][j].dir);
+					mapdata.push(board.cellPorts[i][j].rate);
+				} else {
+					mapdata.push(0);
+					mapdata.push(0);
+					mapdata.push(0);
+				}
 
-		s = 'card_data';
-		for (var i = 0 ; i < devCards.length; i++){
-			s += ' ' + devCards[i].id;
-		}
-		sendRemoteMessage(s);
+		mapdata.push(board.robberPos.i);
+		mapdata.push(board.robberPos.j);
+		dispatchMessage('map_data', mapdata);
+
+		var carddata = [];
+		for (var i = 0 ; i < devCards.length; i++) carddata.push(devCards[i].id);
+		dispatchMessage('card_data', carddata);
 	}
-	sendRemoteMessage('start_game 0');
+	dispatchMessage('start_game');
 };
 
 // update (if required) the player with longest road status
@@ -226,8 +245,10 @@ Game.prototype.updateLongestRoad = function()
 			}
 
 			/* declare to have longest road */
-			if (pislongest && ! p.hasLongestRoad && p.id == game.myId)
-				sendRemoteMessage("longest_road " + p.id);
+			if (pislongest && ! p.hasLongestRoad && p.id == game.myId) {
+				dispatchMessage('longest_road');
+				return;
+			}
 		}
 	}
 };
@@ -254,8 +275,10 @@ Game.prototype.updateLargestArmy = function()
 			}
 
 			/* declare to have largest army */
-			if (pislargest && ! p.hasLargestArmy && p.id == game.myId)
-				sendRemoteMessage("largest_army " + p.id);
+			if (pislargest && ! p.hasLargestArmy && p.id == game.myId) {
+				dispatchMessage('largest_army');
+				return;
+			}
 		}
 	}
 };

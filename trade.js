@@ -1,11 +1,10 @@
-function OutgoingTrade(id, from) {
+function OutgoingTrade(id) {
 	this.PENDING = 0;
 	this.ACCEPTED = 1;
 	this.REJECTED = 2;
 	this.COUNTER = 3;
 
 	this.id = id;
-	this.from = from;
 	this.dialog = null;
 	this.counter_dialog = null;
 }
@@ -63,8 +62,14 @@ OutgoingTrade.prototype.makeDialog = function() {
 };
 
 OutgoingTrade.prototype.propose = function() {
-	for (var i = 0; i < this.recipients.length; ++i)
-		sendRemoteMessage('trade_propose ' + this.from + ' ' + this.id + ' ' + this.recipients[i] + ' ' + dumpArray(this.give) + ' ' + dumpArray(this.get));
+	for (var i = 0; i < this.recipients.length; ++i) {
+		var a = new Array();
+		a.push(this.id);
+		a.push(this.recipients[i]);
+		util.concat_array(a, this.give);
+		util.concat_array(a, this.get);
+		dispatchMessage('trade_propose', a);
+	}
 };
 
 OutgoingTrade.prototype.accepted = function(pid) {
@@ -92,12 +97,12 @@ OutgoingTrade.prototype.counter = function(pid, give, get) {
 };
 
 OutgoingTrade.prototype.show_counter_detail = function(pid) {
-	sendRemoteMessage('trade_cancel ' + this.from + ' ' + this.id);
+	dispatchMessage('trade_cancel', [this.id]);
 	this.dialog.obj.style.visibility = 'hidden';
 };
 
 OutgoingTrade.prototype.cancel = function() {
-	sendRemoteMessage('trade_cancel ' + this.from + ' ' + this.id);
+	dispatchMessage('trade_cancel', [this.id]);
 	this.dialog.obj.style.visibility = 'hidden';
 };
 
@@ -156,12 +161,12 @@ IncomingTrade.prototype.makeDialog = function() {
 };
 
 IncomingTrade.prototype.accept = function() {
-	sendRemoteMessage('trade_accept ' + this.to + ' ' + this.id + ' ' + this.from);
+	dispatchMessage('trade_accept', [ this.to, this.id, this.from ] );
 	this.dialog.obj.style.visibility = 'hidden';
 };
 
 IncomingTrade.prototype.reject = function() {
-	sendRemoteMessage('trade_reject ' + this.to + ' ' + this.id + ' ' + this.from);
+	dispatchMessage('trade_reject', [ this.to, this.id, this.from ] );
 	this.dialog.obj.style.visibility = 'hidden';
 };
 

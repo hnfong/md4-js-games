@@ -1,6 +1,6 @@
 <?php
- $name = $_POST['nick'];
- $room = $_POST['room'];
+ $name = $_GET['nick'];
+ $room = $_GET['room'];
 
  if (!preg_match('/^[a-zA-Z0-9]+$/', $name))
  {
@@ -12,12 +12,9 @@
   echo "invalid room";
   exit;
  }
- if ($room == "0") {
-  $room = $name;
-  // clear the file
-  $fp = fopen("rooms/$room", "w");
+  $fp = fopen("rooms/$room", "a");
+  fwrite($fp, "-1 -1 join " . $name . "\n");
   fclose($fp);
- }
 ?>
 <html>
  <head>
@@ -44,7 +41,7 @@
 <table>
  <tr>
   <td>
-   <img src="img/transparent.gif" id="board_interface" style="width:600px; height: 600px; border: 0; position: absolute; left: 0px; top: -120px; z-index: 100" usemap="#cellmap" />
+   <img src="img/transparent.gif" onmousedown="return false;" id="board_interface" style="width:500px; height: 600px; border: 0; position: absolute; left: 0px; top: -120px; z-index: 100" usemap="#cellmap" />
   </td>
  </tr>
 </table>
@@ -158,7 +155,6 @@ window.onload = function() {
 	game.myId = -1;
 	game.myName = myName;
 	receiveRemoteMessages();
-	sendRemoteMessage("join " + game.myName);
 };
 
 </script>

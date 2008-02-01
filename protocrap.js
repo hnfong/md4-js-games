@@ -22,6 +22,17 @@ if (typeof Array.prototype.shift == 'undefined') {
 }
 
 
+if (typeof Array.prototype.pop == 'undefined') {
+	Array.prototype.pop = function() {
+		if (this.length == 0) return;
+		var ret = this[this.length-1];
+		delete(this[this.length-1]);
+		this.length--;
+		return ret;
+	};
+}
+
+
 if (typeof encodeURIComponent == 'undefined') {
 	// utf16to8() adapted from http://www.onicos.com/staff/iz/amuse/javascript/expert/utf.txt
 	// "Free" license. Presumably OK

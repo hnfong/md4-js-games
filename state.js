@@ -95,7 +95,7 @@ function changeState(stateName) {
 	var st = new State('roll');
 	st.onEnter = function() { ui.setImageMapMode(NULLMODE); ui.rollingDice(); };
 	st.diceHandler = function() {
-		if (game.me.rollForResources())
+		if (game.me.rollForResources() != 7) /* XXX: hardcode */
 			changeState('free');
 		else {
 			var someDiscard = false;

@@ -1,20 +1,35 @@
 function debug(txt)
 {
+	var logger = g('log_window');
+	if (logger) { ui.writeLog(txt); return ; }
 	var x = document.createElement('div');
 	x.innerHTML = txt;
 	document.body.appendChild(x);
 }
 
+var util = new Object(); /* just to avoid polluting the "global" namespace; */
+
 function randInt(n) {
 	return Math.floor(Math.random() * n);
 }
 
-function roll() {
+util.roll = function() {
 	var a = new Array();
 	for (var i = 0; i < game.numDice; ++i)
 		a.push(randInt(game.numDiceFaces) + 1);
 	return a;
-}
+};
+
+util.is_array = function(a) {
+	/* not the best way to guess... but probably adequate for casual use */
+	return (typeof a == 'object' && a.constructor.toString().match(/array/i) != null);
+};
+
+util.concat_array = function (a, b) {
+	if (!util.is_array(b)) a.push(b);
+	for (var i = 0; i < b.length; ++i)
+		util.concat_array(a,b[i]);
+};
 
 function create1DArray(w) {
 	var a = new Array(w);

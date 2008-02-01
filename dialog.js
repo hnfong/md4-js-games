@@ -22,12 +22,22 @@ Dialog.prototype.create = function()
 	this.obj = b;
 
 	return b;
-}
+};
+
+Dialog.prototype.hide = function() {
+	this.obj.style.visibility = 'hidden';
+};
+
+Dialog.prototype.show = function() {
+	this.obj.style.visibility = 'visible';
+	this.clear();
+};
 
 Dialog.prototype.dispose = function() {
 	var x = g('dialogs');
 	x.removeChild(this.obj);
-}
+};
+
 
 var plentyDialog;
 
@@ -47,14 +57,6 @@ function plentyDialog_init() {
 	plentyDialog.obj.style.top = "100px";
 	plentyDialog.obj.style.left = "100px";
 
-	plentyDialog.show = function() {
-		plentyDialog.obj.style.visibility = 'visible';
-		this.clear();
-	};
-
-	plentyDialog.hide = function() {
-		this.obj.style.visibility = 'hidden';
-	};
 
 	plentyDialog.refresh = function(res) {
 		for (var i = 0 ; i < game.numResourceTypes; i++) {
@@ -94,9 +96,7 @@ function plentyDialog_init() {
 		for (var i = 0 ; i < game.numResourceTypes; i++) {
 			r += ' ' + this.resources[i];
 		}
-		sendRemoteMessage("get_resources " + game.me.id + r);
-		game.me.addResources(this.resources);
-		ui.refreshWindows(game.me.id);
+		dispatchMessage('get_resources', this.resources);
 		this.hide();
 	};
 }
@@ -118,15 +118,6 @@ function monopolyDialog_init() {
 	monopolyDialog.create();
 	monopolyDialog.obj.style.top = "100px";
 	monopolyDialog.obj.style.left = "100px";
-
-	monopolyDialog.show = function() {
-		monopolyDialog.obj.style.visibility = 'visible';
-		this.clear();
-	};
-
-	monopolyDialog.hide = function() {
-		this.obj.style.visibility = 'hidden';
-	};
 
 	monopolyDialog.refresh = function(res) {
 		for (var i = 0 ; i < game.numResourceTypes; i++) {
@@ -167,15 +158,8 @@ function monopolyDialog_init() {
 		for (var i = 0 ; i < game.numResourceTypes; i++) {
 			if (this.resources[i] > 0) type = i;
 		}
-		for (var i = 0; i < game.numPlayers; ++i) {
-			var victim = game.players[i];
-			if (game.me.id == victim.id) continue;
-			var count = victim.resources[type];
-			if (count <= 0) continue;
-			sendRemoteMessage('monopoly ' + game.me.id + ' ' + victim.id + ' ' + type + ' ' + count);
-			game.me.monopoly(victim, type, count);
-		}
-		ui.refreshWindows(game.me.id);
+
+		dispatchMessage('monopoly', [type]);
 		this.hide();
 	};
 }
@@ -205,10 +189,6 @@ function discardDialog_init() {
 		this.numCards = numCards;
 		g('discard_num_cards').innerHTML = numCards;
 		this.clear();
-	};
-
-	discardDialog.hide = function() {
-		this.obj.style.visibility = 'hidden';
 	};
 
 	discardDialog.refresh = function(res) {
@@ -243,9 +223,7 @@ function discardDialog_init() {
 			alert('You must discard ' + this.numCards + ' resource cards!');
 			return false;
 		}
-		sendRemoteMessage("discard " + game.me.id + " " + dumpArray(this.resources));
-		game.me.subtractResources(this.resources);
-		ui.refreshWindows(game.me.id);
+		dispatchMessage('discard', this.resources);
 		this.hide();
 	}
 }
@@ -281,15 +259,6 @@ function tradeProposeDialog_init() {
 	tradeProposeDialog.create();
 	tradeProposeDialog.obj.style.top = "100px";
 	tradeProposeDialog.obj.style.left = "100px";
-
-	tradeProposeDialog.show = function() {
-		this.obj.style.visibility = 'visible';
-		this.clear();
-	};
-
-	tradeProposeDialog.hide = function() {
-		this.obj.style.visibility = 'hidden';
-	};
 
 	tradeProposeDialog.refresh = function(res) {
 		for (var i = 0 ; i < game.numResourceTypes; ++i) {
@@ -347,10 +316,10 @@ function tradeProposeDialog_init() {
 			alert('You have to give ' + (this.get[getWhat] * rate) + ' ' + game.resourceNames[giveWhat] + '!');
 			return false;
 		}
-		sendRemoteMessage("trade_self " + game.me.id + " " + dumpArray(this.give) + " " + dumpArray(this.get));
-		game.me.subtractResources(this.give);
-		game.me.addResources(this.get);
-		ui.refreshWindows(game.me.id);
+		var a = [];
+		util.concat_array(a, this.give);
+		util.concat_array(a, this.get);
+		dispatchMessage('trade_self', a);
 		this.hide();
 	};
 
@@ -426,10 +395,6 @@ function counterProposeDialog_init() {
 		this.clear();
 	};
 
-	counterProposeDialog.hide = function() {
-		this.obj.style.visibility = 'hidden';
-	};
-
 	counterProposeDialog.refresh = function(res) {
 		for (var i = 0 ; i < game.numResourceTypes; ++i) {
 			g('counter_propose_give_' + i + '_value').innerHTML = this.give[i];
@@ -480,7 +445,13 @@ function counterProposeDialog_init() {
 			}
 		}
 		var recipients = new Array();
-		sendRemoteMessage('counter_propose ' + this.from + ' ' + this.id + ' ' + this.to + ' ' + dumpArray(this.give) + ' ' + dumpArray(this.get));
+
+		var a = new Array();
+		a.push(this.id);
+		a.push(this.to);
+		util.concat_array(a, this.give);
+		util.concat_array(a, this.get);
+		dispatchMessage('counter_propose', a);
 		ui.refreshWindows(game.me.id);
 		this.parent.setContract(this.give, this.get);
 		this.hide();

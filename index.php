@@ -9,29 +9,32 @@ include_once("rooms.inc.php");
   <?php
     $a = get_room_names();
   ?>
-  <form action="game.php" method="post">
+  <form action="poster.php" method="post">
    <table border="0" cellpadding="0" cellspacing="3">
     <tr><td>Nick:</td><td><input type="text" value="" name="nick"></td>
     <tr>
      <td>Room:</td>
      <td>
       <select name="room">
-       <option value="0">[Create new room]</option>
+        <option value="-1"> --- </option>
         <?php
          for ($i = 0 ; $i < count($a) ; $i++ )
          {
           echo "<option value=\"{$a[$i]}\">{$a[$i]}'s game</option>";
          }
         ?>
-      </select>
+      </select> <input type="submit" name="action" value="Join"><br>
      </td>
-     <td>
-      <input type="submit" name="action" value="Join"><br>
+    </tr>
+    <tr>
+     <td colspan="2">
+      <br>
+      <input type="submit" name="action" value="Create New Room">
      </td>
     </tr>
    </table>
   </form>
 
-  <p>Tested (and supposedly functional) on <a href="http://www.mozilla.org/firefox/">Firefox 2+</a> (Recommended) and IE6.</p>
+  <p>Tested (and supposedly functional) on <a href="http://www.mozilla.org/firefox/">Firefox 2+</a> (Recommended) and IE6. IE5.0 seems to work, but no thorough testing was conducted.</p>
  </body>
 </html>
