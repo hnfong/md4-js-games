@@ -1,0 +1,237 @@
+<head>
+<script>
+function newArray(r, c) {
+	var a = new Array(r);
+	for (var i=0;i<r;++i) {
+		a[i] = new Array(c);
+		for (var j=0;j<c;++j)
+			a[i][j] = 0;
+	}
+	return a;
+}
+
+function copyArray(arr) {
+	var a = new Array(arr.length);
+	for (var i=0;i<a.length;++i) {
+		a[i] = new Array(arr[i].length);
+		for (var j=0;j<a[i].length;++j)
+			a[i][j] = arr[i][j];
+	}
+	return a;
+}
+
+var dx = [-1,0,1,0];
+var dy = [0,-1,0,1];
+
+</script>
+</head>
+<body>
+<h2>Finding cx (cooperatively)</h2>
+<p>Arrow keys - move. Space - teleport.</p>
+<p><a href="index.html">Single player version</a></p>
+<div id="mazeContainer" style="border-bottom: 1px solid black; position:absolute;">
+<div id="mazeContainer2" style="border-bottom: 1px solid black; position:absolute;">
+</div>
+
+<script>
+
+var rows = 20, cols = 20, size = 10;
+var visited = newArray(rows, cols);
+var edges = newArray(rows, cols);
+var q = [ { x: 0, y: 0} ];
+visited[0][0] = 1;
+
+function countPossible(x,y) {
+	var possible = [];
+	for (var i=0;i<4;++i) {
+		var xx = x + dx[i], yy = y + dy[i];
+		if (xx>=0&&yy>=0&&xx<cols&&yy<rows&&visited[xx][yy]==0)
+			possible.push(i);
+	}
+	return possible;
+}
+
+// Generate the maze...
+while (q.length) {
+	var index, xy;
+	if (q.length == 1)
+		index = 0;
+	else {
+		if (Math.random() > 0.1) {
+			index = q.length - 1 - Math.floor(Math.random() * Math.floor(q.length / 3 + 1));
+		} else {
+			index = Math.floor(Math.random() * (Math.floor(q.length * 2 / 3))+1);
+		}
+	}
+	xy = q[index];
+	var possible = countPossible(xy.x, xy.y);
+	if (possible.length) {
+		var k = Math.floor(Math.random()*possible.length);
+		var dir = possible[k];
+		var xx = xy.x + dx[dir], yy = xy.y + dy[dir];
+		edges[xy.x][xy.y] += (1 << dir);
+		edges[xx][yy] += (1 << ((dir+2)%4));
+		q.push( { x: xx, y: yy } );
+		visited[xx][yy] = 1;
+	} else {
+		q[index] = q[q.length-1];
+		q.pop();
+	}
+}
+
+// make a deep copy of the edge array, and randomly insert edges
+var edges2 = copyArray(edges);
+for (var i=0;i<cols;++i)
+	for (var j=0;j<rows;++j) {
+		for (var k=0;k<2;++k) {
+			if (edges[i][j]&(1<<k)) {
+				if (Math.random() > 0.5) { // block with certain probability
+					if (Math.random() > 0.5) { // block either copy with 50% chance
+						edges[i][j] -= (1<<k);
+						var xx = i+dx[k], yy = j+dy[k];
+						edges[xx][yy] -= (1<<(k+2));
+					} else {
+						edges2[i][j] -= (1<<k);
+						var xx = i+dx[k], yy = j+dy[k];
+						edges2[xx][yy] -= (1<<(k+2));
+					}
+				}
+			}
+		}
+	}
+
+// Create the DIVs, place them, and set borders
+
+var container = document.getElementById('mazeContainer');
+container.style.width = (size * cols) + 'px';
+container.style.height = (size * rows) + 'px';
+
+for (var i=0;i<cols;++i) {
+	for (var j=0;j<rows;++j) {
+		var div = document.createElement('DIV');
+		div.id = 'cell_' + i + '_' + j;
+		div.style.left = (i*size) + 'px';
+		div.style.top = (j*size) + 'px';
+		div.style.position = 'absolute';
+		div.style.height = '9px';
+		div.style.width = '9px';
+		// set borders....
+		div.style.border = '1px solid black';
+		if (edges[i][j] & 1) div.style.borderLeft = '1px solid transparent';
+		if (edges[i][j] & 2) div.style.borderTop = '1px solid transparent';
+		if (edges[i][j] & 4) div.style.borderRight = '1px solid transparent';
+		if (edges[i][j] & 8) div.style.borderBottom = '1px solid transparent';
+		
+		container.appendChild(div);
+	}
+}
+
+var heroX = 0;
+var heroY = 0;
+var hero = document.createElement('DIV');
+hero.style.width = '7px';
+hero.style.height = '7px';
+hero.style.left = (heroX*10+2)+'px';
+hero.style.top = (heroY*10+2)+'px';
+hero.style.background = 'red';
+hero.style.position = 'absolute';
+hero.style.zIndex = 3000;
+container.appendChild(hero);
+
+var goalX = cols-1;
+var goalY = rows-1;
+var goal = document.createElement('DIV');
+goal.style.width = '7px';
+goal.style.height = '7px';
+goal.style.left = (goalX*10+2)+'px';
+goal.style.top = (goalY*10+2)+'px';
+goal.style.background = 'blue';
+goal.style.position = 'absolute';
+goal.style.zIndex = 2000;
+container.appendChild(goal);
+
+
+var container2 = document.getElementById('mazeContainer2');
+container2.style.width = (size * cols) + 'px';
+container2.style.height = (size * rows) + 'px';
+container2.style.left = (size * cols + 50) + 'px';
+
+
+for (var i=0;i<cols;++i) {
+	for (var j=0;j<rows;++j) {
+		var div = document.createElement('DIV');
+		div.id = 'cell2_' + i + '_' + j;
+		div.style.left = (i*size) + 'px';
+		div.style.top = (j*size) + 'px';
+		div.style.position = 'absolute';
+		div.style.height = '9px';
+		div.style.width = '9px';
+		// set borders....
+		div.style.border = '1px solid black';
+		if (edges2[i][j] & 1) div.style.borderLeft = '1px solid transparent';
+		if (edges2[i][j] & 2) div.style.borderTop = '1px solid transparent';
+		if (edges2[i][j] & 4) div.style.borderRight = '1px solid transparent';
+		if (edges2[i][j] & 8) div.style.borderBottom = '1px solid transparent';
+		
+		container2.appendChild(div);
+	}
+}
+
+var hero2 = document.createElement('DIV');
+hero2.style.width = '7px';
+hero2.style.height = '7px';
+hero2.style.left = (heroX*10+2)+'px';
+hero2.style.top = (heroY*10+2)+'px';
+hero2.style.background = 'red';
+hero2.style.position = 'absolute';
+hero2.style.zIndex = 3000;
+container2.appendChild(hero2);
+
+var goal2 = document.createElement('DIV');
+goal2.style.width = '7px';
+goal2.style.height = '7px';
+goal2.style.left = (goalX*10+2)+'px';
+goal2.style.top = (goalY*10+2)+'px';
+goal2.style.background = 'blue';
+goal2.style.position = 'absolute';
+goal2.style.zIndex = 2000;
+container2.appendChild(goal2);
+
+var active = 0;
+
+function handleKeydown(e) {
+	if (e.keyCode == 37) // left
+		if (active==1&&(edges[heroX][heroY] & 1) || active==2&&(edges2[heroX][heroY] & 1)) { heroX--; update(); }
+	if (e.keyCode == 38) // up
+		if (active==1&&(edges[heroX][heroY] & 2) || active==2&&(edges2[heroX][heroY] & 2)) { heroY--; update(); }
+	if (e.keyCode == 39) // right
+		if (active==1&&(edges[heroX][heroY] & 4) || active==2&&(edges2[heroX][heroY] & 4)) { heroX++; update(); }
+	if (e.keyCode == 40) // down
+		if (active==1&&(edges[heroX][heroY] & 8) || active==2&&(edges2[heroX][heroY] & 8)) { heroY++; update(); }
+	if (e.keyCode == 32) { // space
+		setActive(3-active);
+	}
+	if (heroX == goalX && heroY == goalY) {
+		alert('Congratulations!');
+		window.removeEventListener('keydown', handleKeydown, true);
+	}
+}
+
+function setActive(t) {
+	active = t;
+	if (t==1) { hero.style.background = 'red'; hero2.style.background = '#ffcccc'; }
+	else { hero.style.background = '#ffcccc'; hero2.style.background = 'red'; }
+}
+
+function update() {
+	hero.style.left = (heroX*10+2)+'px';
+	hero.style.top = (heroY*10+2)+'px';
+	hero2.style.left = (heroX*10+2)+'px';
+	hero2.style.top = (heroY*10+2)+'px';
+}
+
+setActive(1);
+window.addEventListener('keydown', handleKeydown, true);
+
+</script>
+</body>

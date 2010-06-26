@@ -1,0 +1,143 @@
+<body>
+<h2>Finding cx</h2>
+<p><a href="maze2.html">"Cooperative" version</a></p>
+<div id="mazeContainer" style="border-bottom: 1px solid black;width: 600px; height:600px; position:absolute;">
+</div>
+
+<script>
+
+var con = document.getElementById('mazeContainer');
+
+for (var i=0;i<60;++i) {
+	for (var j=0;j<60;++j) {
+		var div = document.createElement('DIV');
+		div.id = 'cell_' + i + '_' + j;
+		div.style.border = '1px solid black';
+		div.style.left = (i*10) + 'px';
+		div.style.top = (j*10) + 'px';
+		div.style.position = 'absolute';
+		div.style.height = '9px';
+		div.style.width = '9px';
+		con.appendChild(div);
+	}
+}
+
+var map = new Array(60);
+for (var i=0;i<60;++i) {
+	map[i] = new Array(60);
+	for (var j=0;j<60;++j)
+		map[i][j] = 0;
+}
+
+var q1 = [ {x:0,y:0} ];
+//var q2 = [ {x:59,y:59} ];
+map[0][0] = 1;
+//map[59][59] = 2;
+var dx = [ -1, 0, 1, 0];
+var dy = [  0,-1, 0, 1]; 
+
+function countPossible(x,y) {
+	var possible = [];
+	for (var i=0;i<4;++i) {
+		var xx = x + dx[i], yy = y + dy[i];
+		if (xx>=0&&yy>=0&&xx<60&&yy<60&&map[xx][yy]==0)
+			possible.push(i);
+	}
+	return possible;
+}
+
+while (q1.length) {
+	var t, index, xy;
+	/*if (!q1.length) t = 2;
+	else if (!q2.length) t = 1;
+	else t = Math.floor(Math.random() * 2) + 1;
+	*/
+	t = 1;
+	if (t == 1) {
+		if (q1.length == 1)
+			index = 0;
+		else {
+			if (Math.random() > 0.1) {
+				index = q1.length - 1 - Math.floor(Math.random() * (Math.floor(q1.length / 3) + 1));
+			} else {
+				index = Math.floor(Math.random() * Math.floor(q1.length * 2 / 3)+1);
+			}
+		}
+		xy = q1[index];
+	}
+	var possible = countPossible(xy.x, xy.y);
+	if (possible.length) {
+		var k = Math.floor(Math.random()*possible.length);
+		var dir = possible[k];
+		var xx = xy.x + dx[dir], yy =xy.y + dy[dir];
+		var cell = document.getElementById('cell_' + xx + '_' + yy);
+		var oldcell = document.getElementById('cell_' + xy.x + '_' + xy.y);
+		//cell.style.background = '#888888';
+		if (dir == 0) {
+			oldcell.style.borderLeft = '1px solid transparent';
+			cell.style.borderRight = '1px solid transparent';
+		} else if (dir == 1) {
+			oldcell.style.borderTop = '1px solid transparent';
+			cell.style.borderBottom = '1px solid transparent';
+		} else if (dir == 2) {
+			oldcell.style.borderRight = '1px solid transparent';
+			cell.style.borderLeft = '1px solid transparent';
+		} else {
+			oldcell.style.borderBottom = '1px solid transparent';
+			cell.style.borderTop = '1px solid transparent';
+		}
+		q1.push( { x: xx, y: yy } );
+		map[xx][yy] = 1;
+	} else {
+		q1[index] = q1[q1.length-1];
+		q1.pop();
+	}
+}
+
+var heroX = 0;
+var heroY = 0;
+var hero = document.createElement('DIV');
+hero.style.width = '7px';
+hero.style.height = '7px';
+hero.style.left = (heroX*10+2)+'px';
+hero.style.top = (heroY*10+2)+'px';
+hero.style.background = 'red';
+hero.style.position = 'absolute';
+hero.style.zIndex = 3000;
+con.appendChild(hero);
+
+var goalX = 59;
+var goalY = 59;
+var goal = document.createElement('DIV');
+goal.style.width = '7px';
+goal.style.height = '7px';
+goal.style.left = (goalX*10+2)+'px';
+goal.style.top = (goalY*10+2)+'px';
+goal.style.background = 'blue';
+goal.style.position = 'absolute';
+goal.style.zIndex = 2000;
+con.appendChild(goal);
+
+function handleKeydown(e) {
+	var cell = document.getElementById('cell_' + heroX + '_' + heroY);
+	if (e.keyCode == 37) // left
+		if (cell.style.borderLeft.indexOf('transparent') > 0) { heroX--; update(); }
+	if (e.keyCode == 38) // up
+		if (cell.style.borderTop.indexOf('transparent') > 0) { heroY--; update(); }
+	if (e.keyCode == 39) // right
+		if (cell.style.borderRight.indexOf('transparent') > 0) { heroX++; update(); }
+	if (e.keyCode == 40) // down
+		if (cell.style.borderBottom.indexOf('transparent') > 0) { heroY++; update(); }
+	if (heroX == goalX && heroY == goalY)
+		alert('Congratulations!');
+}
+
+function update() {
+	hero.style.left = (heroX*10+2)+'px';
+	hero.style.top = (heroY*10+2)+'px';
+}
+
+window.addEventListener('keydown', handleKeydown, true);
+
+</script>
+</body>
