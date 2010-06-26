@@ -27,18 +27,48 @@ var dy = [0,-1,0,1];
 </head>
 <body>
 <h2>Finding cx</h2>
-<p>Use arrow keys to move.</p>
+<p>Use arrow keys to move. Or try the <a href="maze2.html">"Cooperative" version</a></p>
 <div id="mazeContainer" style="border-bottom: 1px solid black; position:absolute;">
 </div>
 
 <script>
+function windowsize() {
+	var w = 0;
+	var h = 0;
 
-var rows = 60, cols = 60, size = 10;
-var visited = newArray(rows, cols);
-var edges = newArray(rows, cols);
+	//IE
+	if(!window.innerWidth)
+	{
+		//strict mode
+		if(!(document.documentElement.clientWidth == 0))
+		{
+			w = document.documentElement.clientWidth;
+			h = document.documentElement.clientHeight;
+		}
+		//quirks mode
+		else
+		{
+			w = document.body.clientWidth;
+			h = document.body.clientHeight;
+		}
+	}
+	//w3c
+	else
+	{
+		w = window.innerWidth;
+		h = window.innerHeight;
+	}
+	return {width:w,height:h};
+}
+
+var size = 8;
+var rows = Math.min(60, parseInt((windowsize().height - 120)/ size));
+var cols = Math.min(60, parseInt((windowsize().width - 50)/ size));
+
+var visited = newArray(cols, rows);
+var edges = newArray(cols, rows);
 var q = [ { x: 0, y: 0} ];
 visited[0][0] = 1;
-var solution = [];
 
 function countPossible(x,y) {
 	var possible = [];
@@ -50,9 +80,11 @@ function countPossible(x,y) {
 	return possible;
 }
 
-// Maze generation: Recursive backtracker
+// Maze generation: Modified recursive backtracker
 while (q.length) {
-	var xy = q[q.length-1];
+	var rr =parseInt(Math.sqrt( Math.random() * q.length) );
+	var idx = q.length-1-rr;
+	var xy = q[idx];
 	var possible = countPossible(xy.x, xy.y);
 	if (possible.length) {
 		var k = Math.floor(Math.random()*possible.length);
@@ -62,13 +94,8 @@ while (q.length) {
 		edges[xx][yy] += (1 << ((dir+2)%4));
 		q.push( { x: xx, y: yy } );
 		visited[xx][yy] = 1;
-		if (xx==cols-1&&yy==rows-1) { // store solution
-			for (var i=0;i<q.length;++i) {
-				solution.push(q[i]);
-			}
-		}
 	} else {
-		q.pop();
+    q.splice(idx, 1);
 	}
 }
 
@@ -85,8 +112,8 @@ for (var i=0;i<cols;++i) {
 		div.style.left = (i*size) + 'px';
 		div.style.top = (j*size) + 'px';
 		div.style.position = 'absolute';
-		div.style.height = '9px';
-		div.style.width = '9px';
+		div.style.height = (size - 1) + 'px';
+		div.style.width = (size - 1) + 'px';
 		// set borders....
 		div.style.border = '1px solid black';
 		if (edges[i][j] & 1) div.style.borderLeft = '1px solid transparent';
@@ -98,19 +125,13 @@ for (var i=0;i<cols;++i) {
 	}
 }
 
-// paint solution
-for (var i=0;i<solution.length;++i) {
-	var o = document.getElementById('cell_'+solution[i].x+'_'+solution[i].y);
-	o.style.background = '#ccffcc';
-}
-
 var heroX = 0;
 var heroY = 0;
 var hero = document.createElement('DIV');
-hero.style.width = '7px';
-hero.style.height = '7px';
-hero.style.left = (heroX*10+2)+'px';
-hero.style.top = (heroY*10+2)+'px';
+hero.style.width = (size-3)+'px';
+hero.style.height = (size-3)+'px';
+hero.style.left = (heroX*size+2)+'px';
+hero.style.top = (heroY*size+2)+'px';
 hero.style.background = 'red';
 hero.style.position = 'absolute';
 hero.style.zIndex = 3000;
@@ -119,10 +140,10 @@ container.appendChild(hero);
 var goalX = cols-1;
 var goalY = rows-1;
 var goal = document.createElement('DIV');
-goal.style.width = '7px';
-goal.style.height = '7px';
-goal.style.left = (goalX*10+2)+'px';
-goal.style.top = (goalY*10+2)+'px';
+goal.style.width = (size-3)+'px';
+goal.style.height = (size-3)+'px';
+goal.style.left = (goalX*size+2)+'px';
+goal.style.top = (goalY*size+2)+'px';
 goal.style.background = 'blue';
 goal.style.position = 'absolute';
 goal.style.zIndex = 2000;
@@ -145,10 +166,10 @@ function handleKeydown(e) {
 }
 
 function update() {
-	hero.style.left = (heroX*10+2)+'px';
-	hero.style.top = (heroY*10+2)+'px';
-	hero2.style.left = (heroX*10+2)+'px';
-	hero2.style.top = (heroY*10+2)+'px';
+	hero.style.left = (heroX*size+2)+'px';
+	hero.style.top = (heroY*size+2)+'px';
+	hero2.style.left = (heroX*size+2)+'px';
+	hero2.style.top = (heroY*size+2)+'px';
 }
 
 window.addEventListener('keydown', handleKeydown, true);
